@@ -143,7 +143,7 @@ tbody tr[data-row-id] { cursor:pointer; transition:background .15s ease, box-sha
 tbody tr[data-row-id]:hover { background:var(--row-hover); }
 tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px var(--row-selected-outline); }
 .chart-box { border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--chart-bg); }
-svg.chart { width:100%; height:340px; display:block; }
+.chart-wrap { position:relative; height:300px; }
 .legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted); }
 .legend span::before { content:''; display:inline-block; width:10px; height:10px; border-radius:999px; margin-right:6px; vertical-align:middle; }
 .legend .l1::before { background:var(--accent); }
@@ -154,6 +154,7 @@ svg.chart { width:100%; height:340px; display:block; }
 @media (max-width:1320px) { .hero,.two-col,.three-col,.cards,.status-row,.metrics-grid { grid-template-columns:1fr; } }
 </style>
 </head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <body>
 <div class="wrap">
   <section class="hero">
@@ -283,15 +284,15 @@ svg.chart { width:100%; height:340px; display:block; }
       <div class="grid three-col">
         <div class="panel chart-box">
           <h2>Top open requests by priority</h2>
-          <svg id="chartPriority" class="chart" viewBox="0 0 560 280"></svg>
+           <div class="chart-wrap"><canvas id="chartPriority"></canvas></div>
         </div>
         <div class="panel chart-box">
           <h2>Open exposure by asset</h2>
-          <svg id="chartAmountByAsset" class="chart" viewBox="0 0 560 280"></svg>
+           <div class="chart-wrap"><canvas id="chartAmountByAsset"></canvas></div>
         </div>
         <div class="panel chart-box">
           <h2>Open request buckets</h2>
-          <svg id="chartBuckets" class="chart" viewBox="0 0 560 280"></svg>
+           <div class="chart-wrap"><canvas id="chartBuckets"></canvas></div>
         </div>
       </div>
     </div>
@@ -379,6 +380,7 @@ const HANDLE_DB_NAME = 'sch-payment-priority-board';
 const HANDLE_STORE_NAME = 'settings';
 const HANDLE_KEY = 'working-folder-handle';
 const dom = {};
+const _charts = {};
 const DEFAULT_CONFIG = {
   schema: { id: 'sch.payment-priority.config', version: '2.0.0' },
   parameters: {
@@ -1018,106 +1020,98 @@ function shortenChartLabel(value, maxLen = 26){
   const text = String(value || '').trim();
   return text.length > maxLen ? `${text.slice(0, maxLen - 1)}...` : text;
 }
-function wrapChartLabel(value, maxLen = 14){
-  const words = String(value || '').trim().split(/\s+/).filter(Boolean);
-  const lines = [];
-  let current = '';
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length <= maxLen) {
-      current = candidate;
-      continue;
+function _getCssVar(name, fallback) {
+  return (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim() || fallback;
+}
+function drawBarChart(canvasEl, items, valueKey, labelKey, formatter='number'){
+  if (_charts[canvasEl.id]) { _charts[canvasEl.id].destroy(); delete _charts[canvasEl.id]; }
+  if (!items.length) return;
+  const accent = _getCssVar('--accent', '#111827');
+  const textColor= _getCssVar('--text',   '#1f2937');
+  const mutedColor= _getCssVar('--muted', '#6b7280');
+  const gridColor = _getCssVar('--line',  '#e5e7eb');
+  const labels = items.map(x => shortenChartLabel(x[labelKey], 30));
+  const values = items.map(x => safeNumber(x[valueKey]));
+  const bgColors = items.map(x => x.color || accent);
+  _charts[canvasEl.id] = new Chart(canvasEl, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: bgColors, borderRadius: 6, borderSkipped: false, barPercentage: 0.7 }] },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1f2937',
+          titleColor: '#f9fafb',
+          bodyColor: '#d1d5db',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: ctx => '  ' + (formatter === 'currency' ? formatCurrency(ctx.parsed.x) : formatNum(ctx.parsed.x, 2)) }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor, drawBorder: false },
+          border: { dash: [4, 4], display: false },
+          ticks: { color: mutedColor, font: { size: 11 }, callback: v => formatter === 'currency' ? formatCurrency(v) : formatNum(v, 0) }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: textColor, font: { size: 12 } }
+        }
+      }
     }
-    if (current) lines.push(current);
-    current = word;
-    if (lines.length === 1) break;
-  }
-  if (current && lines.length < 2) lines.push(current);
-  if (!lines.length) return [''];
-  if (lines.length > 2) lines.length = 2;
-  if (words.join(' ').length > lines.join(' ').length) {
-    lines[lines.length - 1] = shortenChartLabel(lines[lines.length - 1], maxLen);
-  }
-  return lines;
-}
-function drawBarChart(svg, items, valueKey, labelKey, formatter='number'){
-  const width = 640, height = 340, left = 220, right = 90, top = 22, bottom = 24;
-  const plotW = width - left - right;
-  const plotH = height - top - bottom;
-  const css = getComputedStyle(document.documentElement);
-  const accent = (css.getPropertyValue('--accent') || '').trim() || '#111827';
-  const text = (css.getPropertyValue('--text') || '').trim() || '#1f2937';
-  const muted = (css.getPropertyValue('--muted') || '').trim() || '#6b7280';
-  const line = (css.getPropertyValue('--line') || '').trim() || '#e5e7eb';
-  const vals = items.map(x => safeNumber(x[valueKey]));
-  const max = Math.max(1, ...vals);
-  if (!items.length) { svg.innerHTML = `<text x="24" y="36" fill="${muted}" font-size="14">No data</text>`; return; }
-  const ticks = 4;
-  const barH = Math.max(18, Math.floor(plotH / items.length) - 8);
-  let y = top;
-  const out = [`<rect x="0" y="0" width="${width}" height="${height}" fill="transparent"></rect>`];
-  for (let i = 0; i <= ticks; i += 1) {
-    const tickValue = max * (i / ticks);
-    const x = left + plotW * (i / ticks);
-    let shown = formatNum(tickValue, 0);
-    if (formatter === 'currency') shown = formatCurrency(tickValue);
-    out.push(`<line x1="${x}" y1="${top - 6}" x2="${x}" y2="${height - bottom}" stroke="${line}" stroke-width="1"></line>`);
-    out.push(`<text x="${x}" y="${height - 6}" fill="${muted}" font-size="11" text-anchor="middle">${escapeHtml(shown)}</text>`);
-  }
-  items.forEach(item => {
-    const v = safeNumber(item[valueKey]);
-    const w = plotW * (v / max);
-    const label = shortenChartLabel(item[labelKey], 32);
-    const fill = item.color || accent;
-    let shown = formatNum(v,2);
-    if (formatter === 'currency') shown = formatCurrency(v);
-    out.push(`<text x="10" y="${y + barH*0.72}" fill="${text}" font-size="12">${escapeHtml(label)}</text>`);
-    out.push(`<rect x="${left}" y="${y}" rx="6" ry="6" width="${w}" height="${barH}" fill="${fill}"></rect>`);
-    const valueX = Math.min(left + w + 8, width - 6);
-    const valueAnchor = valueX >= width - 12 ? 'end' : 'start';
-    out.push(`<text x="${valueX}" y="${y + barH*0.72}" fill="${muted}" font-size="12" text-anchor="${valueAnchor}">${escapeHtml(shown)}</text>`);
-    y += barH + 8;
   });
-  svg.innerHTML = out.join('');
 }
-function drawBucketChart(svg, items){
-  const width = 640, height = 340, left=52, right=28, bottom=64, top=24;
-  const plotW = width - left - right;
-  const plotH = height - top - bottom;
-  const css = getComputedStyle(document.documentElement);
-  const text = (css.getPropertyValue('--text') || '').trim() || '#1f2937';
-  const muted = (css.getPropertyValue('--muted') || '').trim() || '#6b7280';
-  const line = (css.getPropertyValue('--line') || '').trim() || '#e5e7eb';
-  const max = Math.max(1, ...items.map(x => x.value));
-  if (!items.length) { svg.innerHTML = `<text x="24" y="36" fill="${muted}" font-size="14">No data</text>`; return; }
-  const gap = 28;
-  const barW = Math.min(120, Math.max(72, (plotW - gap * (items.length - 1)) / items.length));
-  let x = left;
+function drawBucketChart(canvasEl, items){
+  if (_charts[canvasEl.id]) { _charts[canvasEl.id].destroy(); delete _charts[canvasEl.id]; }
+  if (!items.length) return;
+  const textColor  = _getCssVar('--text',  '#1f2937');
+  const mutedColor = _getCssVar('--muted', '#6b7280');
+  const gridColor  = _getCssVar('--line',  '#e5e7eb');
   const colors = [
-    (css.getPropertyValue('--bad') || '').trim() || '#991b1b',
-    (css.getPropertyValue('--warn') || '').trim() || '#92400e',
-    (css.getPropertyValue('--ok') || '').trim() || '#065f46',
-    (css.getPropertyValue('--info') || '').trim() || '#1d4ed8',
+    _getCssVar('--bad',  '#dc2626'),
+    _getCssVar('--warn', '#d97706'),
+    _getCssVar('--ok',   '#059669'),
+    _getCssVar('--info', '#3b82f6'),
   ];
-  const out = [`<rect x="0" y="0" width="${width}" height="${height}" fill="transparent"></rect>`];
-  for (let i = 0; i <= 4; i += 1) {
-    const y = top + plotH - (plotH * i / 4);
-    const tickValue = Math.round(max * i / 4);
-    out.push(`<line x1="${left - 6}" y1="${y}" x2="${width - right}" y2="${y}" stroke="${line}" stroke-width="1"></line>`);
-    out.push(`<text x="${left - 12}" y="${y + 4}" fill="${muted}" font-size="11" text-anchor="end">${tickValue}</text>`);
-  }
-  items.forEach((item, idx) => {
-    const h = plotH * (item.value / max);
-    const y = height - bottom - h;
-    const lines = wrapChartLabel(item.label, 14);
-    out.push(`<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="8" ry="8" fill="${colors[idx % colors.length]}"></rect>`);
-    lines.forEach((labelLine, lineIndex) => {
-      out.push(`<text x="${x + barW/2}" y="${height - 24 + (lineIndex * 14)}" fill="${text}" font-size="12" text-anchor="middle">${escapeHtml(labelLine)}</text>`);
-    });
-    out.push(`<text x="${x + barW/2}" y="${y - 6}" fill="${muted}" font-size="12" text-anchor="middle">${escapeHtml(String(item.value))}</text>`);
-    x += barW + gap;
+  _charts[canvasEl.id] = new Chart(canvasEl, {
+    type: 'bar',
+    data: {
+      labels: items.map(x => x.label),
+      datasets: [{ data: items.map(x => x.value), backgroundColor: items.map((_, i) => colors[i % colors.length]), borderRadius: 8, borderSkipped: false, barPercentage: 0.6 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1f2937',
+          titleColor: '#f9fafb',
+          bodyColor: '#d1d5db',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: ctx => '  ' + ctx.parsed.y + ' requests' }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: textColor, font: { size: 13, weight: '600' } }
+        },
+        y: {
+          grid: { color: gridColor, drawBorder: false },
+          border: { dash: [4, 4], display: false },
+          ticks: { color: mutedColor, font: { size: 11 }, stepSize: 1, precision: 0 }
+        }
+      }
+    }
   });
-  svg.innerHTML = out.join('');
 }
 function renderCharts(){
   const open = state.jobs.filter(j => j.status !== 'paid').sort((a,b) => safeNumber(b.priority_score) - safeNumber(a.priority_score));
