@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SCH Payment Priority Board</title>
+<style>
+:root {
+  --bg:#0b1020; --panel:#121a2f; --text:#eef3ff; --muted:#a8b4d4; --accent:#6ea8fe; --accent2:#7ee0c3;
+  --warn:#ffc857; --danger:#ff6b6b; --ok:#6dd28c; --border:#2d3d67; --ink:#0b1020;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:linear-gradient(180deg,#09101f,#0d1428); color:var(--text); }
+.wrap { max-width:1680px; margin:0 auto; padding:18px; }
+.grid { display:grid; gap:16px; }
+.hero { display:grid; gap:16px; grid-template-columns:1.6fr 1fr; margin-bottom:16px; }
+.two-col { display:grid; gap:16px; grid-template-columns:430px 1fr; }
+.three-col { display:grid; gap:16px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.cards { display:grid; gap:12px; grid-template-columns:repeat(6,minmax(0,1fr)); }
+.panel { background:rgba(18,26,47,.96); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.24); }
+h1,h2,h3 { margin:0 0 10px; }
+h1 { font-size:30px; line-height:1.1; }
+h2 { font-size:18px; color:var(--accent2); }
+h3 { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+p { margin:0 0 10px; color:var(--muted); }
+.small { font-size:12px; color:var(--muted); }
+.controls,.toolbar,.row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+button,input,select,textarea { font:inherit; border-radius:12px; border:1px solid var(--border); background:#0e1730; color:var(--text); }
+button { cursor:pointer; padding:10px 14px; background:linear-gradient(180deg,#2d60dd,#2348a7); border:none; font-weight:600; }
+button.secondary { background:#1a2646; border:1px solid var(--border); }
+button.ghost { background:transparent; border:1px solid var(--border); }
+button.warn { background:linear-gradient(180deg,#ffd27c,#c88f1d); color:#2d1b00; }
+button.danger { background:linear-gradient(180deg,#ff8a8a,#d94747); color:#2b0707; }
+button.slim { padding:7px 10px; font-size:12px; }
+input,select,textarea { padding:10px 12px; }
+textarea { min-height:96px; resize:vertical; }
+.field { display:flex; flex-direction:column; gap:6px; }
+.field label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.form-grid { display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+.full { grid-column:1 / -1; }
+.card { background:linear-gradient(180deg,rgba(110,168,254,.09),rgba(255,255,255,.02)); border:1px solid var(--border); border-radius:18px; padding:14px; }
+.metric { font-size:27px; font-weight:700; line-height:1.1; margin-top:8px; }
+.tag { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; border:1px solid transparent; margin-right:6px; margin-bottom:6px; }
+.tag.ok { background:rgba(109,210,140,.12); color:#8ef0ac; border-color:rgba(109,210,140,.28); }
+.tag.warn { background:rgba(255,200,87,.12); color:#ffd77e; border-color:rgba(255,200,87,.28); }
+.tag.danger { background:rgba(255,107,107,.12); color:#ff9e9e; border-color:rgba(255,107,107,.28); }
+.tag.info { background:rgba(110,168,254,.12); color:#95c1ff; border-color:rgba(110,168,254,.28); }
+.asset-meta,.metrics-grid { display:grid; gap:10px; grid-template-columns:repeat(2,minmax(0,1fr)); }
+.metrics-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.asset-box { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:14px; padding:10px 12px; }
+.asset-box .k { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.asset-box .v { font-size:14px; margin-top:4px; word-break:break-word; }
+.table-wrap { overflow:auto; border-radius:16px; border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; min-width:1400px; }
+thead th { position:sticky; top:0; background:#13203d; color:#dce6ff; font-size:12px; text-transform:uppercase; letter-spacing:.06em; text-align:left; padding:12px 10px; border-bottom:1px solid var(--border); }
+tbody td { padding:10px; border-bottom:1px solid rgba(255,255,255,.06); font-size:14px; vertical-align:top; }
+tbody tr:hover { background:rgba(110,168,254,.06); }
+tbody tr.selected { background:rgba(126,224,195,.12); }
+.kpi-note { font-size:11px; color:var(--muted); margin-top:5px; }
+.badge-col { display:flex; flex-wrap:wrap; gap:6px; }
+.chart-box { border:1px solid var(--border); border-radius:16px; padding:12px; background:rgba(255,255,255,.025); }
+svg.chart { width:100%; height:280px; display:block; }
+details { border:1px solid var(--border); border-radius:14px; padding:10px 12px; background:rgba(255,255,255,.025); }
+summary { cursor:pointer; font-weight:700; color:#d9e6ff; }
+.note { border-left:3px solid var(--accent); padding:10px 12px; border-radius:12px; background:rgba(110,168,254,.08); }
+.legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted); }
+.legend span::before { content:''; display:inline-block; width:10px; height:10px; border-radius:999px; margin-right:6px; vertical-align:middle; }
+.legend .l1::before { background:#6ea8fe; }
+.legend .l2::before { background:#7ee0c3; }
+.legend .l3::before { background:#ffc857; }
+.legend .l4::before { background:#ff6b6b; }
+.mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+.hidden { display:none !important; }
+@media (max-width:1320px) { .hero,.two-col,.three-col,.cards,.metrics-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="panel">
+      <h1>SCH Payment Priority Board</h1>
+      <p>Technical submits the issue. The app derives the asset economics, calculates lost kWh/day, lost revenue/day, payback, and risk, then ranks all open requests so the economic department can decide what to pay first.</p>
+      <div class="controls" style="margin-top:14px;">
+        <button id="exportStateBtn">Export app state</button>
+        <button id="exportCsvBtn" class="secondary">Export open ranking CSV</button>
+        <button id="loadStateBtn" class="secondary">Load app state</button>
+        <button id="loadConfigBtn" class="ghost">Load economics config JSON</button>
+        <button id="resetBtn" class="ghost">Reset local data</button>
+        <input id="stateLoader" type="file" accept=".json" class="hidden">
+        <input id="configLoader" type="file" accept=".json" class="hidden">
+      </div>
+      <div class="small" style="margin-top:10px;">The app ships with an embedded copy of the current asset/company masters and a default economics config. State is saved locally in your browser.</div>
+    </div>
+    <div class="panel">
+      <h2>Ranking logic</h2>
+      <div class="badge-col" style="margin:8px 0 12px;">
+        <span class="tag danger">Mandatory risk first</span>
+        <span class="tag warn">Then score per euro</span>
+        <span class="tag info">Then lost revenue/day</span>
+      </div>
+      <p>The score is inspired by the workbook logic: high daily exposure, high Security/HSE risk, and lower payment amount move a request upward. Paid requests are archived and automatically removed from the live ranking.</p>
+      <details style="margin-top:12px;">
+        <summary>Formula summary</summary>
+        <div class="small" style="margin-top:10px; line-height:1.65;">
+          <div class="mono">Lost kWh/day = Capacity(MW) × 1000 × 24 × CFtyp × ProductionEffect%</div>
+          <div class="mono">Lost revenue/day = Lost kWh/day × Value€/kWh</div>
+          <div class="mono">SecRisk = Likelihood × Impact, HseRisk = Likelihood × Impact</div>
+          <div class="mono">Priority score = ((eps+nExposure)^wE × (eps+nSec)^wS × (eps+nHse)^wH) / ((eps+nPayment)^wP)</div>
+          <div class="mono">Simple payback = Request amount / Lost revenue/day</div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="cards" id="kpiCards"></section>
+
+  <section class="grid two-col" style="margin-top:16px;">
+    <div class="panel">
+      <h2>Technical request form</h2>
+      <div class="field" style="margin-top:12px;">
+        <label for="assetSearch">Search asset</label>
+        <input id="assetSearch" placeholder="Type part of asset, company, location, or type">
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label for="assetSelect">Asset</label>
+        <select id="assetSelect"></select>
+      </div>
+
+      <div class="asset-meta" style="margin-top:14px;">
+        <div class="asset-box"><div class="k">Asset</div><div class="v" id="metaAsset">-</div></div>
+        <div class="asset-box"><div class="k">Company</div><div class="v" id="metaCompany">-</div></div>
+        <div class="asset-box"><div class="k">Type</div><div class="v" id="metaType">-</div></div>
+        <div class="asset-box"><div class="k">Derived capacity</div><div class="v" id="metaCapacity">-</div></div>
+        <div class="asset-box"><div class="k">CF typ</div><div class="v" id="metaCf">-</div></div>
+        <div class="asset-box"><div class="k">Value €/kWh</div><div class="v" id="metaValueKwh">-</div></div>
+      </div>
+      <div id="metaCalcNote" class="note" style="margin-top:12px;">Select an asset to see the calculation basis.</div>
+
+      <div class="form-grid" style="margin-top:16px;">
+        <div class="field full">
+          <label for="requestTitle">Request name</label>
+          <input id="requestTitle" placeholder="Short title for the payment request">
+        </div>
+        <div class="field full">
+          <label for="requestDescription">Problem description</label>
+          <textarea id="requestDescription" placeholder="What failed, what needs to be bought/paid, what happens if not paid?"></textarea>
+        </div>
+        <div class="field">
+          <label for="requestAmount">Request amount (€)</label>
+          <input id="requestAmount" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="productionEffect">Effect on production (%)</label>
+          <input id="productionEffect" type="number" min="0" max="100" step="0.1" placeholder="0 to 100">
+        </div>
+        <div class="field">
+          <label for="secLikelihood">Security likelihood</label>
+          <select id="secLikelihood"></select>
+        </div>
+        <div class="field">
+          <label for="secImpact">Security impact</label>
+          <select id="secImpact"></select>
+        </div>
+        <div class="field">
+          <label for="hseLikelihood">HSE likelihood</label>
+          <select id="hseLikelihood"></select>
+        </div>
+        <div class="field">
+          <label for="hseImpact">HSE impact</label>
+          <select id="hseImpact"></select>
+        </div>
+      </div>
+
+      <div class="controls" style="margin-top:16px;">
+        <button id="addRequestBtn">Add to ranking</button>
+        <button id="updateRequestBtn" class="secondary">Update selected</button>
+        <button id="clearFormBtn" class="ghost">Clear form</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Live calculation preview</h2>
+        <div class="metrics-grid" style="margin-top:12px;" id="previewCards"></div>
+        <div class="legend">
+          <span class="l1">Production / exposure</span>
+          <span class="l2">Economics / payback</span>
+          <span class="l3">Risk</span>
+          <span class="l4">Priority class</span>
+        </div>
+      </div>
+
+      <div class="grid three-col">
+        <div class="panel chart-box">
+          <h3>Top open requests by priority score</h3>
+          <svg id="chartPriority" class="chart" viewBox="0 0 700 280" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="panel chart-box">
+          <h3>Lost revenue/day by asset</h3>
+          <svg id="chartAssetExposure" class="chart" viewBox="0 0 700 280" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="panel chart-box">
+          <h3>Open requests by priority class</h3>
+          <svg id="chartBuckets" class="chart" viewBox="0 0 700 280" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:16px;">
+    <div class="toolbar">
+      <h2 style="margin-right:auto;">Open payment ranking</h2>
+      <input id="queueSearch" placeholder="Filter requests / asset / company">
+      <select id="queueFilter">
+        <option value="all">All open</option>
+        <option value="mandatory">Mandatory only</option>
+        <option value="paysoon">Pay soon only</option>
+        <option value="economics">Economics driven only</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Priority class</th>
+            <th>Request</th>
+            <th>Asset</th>
+            <th>Company</th>
+            <th>Amount €</th>
+            <th>Prod. effect %</th>
+            <th>Lost kWh/day</th>
+            <th>Lost revenue/day €</th>
+            <th>Payback</th>
+            <th>Sec risk</th>
+            <th>HSE risk</th>
+            <th>Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="openTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:16px;">
+    <details>
+      <summary>Paid requests archive</summary>
+      <div class="table-wrap" style="margin-top:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Paid date</th>
+              <th>Request</th>
+              <th>Asset</th>
+              <th>Company</th>
+              <th>Amount €</th>
+              <th>Final rank before pay</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="paidTableBody"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+</div>
+
+<script>
+const EMBEDDED_DATA = {"assets": [{"asset_id": "AST-0001", "company_id": "CMP-0031", "company_folder": "RESCOR-IKE-803025296", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "type": "DTC", "input_value": 12, "input_unit": "MW", "metric": "12p000", "ss": "01", "typeid": "DTC12p000-01", "project_name": "alexandroupoli", "location": "ALEXANDROUPOLI", "asset_folder": "DTC12p000-01_alexandroupoli_ALEXANDROUPOLI", "lifecycle_status": "active", "is_active": true, "notes": ""}, {"asset_id": "AST-0002", "company_id": "CMP-0010", "company_folder": "CLDCOR-IKE-803025339", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "type": "DTC", "input_value": 12, "input_unit": "MW", "metric": "12p000", "ss": "01", "typeid": "DTC12p000-01", "project_name": "ioannina", "location": "IOANNINA", "asset_folder": "DTC12p000-01_ioannina_IOANNINA", "lifecycle_status": "active", "is_active": true, "notes": ""}, {"asset_id": "AST-0003", "company_id": "CMP-0070", "company_folder": "PHOS01-MIK-803155402", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "type": "DTC", "input_value": 15, "input_unit": "MW", "metric": "15p000", "ss": "01", "typeid": "DTC15p000-01", "project_name": "meligalas", "location": "PELOPONISOS", "asset_folder": "DTC15p000-01_meligalas_PELOPONISOS", "lifecycle_status": "active", "is_active": true, "notes": ""}, {"asset_id": "AST-0004", "company_id": "CMP-0070", "company_folder": "PHOS01-MIK-803155402", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "type": "DTC", "input_value": 5, "input_unit": "MW", "metric": "05p000", "ss": "01", "typeid": "DTC05p000-01", "project_name": "megalopoli", "location": "PELOPONISOS", "asset_folder": "DTC05p000-01_megalopoli_PELOPONISOS", "lifecycle_status": "active", "is_active": true, "notes": ""}, {"asset_id": "AST-0005", "company_id": "CMP-0071", "company_folder": "PHOS02-MIK-", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "type": "DTC", "input_value": 13, "input_unit": "MW", "metric": "13p000", "ss": "01", "typeid": "DTC13p000-01", "project_name": "soltech", "location": "PATRA", "asset_folder": "DTC13p000-01_soltech_PATRA", "lifecycle_status": "active", "is_active": true, "notes": ""}, {"asset_id": "AST-0006", "company_id": "CMP-0072", "company_folder": "PHOS03-MIK-", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "type": "DTC", "input_value": 8, "input_unit": "MW", "metric": "08p000", "ss": "01", "typeid": "DTC08p000-01", "project_name": "admotech", "location": "THEVA", "asset_folder": "DTC08p000-01_admotech_THEVA", "lifecycle_status": "active", "is_active": true, "notes": ""}, {"asset_id": "AST-0007", "company_id": "CMP-0045", "company_folder": "SONADO-IKE-801455240", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "type": "HTL", "input_value": 49, "input_unit": "beds", "metric": "00p049", "ss": "01", "typeid": "HTL00p049-01", "project_name": "oitilo-kokkala", "location": "MANI", "asset_folder": "HTL00p049-01_oitilo-kokkala_MANI", "lifecycle_status": "active", "is_active": true, "notes": ""}], "companies": [{"company_id": "CMP-0001", "display_name": "4Ε ΕΝΕΡΓΕΙΑΚΗ ΕΤΑΙΡΕΙΑ ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "4EENER", "typ3": "AEE", "vat9": "998808360", "company_folder": "4EENER-AEE-998808360", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "4EENER-AE-998808360", "validation_errors": [], "source_row": 2}, {"company_id": "CMP-0002", "display_name": "ADMOTEC AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ADMOTE", "typ3": "AEE", "vat9": "094459299", "company_folder": "ADMOTE-AEE-094459299", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "ADMOTE-AE-094459299", "validation_errors": [], "source_row": 3}, {"company_id": "CMP-0003", "display_name": "AETHER BIOCHAR TECHNOLOGIES IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ATHBIO", "typ3": "IKE", "vat9": "803026649", "company_folder": "ATHBIO-IKE-803026649", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "ATHBIO-IK-803026649", "validation_errors": [], "source_row": 4}, {"company_id": "CMP-0004", "display_name": "AF CONSULTING ΜΟΝ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "AFCONS", "typ3": "IKE", "vat9": "802328003", "company_folder": "AFCONS-IKE-802328003", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "AFCONS-IK-802328003", "validation_errors": [], "source_row": 5}, {"company_id": "CMP-0005", "display_name": "AGROBERRY MIKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "AGRBRY", "typ3": "MIK", "vat9": "803059656", "company_folder": "AGRBRY-MIK-803059656", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "AGRBRY-MIK-803059656", "validation_errors": [], "source_row": 6}, {"company_id": "CMP-0006", "display_name": "AK SOLAR MΟΝΟΠΡΟΣΩΠΗ IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "AKSOLR", "typ3": "IKE", "vat9": "801374704", "company_folder": "AKSOLR-IKE-801374704", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "AKSOLR-IK-801374704", "validation_errors": [], "source_row": 7}, {"company_id": "CMP-0007", "display_name": "ATLASCORE IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ATLCOR", "typ3": "IKE", "vat9": "803043056", "company_folder": "ATLCOR-IKE-803043056", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "ATLCOR-IK-803043056", "validation_errors": [], "source_row": 8}, {"company_id": "CMP-0008", "display_name": "AVLIDA ENERGY ΜIKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "AVLIEN", "typ3": "MIK", "vat9": "801621154", "company_folder": "AVLIEN-MIK-801621154", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "AVLIEN-MIK-801621154", "validation_errors": [], "source_row": 9}, {"company_id": "CMP-0009", "display_name": "BONITAS SOLARIS AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "BONITS", "typ3": "AEE", "vat9": "998383734", "company_folder": "BONITS-AEE-998383734", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "BONITS-AE-998383734", "validation_errors": [], "source_row": 10}, {"company_id": "CMP-0010", "display_name": "CLOUDCORE IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "CLDCOR", "typ3": "IKE", "vat9": "803025339", "company_folder": "CLDCOR-IKE-803025339", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "CLDCOR-IK-803025339", "validation_errors": [], "source_row": 11}, {"company_id": "CMP-0011", "display_name": "DIMPAN CONSTRUCTIONS AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "DIMPAN", "typ3": "AEE", "vat9": "800339765", "company_folder": "DIMPAN-AEE-800339765", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "DIMPAN-AE-800339765", "validation_errors": [], "source_row": 12}, {"company_id": "CMP-0012", "display_name": "ENERGY LINE AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ENERGY", "typ3": "AEE", "vat9": "998807037", "company_folder": "ENERGY-AEE-998807037", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "ENERGY-AE-998807037", "validation_errors": [], "source_row": 13}, {"company_id": "CMP-0013", "display_name": "HABITATIO ΑΕ (ΠΡΩΗΝ SOLAR FM)", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "HABITA", "typ3": "AEE", "vat9": "800341539", "company_folder": "HABITA-AEE-800341539", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "HABITA-AE-800341539", "validation_errors": [], "source_row": 14}, {"company_id": "CMP-0014", "display_name": "HELLAS PELLETS AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "HELPEL", "typ3": "AEE", "vat9": "800450399", "company_folder": "HELPEL-AEE-800450399", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "HELPEL-AE-800450399", "validation_errors": [], "source_row": 15}, {"company_id": "CMP-0015", "display_name": "IP SOLAR ΜΟΝΟΠΡΟΣΩΠΗ IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "IPSOLR", "typ3": "IKE", "vat9": "801404412", "company_folder": "IPSOLR-IKE-801404412", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "IPSOLR-IK-801404412", "validation_errors": [], "source_row": 16}, {"company_id": "CMP-0016", "display_name": "KALLOS FRAOULA ΜΟΝΟΠΡΟΣΩΠΗ ΙΔΙΩΤΙΚΗ ΚΕΦΑΛΑΙΟΥΧΙΚΗ ΕΤΑΙΡΕΙΑ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "KALLOS", "typ3": "IKE", "vat9": "803082426", "company_folder": "KALLOS-IKE-803082426", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "KALLOS-IK-803082426", "validation_errors": [], "source_row": 17}, {"company_id": "CMP-0017", "display_name": "KOFIDOU FRAOULA MIKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "KOFFRA", "typ3": "MIK", "vat9": "803081466", "company_folder": "KOFFRA-MIK-803081466", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "KOFFRA-MIK-803081466", "validation_errors": [], "source_row": 18}, {"company_id": "CMP-0018", "display_name": "LEOPAN CONSTRUCTIONS AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "LEOPAN", "typ3": "AEE", "vat9": "800340819", "company_folder": "LEOPAN-AEE-800340819", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "LEOPAN-AE-800340819", "validation_errors": [], "source_row": 19}, {"company_id": "CMP-0019", "display_name": "MAK K ΜΟΝΟΠΡΟΣΩΠΗ IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "MAKMIK", "typ3": "MIK", "vat9": "801416484", "company_folder": "MAKMIK-MIK-801416484", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "MAKMIK-MIK-801416484", "validation_errors": [], "source_row": 20}, {"company_id": "CMP-0020", "display_name": "MARIA KOFIDOU MΟΝΟΠΡΟΣΩΠΗ IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "KOFIDM", "typ3": "IKE", "vat9": "801386057", "company_folder": "KOFIDM-IKE-801386057", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "KOFIDM-IK-801386057", "validation_errors": [], "source_row": 21}, {"company_id": "CMP-0021", "display_name": "MINING X ENERGY MIKE (ΑΝΔΡΕΑΣ Τ. ΜΕΛΕΤΙΟΥ ΜΙΚΕ)", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "MINING", "typ3": "MIK", "vat9": "801360202", "company_folder": "MINING-MIK-801360202", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "MINING-MIK-801360202", "validation_errors": [], "source_row": 22}, {"company_id": "CMP-0022", "display_name": "MOVO FRAOULA ΜΟΝΟΠΡΟΣΩΠΗ ΙΔΙΩΤΙΚΗ ΚΕΦΑΛΑΙΟΥΧΙΚΗ ΕΤΑΙΡΕΙΑ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "MOVOFR", "typ3": "MIK", "vat9": "803082414", "company_folder": "MOVOFR-MIK-803082414", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "MOVOFR-MIK-803082414", "validation_errors": [], "source_row": 23}, {"company_id": "CMP-0023", "display_name": "NEW SUNRISE AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "NEWSUN", "typ3": "AEE", "vat9": "800339685", "company_folder": "NEWSUN-AEE-800339685", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "NEWSUN-AE-800339685", "validation_errors": [], "source_row": 24}, {"company_id": "CMP-0024", "display_name": "NIK K ΜΟΝΟΠΡΟΣΩΠΗ IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "NIKMIK", "typ3": "MIK", "vat9": "801429387", "company_folder": "NIKMIK-MIK-801429387", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "NIKMIK-MIK-801429387", "validation_errors": [], "source_row": 25}, {"company_id": "CMP-0025", "display_name": "NYCONTEC & ΣΙΑ ΟΕ - PETRA & FOS OE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "NYCONT", "typ3": "OEE", "vat9": "800070618", "company_folder": "NYCONT-OEE-800070618", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "OE", "source_company_folder": "NYCONT-OE-800070618", "validation_errors": [], "source_row": 26}, {"company_id": "CMP-0026", "display_name": "NYCONTEC ΞΕΝ. ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "NYCONT", "typ3": "AEE", "vat9": "800120884", "company_folder": "NYCONT-AEE-800120884", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "NYCONT-AE-800120884", "validation_errors": [], "source_row": 27}, {"company_id": "CMP-0027", "display_name": "ODITEC AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ODITEC", "typ3": "AEE", "vat9": "997597831", "company_folder": "ODITEC-AEE-997597831", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "ODITEC-AE-997597831", "validation_errors": [], "source_row": 28}, {"company_id": "CMP-0028", "display_name": "PAP ENERGY AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "PAPENE", "typ3": "AEE", "vat9": "800372393", "company_folder": "PAPENE-AEE-800372393", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "PAPENE-AE-800372393", "validation_errors": [], "source_row": 29}, {"company_id": "CMP-0029", "display_name": "Q PACK AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "Q-PACK", "typ3": "AEE", "vat9": "800557897", "company_folder": "Q-PACK-AEE-800557897", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "Q-PACK-AE-800557897", "validation_errors": [], "source_row": 30}, {"company_id": "CMP-0030", "display_name": "REGIONAL INVESTMENTS AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "REGION", "typ3": "AEE", "vat9": "997801489", "company_folder": "REGION-AEE-997801489", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "REGION-AE-997801489", "validation_errors": [], "source_row": 31}, {"company_id": "CMP-0031", "display_name": "RESILIENTCORE IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "RESCOR", "typ3": "IKE", "vat9": "803025296", "company_folder": "RESCOR-IKE-803025296", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "RESCOR-IK-803025296", "validation_errors": [], "source_row": 32}, {"company_id": "CMP-0032", "display_name": "RHIPSALIS ΜΙΚΕ (ΠΡΩΗΝ ΤΙΝΑ ΠΑΝΑΓΑΚΟΥ ΤΟΥΡΙΣΤΙΚΗ ΙΚΕ)", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "RHIPSA", "typ3": "MIK", "vat9": "800907496", "company_folder": "RHIPSA-MIK-800907496", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "RHIPSA-MIK-800907496", "validation_errors": [], "source_row": 33}, {"company_id": "CMP-0033", "display_name": "SAISON SOLAIR ΕΝΑ (1) ΜΟΝΟΠΡΟΣΩΠΗ ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SAISL1", "typ3": "AEE", "vat9": "801224517", "company_folder": "SAISL1-AEE-801224517", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SAISL1-AE-801224517", "validation_errors": [], "source_row": 34}, {"company_id": "CMP-0034", "display_name": "SAISON SOLAIRE ΔΥΟ (2) ΜΟΝΟΠΡΟΣΩΠΗ ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SAISL2", "typ3": "AEE", "vat9": "801224474", "company_folder": "SAISL2-AEE-801224474", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SAISL2-AE-801224474", "validation_errors": [], "source_row": 35}, {"company_id": "CMP-0035", "display_name": "SOFTA ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SOFTA_", "typ3": "MIK", "vat9": "801421181", "company_folder": "SOFTA_-MIK-801421181", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "SOFTA_-MIK-801421181", "validation_errors": [], "source_row": 36}, {"company_id": "CMP-0036", "display_name": "SOLAR CELLS HELLAS AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SCHELL", "typ3": "AEE", "vat9": "999646002", "company_folder": "SCHELL-AEE-999646002", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SCHELL-AE-999646002", "validation_errors": [], "source_row": 37}, {"company_id": "CMP-0037", "display_name": "SOLAR CONCEPT ENA(1) AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SLCON1", "typ3": "AEE", "vat9": "800340242", "company_folder": "SLCON1-AEE-800340242", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SLCON1-AE-800340242", "validation_errors": [], "source_row": 38}, {"company_id": "CMP-0038", "display_name": "SOLAR CONCEPT ΔΥΟ(2) ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SLCON2", "typ3": "AEE", "vat9": "800341054", "company_folder": "SLCON2-AEE-800341054", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SLCON2-AE-800341054", "validation_errors": [], "source_row": 39}, {"company_id": "CMP-0039", "display_name": "SOLAR DATUM ENA(1) AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SLDAT1", "typ3": "AEE", "vat9": "800340440", "company_folder": "SLDAT1-AEE-800340440", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SLDAT1-AE-800340440", "validation_errors": [], "source_row": 40}, {"company_id": "CMP-0040", "display_name": "SOLAR DATUM ΔΥΟ(2) AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SLDAT2", "typ3": "AEE", "vat9": "800341527", "company_folder": "SLDAT2-AEE-800341527", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SLDAT2-AE-800341527", "validation_errors": [], "source_row": 41}, {"company_id": "CMP-0041", "display_name": "SOLAR FACTORY ΜON. ΕΠΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SLFACT", "typ3": "EPE", "vat9": "999012590", "company_folder": "SLFACT-EPE-999012590", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "EPE", "source_company_folder": "SLFACT-EPE-999012590", "validation_errors": [], "source_row": 42}, {"company_id": "CMP-0042", "display_name": "SOLSTICE MIKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SOLSTI", "typ3": "MIK", "vat9": "801263520", "company_folder": "SOLSTI-MIK-801263520", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "SOLSTI-MIK-801263520", "validation_errors": [], "source_row": 43}, {"company_id": "CMP-0043", "display_name": "SOLSTICE TWO ΜΟΝ IKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SOLST2", "typ3": "IKE", "vat9": "801457927", "company_folder": "SOLST2-IKE-801457927", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "SOLST2-IK-801457927", "validation_errors": [], "source_row": 44}, {"company_id": "CMP-0044", "display_name": "SOLTECH AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SOLTEC", "typ3": "AEE", "vat9": "998807584", "company_folder": "SOLTEC-AEE-998807584", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SOLTEC-AE-998807584", "validation_errors": [], "source_row": 45}, {"company_id": "CMP-0045", "display_name": "SONADO ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SONADO", "typ3": "IKE", "vat9": "801455240", "company_folder": "SONADO-IKE-801455240", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "SONADO-IK-801455240", "validation_errors": [], "source_row": 46}, {"company_id": "CMP-0046", "display_name": "SOUTH STAFF ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SOUTHS", "typ3": "AEE", "vat9": "998385868", "company_folder": "SOUTHS-AEE-998385868", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SOUTHS-AE-998385868", "validation_errors": [], "source_row": 47}, {"company_id": "CMP-0047", "display_name": "SPES SOLARIS AE - ΠΑΝΑΓΙΩΤΑ ΝΙΚΑ ΟΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SPESNI", "typ3": "OEE", "vat9": "800432486", "company_folder": "SPESNI-OEE-800432486", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "OE", "source_company_folder": "SPESNI-OE-800432486", "validation_errors": [], "source_row": 48}, {"company_id": "CMP-0048", "display_name": "SPES SOLARIS SOLAR CONCEPT AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SSSCON", "typ3": "AEE", "vat9": "800346800", "company_folder": "SSSCON-AEE-800346800", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SSSCON-AE-800346800", "validation_errors": [], "source_row": 49}, {"company_id": "CMP-0049", "display_name": "SPES SOLARIS ΔΥΟ(2) ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SPSOL2", "typ3": "AEE", "vat9": "800341484", "company_folder": "SPSOL2-AEE-800341484", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SPSOL2-AE-800341484", "validation_errors": [], "source_row": 50}, {"company_id": "CMP-0050", "display_name": "SPES SOLARIS ΤΡΙΑ(3)ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SPSOL3", "typ3": "AEE", "vat9": "800341515", "company_folder": "SPSOL3-AEE-800341515", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SPSOL3-AE-800341515", "validation_errors": [], "source_row": 51}, {"company_id": "CMP-0051", "display_name": "STONE VILLAGE RESORTS AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "STONEV", "typ3": "AEE", "vat9": "998385832", "company_folder": "STONEV-AEE-998385832", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "STONEV-AE-998385832", "validation_errors": [], "source_row": 52}, {"company_id": "CMP-0052", "display_name": "Solar Cells Hellas Trading Α.Ε. (4Ε ΕΝΕΡΓΕΙΑΚΗ ΔΥΟ(2) ΑΕ)", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "SCHTRD", "typ3": "AEE", "vat9": "800341423", "company_folder": "SCHTRD-AEE-800341423", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "SCHTRD-AE-800341423", "validation_errors": [], "source_row": 53}, {"company_id": "CMP-0053", "display_name": "TAFF PRIME AE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "TAFFPR", "typ3": "AEE", "vat9": "800466035", "company_folder": "TAFFPR-AEE-800466035", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "TAFFPR-AE-800466035", "validation_errors": [], "source_row": 54}, {"company_id": "CMP-0054", "display_name": "THREE A CONSTRUCTIONS ΜΟΝΟΠΡΟΣΩΠΗ ΙΔΙΩΤΙΚΗ ΚΕΦΑΛΑΙΟΥΧΙΚΗ ΕΤΑΙΡΕΙΑ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "THREEA", "typ3": "IKE", "vat9": "802871675", "company_folder": "THREEA-IKE-802871675", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "THREEA-IK-802871675", "validation_errors": [], "source_row": 55}, {"company_id": "CMP-0055", "display_name": "Venice Energy MIKE", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "VENICE", "typ3": "MIK", "vat9": "802738890", "company_folder": "VENICE-MIK-802738890", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "VENICE-MIK-802738890", "validation_errors": [], "source_row": 56}, {"company_id": "CMP-0056", "display_name": "ZA SOLAR ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ZASOLR", "typ3": "IKE", "vat9": "801373420", "company_folder": "ZASOLR-IKE-801373420", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "ZASOLR-IK-801373420", "validation_errors": [], "source_row": 57}, {"company_id": "CMP-0057", "display_name": "ΓΕΩΕΛ ΦΡΑΟΥΛΑ ΜΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "GEOELF", "typ3": "MIK", "vat9": "803060053", "company_folder": "GEOELF-MIK-803060053", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "GEOELF-MIK-803060053", "validation_errors": [], "source_row": 58}, {"company_id": "CMP-0058", "display_name": "ΕΝΕΡΓΕΙΑΚΗ ΑΣΠΡΟΧΩΜΑΤΟΣ ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ΕΝΕASP", "typ3": "AEE", "vat9": "998808833", "company_folder": "ΕΝΕASP-AEE-998808833", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "ΕΝΕASP-AE-998808833", "validation_errors": [], "source_row": 59}, {"company_id": "CMP-0059", "display_name": "ΕΝΕΡΓΕΙΑΚΗ ΛΙΒΑΔΕΙΑΣ 3 ΜΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "ΕΝΕLV3", "typ3": "MIK", "vat9": "801768674", "company_folder": "ΕΝΕLV3-MIK-801768674", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "ΕΝΕLV3-MIK-801768674", "validation_errors": [], "source_row": 60}, {"company_id": "CMP-0060", "display_name": "ΗΛΕΚΤΡΟΔΥΝΑΜΙΚΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "HLEKTR", "typ3": "IKE", "vat9": "997945805", "company_folder": "HLEKTR-IKE-997945805", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "HLEKTR-IK-997945805", "validation_errors": [], "source_row": 61}, {"company_id": "CMP-0061", "display_name": "ΗΛΙΟΠΟΥΛΟΣ ΑΝΤΩΝΗΣ ΑΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "HLIOPA", "typ3": "AEE", "vat9": "998101890", "company_folder": "HLIOPA-AEE-998101890", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "AE", "source_company_folder": "HLIOPA-AE-998101890", "validation_errors": [], "source_row": 62}, {"company_id": "CMP-0062", "display_name": "Λ.ΠΑΝΑΓΑΚΟΣ & ΣΙΑ ΕΕ ( ΜΗΤΣΟΠΟΥΛΟΥ )", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "LPANEE", "typ3": "EEE", "vat9": "998138950", "company_folder": "LPANEE-EEE-998138950", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "EE", "source_company_folder": "LPANEE-EE-998138950", "validation_errors": [], "source_row": 63}, {"company_id": "CMP-0063", "display_name": "Λ.ΠΑΝΑΓΑΚΟΣ & ΣΙΑ ΟΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "LPANOE", "typ3": "OEE", "vat9": "998171737", "company_folder": "LPANOE-OEE-998171737", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "OE", "source_company_folder": "LPANOE-OE-998171737", "validation_errors": [], "source_row": 64}, {"company_id": "CMP-0064", "display_name": "ΛΕΩΜΕΛ ΒΙΟΜΑΖΑ ΓΙΑΝΝΙΤΣΩΝ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "LEOGIA", "typ3": "IKE", "vat9": "802134614", "company_folder": "LEOGIA-IKE-802134614", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "LEOGIA-IK-802134614", "validation_errors": [], "source_row": 65}, {"company_id": "CMP-0065", "display_name": "ΛΕΩΜΕΛ ΒΙΟΜΑΖΑ ΛΑΚΩΝΙΑΣ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "LEOLAK", "typ3": "IKE", "vat9": "802135149", "company_folder": "LEOLAK-IKE-802135149", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "LEOLAK-IK-802135149", "validation_errors": [], "source_row": 66}, {"company_id": "CMP-0066", "display_name": "ΛΕΩΜΕΛ ΒΙΟΜΑΖΑ ΠΕΛΛΑΣ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "LEOPEL", "typ3": "IKE", "vat9": "802135113", "company_folder": "LEOPEL-IKE-802135113", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "LEOPEL-IK-802135113", "validation_errors": [], "source_row": 67}, {"company_id": "CMP-0067", "display_name": "ΛΕΩΝ.ΠΑΝ ΜΟΝ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "LEOPAN", "typ3": "IKE", "vat9": "801677360", "company_folder": "LEOPAN-IKE-801677360", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "LEOPAN-IK-801677360", "validation_errors": [], "source_row": 68}, {"company_id": "CMP-0068", "display_name": "ΠΑΝΑΓΑΚΟΣ Λ ΣΙΑ ΕΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "PANLEO", "typ3": "EEE", "vat9": "093840377", "company_folder": "PANLEO-EEE-093840377", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "EE", "source_company_folder": "PANLEO-EE-093840377", "validation_errors": [], "source_row": 69}, {"company_id": "CMP-0069", "display_name": "ΣΤΑΜΑΤΙΑ ΠΑΝΑΓΑΚΟΥ ΤΟΥΡΙΣΤΙΚΗ ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "STAPAN", "typ3": "IKE", "vat9": "800907380", "company_folder": "STAPAN-IKE-800907380", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "IK", "source_company_folder": "STAPAN-IK-800907380", "validation_errors": [], "source_row": 70}, {"company_id": "CMP-0070", "display_name": "PHOS 1 DATASYSTEMS ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "PHOS01", "typ3": "MIK", "vat9": "803155402", "company_folder": "PHOS01-MIK-803155402", "is_active": true, "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "PHOS01-MIK-803155402", "validation_errors": [], "source_row": 71}, {"company_id": "CMP-0071", "display_name": "PHOS 2 DATASYSTEMS ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "PHOS02", "typ3": "MIK", "vat9": "", "company_folder": "PHOS02-MIK-", "is_active": true, "notes": "VAT9 missing in source workbook; absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "PHOS02-MIK-", "validation_errors": ["missing_vat9"], "source_row": 72}, {"company_id": "CMP-0072", "display_name": "PHOS 3 DATASYSTEMS ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ", "absolute_company_root_path": "\\\\192.168.200.4\\Files", "namecode": "PHOS03", "typ3": "MIK", "vat9": "", "company_folder": "PHOS03-MIK-", "is_active": true, "notes": "VAT9 missing in source workbook; absolute_company_root_path set to shared root \\\\192.168.200.4\\Files", "source_type_std": "MIK", "source_company_folder": "PHOS03-MIK-", "validation_errors": ["missing_vat9"], "source_row": 73}, {"company_id": "CMP-0073", "display_name": "NEW SPES CONCEPT ΜΟΝΟΠΡΟΣΩΠΗ Α.Ε.", "absolute_company_root_path": "/192.168.200.4/Files", "namecode": "NSPCON", "typ3": "ΜΑΕ", "vat9": "801169966", "company_folder": "NSPCON-ΜΑΕ-801169966", "is_active": true, "notes": "DEPA related company"}], "assetTypes": [{"type_code": "PVS", "label": "PV_plant", "characteristic": "capacity", "display_unit": "MW", "base_value_unit": "kW", "allowed_input_units": ["MW", "kW", "kWp"], "input_to_base_multiplier": {"MW": 1000, "kW": 1, "kWp": 1}, "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.", "example": "15.473 MW -> 15p473"}, {"type_code": "WND", "label": "Wind_farm", "characteristic": "capacity", "display_unit": "MW", "base_value_unit": "kW", "allowed_input_units": ["MW", "kW"], "input_to_base_multiplier": {"MW": 1000, "kW": 1}, "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.", "example": "2.000 MW -> 02p000"}, {"type_code": "DTC", "label": "Datacenter", "characteristic": "contracted_it_load", "display_unit": "MW", "base_value_unit": "kW", "allowed_input_units": ["MW", "kW"], "input_to_base_multiplier": {"MW": 1000, "kW": 1}, "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.", "example": "3.200 MW -> 03p200"}, {"type_code": "HTL", "label": "Hotel", "characteristic": "beds", "display_unit": "beds", "base_value_unit": "beds", "allowed_input_units": ["beds"], "input_to_base_multiplier": {"beds": 1}, "metric_rule": "Convert input to integer beds, then metric = total//1000 as XX and total%1000 as YYY.", "example": "70 beds -> 00p070"}, {"type_code": "HYP", "label": "Hydroponics", "characteristic": "cultivation_area", "display_unit": "m2", "base_value_unit": "m2", "allowed_input_units": ["m2", "ha"], "input_to_base_multiplier": {"m2": 1, "ha": 10000}, "metric_rule": "Convert input to integer m2, then metric = total//1000 as XX and total%1000 as YYY.", "example": "7000 m2 -> 07p000"}, {"type_code": "BCH", "label": "Biochar_plant", "characteristic": "output_capacity", "display_unit": "tpy", "base_value_unit": "tpy", "allowed_input_units": ["tpy"], "input_to_base_multiplier": {"tpy": 1}, "metric_rule": "Convert input to integer tpy, then metric = total//1000 as XX and total%1000 as YYY.", "example": "2500 tpy -> 02p500"}, {"type_code": "BMS", "label": "Biomass_plant", "characteristic": "output_capacity", "display_unit": "tpy", "base_value_unit": "tpy", "allowed_input_units": ["tpy"], "input_to_base_multiplier": {"tpy": 1}, "metric_rule": "Convert input to integer tpy, then metric = total//1000 as XX and total%1000 as YYY.", "example": "12500 tpy -> 12p500"}, {"type_code": "HYD", "label": "Hydrogen", "characteristic": "production", "display_unit": "kg/day", "base_value_unit": "kg/day", "allowed_input_units": ["kg/day"], "input_to_base_multiplier": {"kg/day": 1}, "metric_rule": "Convert input to integer kg/day, then metric = total//1000 as XX and total%1000 as YYY.", "example": "3000 kg/day -> 03p000"}, {"type_code": "BES", "label": "BESS", "characteristic": "energy_capacity", "display_unit": "kWh", "base_value_unit": "kWh", "allowed_input_units": ["MWh", "kWh"], "input_to_base_multiplier": {"MWh": 1000, "kWh": 1}, "metric_rule": "Convert input to integer kWh, then metric = total//1000 as XX and total%1000 as YYY.", "example": "12.5 MWh -> 12p500"}, {"type_code": "OTH", "label": "Other", "characteristic": "user_defined", "display_unit": "unit", "base_value_unit": "unit", "allowed_input_units": ["unit"], "input_to_base_multiplier": {"unit": 1}, "metric_rule": "Convert input to integer units, then metric = total//1000 as XX and total%1000 as YYY.", "example": "42 -> 00p042"}], "defaultConfig": {"schema": {"id": "sch.payment-priority.config", "version": "1.0.0", "generated_at": "2026-03-18T05:59:19.060949Z"}, "parameters": {"currency": "EUR", "high_risk_threshold": 16, "medium_risk_threshold": 8, "eps": 1e-06, "weights": {"exposure": 0.45, "security": 0.275, "hse": 0.275, "payment_penalty": 1.0}}, "risk_scales": {"likelihood": [{"value": 1, "label": "1 - Rare", "description": "Very unlikely in normal operation"}, {"value": 2, "label": "2 - Unlikely", "description": "Could happen but not expected"}, {"value": 3, "label": "3 - Possible", "description": "Realistic / may occur"}, {"value": 4, "label": "4 - Likely", "description": "Expected in many cases"}, {"value": 5, "label": "5 - Almost certain", "description": "Expected or already recurring"}], "impact": [{"value": 1, "label": "1 - Negligible", "description": "Very limited operational effect"}, {"value": 2, "label": "2 - Minor", "description": "Small disturbance, easy recovery"}, {"value": 3, "label": "3 - Moderate", "description": "Relevant impact, management attention needed"}, {"value": 4, "label": "4 - Major", "description": "Serious impact on operations or compliance"}, {"value": 5, "label": "5 - Critical", "description": "Severe / unacceptable impact"}]}, "type_economics": {"PVS": {"label": "PV plant", "calc_mode": "mw_capacity", "typical_cf": 0.15, "value_per_kwh": 0.02, "notes": "Workbook defaults for PV assets. Edit if you have better park economics."}, "WND": {"label": "Wind farm", "calc_mode": "mw_capacity", "typical_cf": 0.254, "value_per_kwh": 0.098, "notes": "Workbook defaults for wind assets. Edit if you have better park economics."}, "DTC": {"label": "Datacenter", "calc_mode": "mw_capacity", "typical_cf": 0.9, "value_per_kwh": 0.12, "notes": "Editable proxy for datacenter utilization/value. Validate with your operations team.", "is_placeholder": true}, "HTL": {"label": "Hotel", "calc_mode": "disabled", "typical_cf": 0.0, "value_per_kwh": 0.0, "notes": "No direct MW capacity in the current naming metric. Add a proxy method before using production-loss economics."}, "HYP": {"label": "Hydroponics", "calc_mode": "disabled", "typical_cf": 0.0, "value_per_kwh": 0.0, "notes": "Needs a proxy energy/output model before using lost-kWh calculations."}, "BCH": {"label": "Biochar plant", "calc_mode": "disabled", "typical_cf": 0.0, "value_per_kwh": 0.0, "notes": "Needs a proxy energy/output model before using lost-kWh calculations."}, "BMS": {"label": "Biomass plant", "calc_mode": "disabled", "typical_cf": 0.0, "value_per_kwh": 0.0, "notes": "Needs a proxy energy/output model before using lost-kWh calculations."}, "HYD": {"label": "Hydrogen", "calc_mode": "disabled", "typical_cf": 0.0, "value_per_kwh": 0.0, "notes": "Needs a proxy energy/output model before using lost-kWh calculations."}, "BES": {"label": "BESS", "calc_mode": "disabled", "typical_cf": 0.0, "value_per_kwh": 0.0, "notes": "Storage needs a different economic model than simple production-loss CF."}, "OTH": {"label": "Other", "calc_mode": "disabled", "typical_cf": 0.0, "value_per_kwh": 0.0, "notes": "Configure before use."}}}};
+const STORAGE_KEY = 'sch-payment-priority-board-v2';
+
+const state = {
+  assets: [],
+  companies: EMBEDDED_DATA.companies || [],
+  assetTypes: EMBEDDED_DATA.assetTypes || [],
+  config: structuredClone(EMBEDDED_DATA.defaultConfig),
+  openRequests: [],
+  paidRequests: [],
+  selectedRequestId: null,
+  selectedAssetId: null
+};
+
+const els = {
+  kpiCards: document.getElementById('kpiCards'),
+  previewCards: document.getElementById('previewCards'),
+  assetSearch: document.getElementById('assetSearch'),
+  assetSelect: document.getElementById('assetSelect'),
+  metaAsset: document.getElementById('metaAsset'),
+  metaCompany: document.getElementById('metaCompany'),
+  metaType: document.getElementById('metaType'),
+  metaCapacity: document.getElementById('metaCapacity'),
+  metaCf: document.getElementById('metaCf'),
+  metaValueKwh: document.getElementById('metaValueKwh'),
+  metaCalcNote: document.getElementById('metaCalcNote'),
+  requestTitle: document.getElementById('requestTitle'),
+  requestDescription: document.getElementById('requestDescription'),
+  requestAmount: document.getElementById('requestAmount'),
+  productionEffect: document.getElementById('productionEffect'),
+  secLikelihood: document.getElementById('secLikelihood'),
+  secImpact: document.getElementById('secImpact'),
+  hseLikelihood: document.getElementById('hseLikelihood'),
+  hseImpact: document.getElementById('hseImpact'),
+  addRequestBtn: document.getElementById('addRequestBtn'),
+  updateRequestBtn: document.getElementById('updateRequestBtn'),
+  clearFormBtn: document.getElementById('clearFormBtn'),
+  queueSearch: document.getElementById('queueSearch'),
+  queueFilter: document.getElementById('queueFilter'),
+  openTableBody: document.getElementById('openTableBody'),
+  paidTableBody: document.getElementById('paidTableBody'),
+  exportStateBtn: document.getElementById('exportStateBtn'),
+  exportCsvBtn: document.getElementById('exportCsvBtn'),
+  loadStateBtn: document.getElementById('loadStateBtn'),
+  loadConfigBtn: document.getElementById('loadConfigBtn'),
+  resetBtn: document.getElementById('resetBtn'),
+  stateLoader: document.getElementById('stateLoader'),
+  configLoader: document.getElementById('configLoader'),
+  chartPriority: document.getElementById('chartPriority'),
+  chartAssetExposure: document.getElementById('chartAssetExposure'),
+  chartBuckets: document.getElementById('chartBuckets')
+};
+
+function structuredCloneSafe(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function formatCurrency(v) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
+  return new Intl.NumberFormat('en-GB', { style:'currency', currency:'EUR', maximumFractionDigits:2 }).format(Number(v));
+}
+
+function formatNumber(v, digits=2) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
+  return new Intl.NumberFormat('en-GB', { maximumFractionDigits:digits }).format(Number(v));
+}
+
+function formatCompact(v) {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
+  return new Intl.NumberFormat('en-GB', { notation:'compact', maximumFractionDigits:2 }).format(Number(v));
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function slugify(text) {
+  return (text || '').toString().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60) || 'request';
+}
+
+function escapeHtml(text) {
+  return (text ?? '').toString()
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function normalizeLegacyType(code) {
+  const raw = (code || '').toString().toUpperCase().trim();
+  const aliases = { PV:'PVS', PVS:'PVS', WND:'WND', WIND:'WND', DTC:'DTC', HTL:'HTL', HYP:'HYP', BCH:'BCH', BMS:'BMS', HYD:'HYD', BES:'BES', OTH:'OTH' };
+  return aliases[raw] || raw;
+}
+
+function parseTypeIdParts(name) {
+  const text = (name || '').toString();
+  const direct = text.match(/\b([A-Z]{2,3})(\d{2})p(\d{3})-(\d{2})\b/);
+  if (direct) {
+    return {
+      typeCode: normalizeLegacyType(direct[1]),
+      metricText: `${direct[2]}p${direct[3]}`,
+      sequence: direct[4]
+    };
+  }
+  return null;
+}
+
+function deriveCapacity(asset, typeCode, assetType) {
+  const fromName = parseTypeIdParts(asset.typeid || asset.asset_folder || asset.task_name || asset.name || '');
+  const unit = assetType?.display_unit || asset.input_unit || '';
+  let value = null;
+  if (fromName) {
+    const base = Number(fromName.metricText.split('p')[0]) + Number(fromName.metricText.split('p')[1]) / 1000;
+    value = base;
+  }
+  if ((value === null || Number.isNaN(value)) && asset.input_value !== undefined && asset.input_value !== null) {
+    value = Number(asset.input_value);
+  }
+  let calcCapacityMw = null;
+  const inputUnit = (asset.input_unit || '').toString();
+  if (['MW'].includes(inputUnit) || ['PVS','WND','DTC'].includes(typeCode)) {
+    calcCapacityMw = Number(value);
+  } else if (inputUnit === 'kW') {
+    calcCapacityMw = Number(value) / 1000;
+  } else if (inputUnit === 'MWh') {
+    calcCapacityMw = Number(value); // displayed only; economics disabled by config by default
+  }
+  return {
+    rawValue: Number.isFinite(Number(value)) ? Number(value) : null,
+    displayUnit: unit || inputUnit || 'unit',
+    capacityMw: Number.isFinite(Number(calcCapacityMw)) ? Number(calcCapacityMw) : null
+  };
+}
+
+function buildAssetCatalog() {
+  const companyMap = new Map(state.companies.map(c => [c.company_id, c]));
+  const typeMap = new Map(state.assetTypes.map(t => [t.type_code, t]));
+  state.assets = (EMBEDDED_DATA.assets || []).filter(a => a && a.is_active !== false).map(asset => {
+    const rawName = asset.asset_folder || asset.task_name || asset.name || asset.typeid || asset.asset_id;
+    const typeInfo = parseTypeIdParts(asset.typeid || rawName || '') || { typeCode: normalizeLegacyType(asset.type || asset.type_code || ''), metricText: asset.metric || '' };
+    const typeCode = normalizeLegacyType(typeInfo.typeCode || asset.type || asset.type_code || 'OTH');
+    const assetType = typeMap.get(typeCode) || null;
+    const cap = deriveCapacity(asset, typeCode, assetType);
+    const company = companyMap.get(asset.company_id) || {};
+    const economics = state.config.type_economics?.[typeCode] || {};
+    return {
+      ...asset,
+      raw_name: rawName,
+      type_code: typeCode,
+      metric_text: typeInfo.metricText || asset.metric || '',
+      company_display: company.display_name || asset.company_folder || 'Unknown company',
+      company_folder_resolved: company.company_folder || asset.company_folder || '',
+      company_vat: company.vat9 || '',
+      type_label: assetType?.label || typeCode,
+      display_capacity: cap.rawValue,
+      display_unit: cap.displayUnit,
+      capacity_mw: cap.capacityMw,
+      economics_enabled: economics.calc_mode && economics.calc_mode !== 'disabled',
+      economics_note: economics.notes || '',
+      price_per_kwh: Number(economics.value_per_kwh || 0),
+      cf_typ: Number(economics.typical_cf || 0),
+      config_placeholder: Boolean(economics.is_placeholder)
+    };
+  }).sort((a,b) => a.raw_name.localeCompare(b.raw_name));
+}
+
+function saveState() {
+  const payload = {
+    openRequests: state.openRequests,
+    paidRequests: state.paidRequests,
+    config: state.config
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function loadStateFromStorage() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    state.openRequests = Array.isArray(parsed.openRequests) ? parsed.openRequests : [];
+    state.paidRequests = Array.isArray(parsed.paidRequests) ? parsed.paidRequests : [];
+    if (parsed.config?.type_economics) state.config = parsed.config;
+  } catch (err) {
+    console.warn('Unable to load state', err);
+  }
+}
+
+function populateRiskSelect(selectEl, items) {
+  selectEl.innerHTML = items.map(item => `<option value="${item.value}">${escapeHtml(item.label)} — ${escapeHtml(item.description)}</option>`).join('');
+  if (selectEl.id.includes('Impact')) selectEl.value = '3';
+  if (selectEl.id.includes('Likelihood')) selectEl.value = '2';
+}
+
+function populateAssetSelect(filter='') {
+  const q = filter.trim().toLowerCase();
+  const filtered = state.assets.filter(a => {
+    if (!q) return true;
+    const hay = [a.raw_name, a.company_display, a.location, a.project_name, a.type_code, a.type_label].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+  els.assetSelect.innerHTML = filtered.map(a => `<option value="${escapeHtml(a.asset_id)}">${escapeHtml(a.raw_name)} · ${escapeHtml(a.company_display)}</option>`).join('');
+  if (!filtered.length) {
+    els.assetSelect.innerHTML = '<option value="">No assets match the search</option>';
+    state.selectedAssetId = null;
+    renderSelectedAssetMeta(null);
+    return;
+  }
+  const stillVisible = filtered.find(a => a.asset_id === state.selectedAssetId);
+  const selected = stillVisible || filtered[0];
+  els.assetSelect.value = selected.asset_id;
+  state.selectedAssetId = selected.asset_id;
+  renderSelectedAssetMeta(selected);
+}
+
+function getSelectedAsset() {
+  return state.assets.find(a => a.asset_id === els.assetSelect.value) || null;
+}
+
+function getFormPayload() {
+  const asset = getSelectedAsset();
+  return {
+    assetId: asset?.asset_id || null,
+    requestTitle: els.requestTitle.value.trim(),
+    requestDescription: els.requestDescription.value.trim(),
+    requestAmount: Number(els.requestAmount.value || 0),
+    productionEffectPct: Number(els.productionEffect.value || 0),
+    secLikelihood: Number(els.secLikelihood.value || 1),
+    secImpact: Number(els.secImpact.value || 1),
+    hseLikelihood: Number(els.hseLikelihood.value || 1),
+    hseImpact: Number(els.hseImpact.value || 1)
+  };
+}
+
+function computeDerived(requestLike, scopeRequests = []) {
+  const asset = state.assets.find(a => a.asset_id === requestLike.assetId) || null;
+  const typeCfg = asset ? (state.config.type_economics?.[asset.type_code] || {}) : {};
+  const secRisk = Number(requestLike.secLikelihood || 0) * Number(requestLike.secImpact || 0);
+  const hseRisk = Number(requestLike.hseLikelihood || 0) * Number(requestLike.hseImpact || 0);
+  const effect = Math.max(0, Math.min(100, Number(requestLike.productionEffectPct || 0))) / 100;
+  let lostKwhDay = null;
+  if (asset && typeCfg.calc_mode === 'mw_capacity' && Number.isFinite(asset.capacity_mw)) {
+    lostKwhDay = asset.capacity_mw * 1000 * 24 * Number(typeCfg.typical_cf || 0) * effect;
+  }
+  const lostRevenueDay = Number.isFinite(lostKwhDay) ? lostKwhDay * Number(typeCfg.value_per_kwh || 0) : null;
+  const paybackDays = (Number(requestLike.requestAmount || 0) > 0 && Number(lostRevenueDay || 0) > 0)
+    ? Number(requestLike.requestAmount) / Number(lostRevenueDay)
+    : null;
+  const mandatory = secRisk >= Number(state.config.parameters.high_risk_threshold || 16) || hseRisk >= Number(state.config.parameters.high_risk_threshold || 16);
+  const paySoon = !mandatory && (secRisk >= Number(state.config.parameters.medium_risk_threshold || 8) || hseRisk >= Number(state.config.parameters.medium_risk_threshold || 8));
+  const exposureLog = Number.isFinite(lostRevenueDay) && lostRevenueDay > 0 ? Math.log(1 + lostRevenueDay) : 0;
+  const paymentLog = Number(requestLike.requestAmount || 0) > 0 ? Math.log(1 + Number(requestLike.requestAmount)) : 0;
+  const exposures = scopeRequests.map(r => Number.isFinite(r._metrics?.exposureLog) ? r._metrics.exposureLog : 0);
+  const payments = scopeRequests.map(r => Number.isFinite(r._metrics?.paymentLog) ? r._metrics.paymentLog : 0);
+  const minExposure = exposures.length ? Math.min(...exposures) : 0;
+  const maxExposure = exposures.length ? Math.max(...exposures) : 1;
+  const minPayment = payments.length ? Math.min(...payments) : 0;
+  const maxPayment = payments.length ? Math.max(...payments) : 1;
+  const nExposure = maxExposure - minExposure <= 0 ? (exposureLog > 0 ? 0.5 : 0) : Math.max(0, Math.min(1, (exposureLog - minExposure) / (maxExposure - minExposure)));
+  const nPayment = maxPayment - minPayment <= 0 ? (paymentLog > 0 ? 0.5 : 0) : Math.max(0, Math.min(1, (paymentLog - minPayment) / (maxPayment - minPayment)));
+  const nSec = secRisk > 0 ? (secRisk - 1) / 24 : 0;
+  const nHse = hseRisk > 0 ? (hseRisk - 1) / 24 : 0;
+  const eps = Number(state.config.parameters.eps || 1e-6);
+  const w = state.config.parameters.weights || {};
+  const rawScore = (((eps + nExposure) ** Number(w.exposure || 0.45)) * ((eps + nSec) ** Number(w.security || 0.275)) * ((eps + nHse) ** Number(w.hse || 0.275))) / ((eps + nPayment) ** Number(w.payment_penalty || 1));
+  const priorityScore = mandatory ? 1000000000 + rawScore : rawScore;
+  let priorityClass = 'Economics driven';
+  if (mandatory) priorityClass = 'Mandatory pay first';
+  else if (paySoon) priorityClass = 'Pay soon';
+  else if ((lostRevenueDay || 0) <= 0) priorityClass = 'Risk only / monitor';
+  return {
+    asset,
+    typeCfg,
+    secRisk,
+    hseRisk,
+    lostKwhDay,
+    lostRevenueDay,
+    paybackDays,
+    mandatory,
+    paySoon,
+    priorityClass,
+    exposureLog,
+    paymentLog,
+    nExposure,
+    nPayment,
+    nSec,
+    nHse,
+    priorityScore,
+    configReady: Boolean(asset && typeCfg.calc_mode && typeCfg.calc_mode !== 'disabled' && Number(typeCfg.typical_cf || 0) > 0 && Number(typeCfg.value_per_kwh || 0) >= 0)
+  };
+}
+
+function enrichRequests() {
+  const working = state.openRequests.map(r => ({ ...r }));
+  working.forEach(r => { r._metrics = computeDerived(r); });
+  working.forEach(r => { r._metrics = computeDerived(r, working); });
+  working.sort((a,b) => {
+    if (b._metrics.mandatory !== a._metrics.mandatory) return Number(b._metrics.mandatory) - Number(a._metrics.mandatory);
+    if (b._metrics.priorityScore !== a._metrics.priorityScore) return b._metrics.priorityScore - a._metrics.priorityScore;
+    if ((b._metrics.lostRevenueDay || 0) !== (a._metrics.lostRevenueDay || 0)) return (b._metrics.lostRevenueDay || 0) - (a._metrics.lostRevenueDay || 0);
+    return a.createdAt.localeCompare(b.createdAt);
+  });
+  working.forEach((r, idx) => { r.rank = idx + 1; });
+  state.openRequests = working.map(({ _metrics, ...rest }, idx) => ({ ...rest, rank: idx + 1 }));
+  state.paidRequests = state.paidRequests.map(r => {
+    const metrics = computeDerived(r, working);
+    return { ...r, finalRankAtPayment: r.finalRankAtPayment || r.rank || null, _metrics: metrics };
+  });
+  return {
+    open: working,
+    paid: state.paidRequests
+  };
+}
+
+function renderSelectedAssetMeta(asset) {
+  if (!asset) {
+    els.metaAsset.textContent = '—';
+    els.metaCompany.textContent = '—';
+    els.metaType.textContent = '—';
+    els.metaCapacity.textContent = '—';
+    els.metaCf.textContent = '—';
+    els.metaValueKwh.textContent = '—';
+    els.metaCalcNote.textContent = 'Select an asset to see the calculation basis.';
+    return;
+  }
+  els.metaAsset.textContent = asset.raw_name;
+  els.metaCompany.textContent = asset.company_display;
+  els.metaType.textContent = `${asset.type_code} · ${asset.type_label}`;
+  els.metaCapacity.textContent = asset.display_capacity !== null ? `${formatNumber(asset.display_capacity, 3)} ${asset.display_unit}` : '—';
+  els.metaCf.textContent = asset.economics_enabled ? formatNumber(asset.cf_typ, 3) : 'Needs config';
+  els.metaValueKwh.textContent = asset.economics_enabled ? formatCurrency(asset.price_per_kwh) : 'Needs config';
+  let note = asset.economics_note || 'Configured.';
+  if (asset.config_placeholder) note = 'Using editable placeholder economics. ' + note;
+  if (!asset.economics_enabled) note = 'This asset type is currently not configured for lost-kWh/day economics. You can still rank it by risk and cost, or load an updated config JSON.';
+  els.metaCalcNote.textContent = note;
+}
+
+function renderPreview() {
+  const payload = getFormPayload();
+  const open = state.openRequests.map(r => ({ ...r, _metrics: computeDerived(r) }));
+  const metrics = computeDerived(payload, open);
+  const cards = [
+    { label:'Lost kWh/day', value: formatNumber(metrics.lostKwhDay, 2), note:'Production loss proxy from capacity, CF, and effect %' },
+    { label:'Lost revenue/day', value: formatCurrency(metrics.lostRevenueDay), note:'Lost kWh/day × value €/kWh' },
+    { label:'Simple payback', value: metrics.paybackDays ? `${formatNumber(metrics.paybackDays,1)} days` : 'N/A', note:'Request amount ÷ lost revenue/day' },
+    { label:'Priority score', value: formatNumber(metrics.priorityScore, 6), note:'Score per euro with risk weighting' },
+    { label:'Security risk', value: `${metrics.secRisk} / 25`, note:`${payload.secLikelihood || 0} × ${payload.secImpact || 0}` },
+    { label:'HSE risk', value: `${metrics.hseRisk} / 25`, note:`${payload.hseLikelihood || 0} × ${payload.hseImpact || 0}` },
+    { label:'Priority class', value: metrics.priorityClass, note: metrics.mandatory ? 'Above mandatory threshold' : (metrics.paySoon ? 'Above pay-soon threshold' : 'Normal score order') },
+    { label:'Config status', value: metrics.configReady ? 'Ready' : 'Risk-only', note: metrics.configReady ? 'Economics config available' : 'Needs/uses limited economics config' }
+  ];
+  els.previewCards.innerHTML = cards.map(c => `<div class="card"><div class="small">${escapeHtml(c.label)}</div><div class="metric">${escapeHtml(c.value)}</div><div class="kpi-note">${escapeHtml(c.note)}</div></div>`).join('');
+}
+
+function renderKpis(openEnriched, paid) {
+  const totalOpenAmount = openEnriched.reduce((s,r) => s + Number(r.requestAmount || 0), 0);
+  const totalPaidAmount = paid.reduce((s,r) => s + Number(r.requestAmount || 0), 0);
+  const totalLostRevenue = openEnriched.reduce((s,r) => s + Number(r._metrics.lostRevenueDay || 0), 0);
+  const mandatoryCount = openEnriched.filter(r => r._metrics.mandatory).length;
+  const avgPayback = openEnriched.filter(r => Number.isFinite(r._metrics.paybackDays)).reduce((acc,r,_,arr) => acc + r._metrics.paybackDays / arr.length, 0);
+  const cards = [
+    { title:'Open requests', value: formatNumber(openEnriched.length,0), note:'Live ranking only' },
+    { title:'Mandatory now', value: formatNumber(mandatoryCount,0), note:'High Security/HSE threshold' },
+    { title:'Open amount', value: formatCurrency(totalOpenAmount), note:'All unpaid requests' },
+    { title:'Lost revenue/day', value: formatCurrency(totalLostRevenue), note:'Current open exposure proxy' },
+    { title:'Average payback', value: Number.isFinite(avgPayback) ? `${formatNumber(avgPayback,1)} days` : 'N/A', note:'Open requests with revenue loss' },
+    { title:'Paid archive', value: formatCurrency(totalPaidAmount), note:`${paid.length} paid requests` }
+  ];
+  els.kpiCards.innerHTML = cards.map(c => `<div class="card"><div class="small">${escapeHtml(c.title)}</div><div class="metric">${escapeHtml(c.value)}</div><div class="kpi-note">${escapeHtml(c.note)}</div></div>`).join('');
+}
+
+function priorityTag(metrics) {
+  if (metrics.mandatory) return '<span class="tag danger">Mandatory</span>';
+  if (metrics.paySoon) return '<span class="tag warn">Pay soon</span>';
+  if ((metrics.lostRevenueDay || 0) > 0) return '<span class="tag info">Economics</span>';
+  return '<span class="tag ok">Risk / monitor</span>';
+}
+
+function renderOpenTable(openEnriched) {
+  const q = els.queueSearch.value.trim().toLowerCase();
+  const filter = els.queueFilter.value;
+  const filtered = openEnriched.filter(r => {
+    const hay = [r.requestTitle, r.requestDescription, r._metrics.asset?.raw_name, r._metrics.asset?.company_display].join(' ').toLowerCase();
+    if (q && !hay.includes(q)) return false;
+    if (filter === 'mandatory' && !r._metrics.mandatory) return false;
+    if (filter === 'paysoon' && !r._metrics.paySoon) return false;
+    if (filter === 'economics' && (r._metrics.mandatory || r._metrics.paySoon)) return false;
+    return true;
+  });
+  if (!filtered.length) {
+    els.openTableBody.innerHTML = '<tr><td colspan="14" class="small">No open requests match the current filter.</td></tr>';
+    return;
+  }
+  els.openTableBody.innerHTML = filtered.map(r => {
+    const asset = r._metrics.asset || {};
+    return `<tr class="${state.selectedRequestId === r.id ? 'selected' : ''}">
+      <td>${r.rank}</td>
+      <td>${priorityTag(r._metrics)}<div class="small">${escapeHtml(r._metrics.priorityClass)}</div></td>
+      <td><strong>${escapeHtml(r.requestTitle)}</strong><div class="small">${escapeHtml(r.requestDescription || '')}</div></td>
+      <td>${escapeHtml(asset.raw_name || '—')}</td>
+      <td>${escapeHtml(asset.company_display || '—')}</td>
+      <td>${formatCurrency(r.requestAmount)}</td>
+      <td>${formatNumber(r.productionEffectPct,1)}%</td>
+      <td>${formatCompact(r._metrics.lostKwhDay)}</td>
+      <td>${formatCurrency(r._metrics.lostRevenueDay)}</td>
+      <td>${r._metrics.paybackDays ? `${formatNumber(r._metrics.paybackDays,1)} d` : 'N/A'}</td>
+      <td>${r._metrics.secRisk}</td>
+      <td>${r._metrics.hseRisk}</td>
+      <td>${formatNumber(r._metrics.priorityScore,6)}</td>
+      <td>
+        <div class="controls">
+          <button class="slim secondary" onclick="editRequest('${r.id}')">Edit</button>
+          <button class="slim warn" onclick="markPaid('${r.id}')">Mark paid</button>
+          <button class="slim danger" onclick="deleteOpenRequest('${r.id}')">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPaidTable(paid) {
+  if (!paid.length) {
+    els.paidTableBody.innerHTML = '<tr><td colspan="8" class="small">No paid requests yet.</td></tr>';
+    return;
+  }
+  els.paidTableBody.innerHTML = paid.slice().sort((a,b) => (b.paidAt || '').localeCompare(a.paidAt || '')).map(r => {
+    const metrics = r._metrics || computeDerived(r);
+    return `<tr>
+      <td>${escapeHtml(r.paidAt || '—')}</td>
+      <td><strong>${escapeHtml(r.requestTitle)}</strong></td>
+      <td>${escapeHtml(metrics.asset?.raw_name || '—')}</td>
+      <td>${escapeHtml(metrics.asset?.company_display || '—')}</td>
+      <td>${formatCurrency(r.requestAmount)}</td>
+      <td>${r.finalRankAtPayment || '—'}</td>
+      <td>${escapeHtml(r.requestDescription || '')}</td>
+      <td><div class="controls"><button class="slim secondary" onclick="reopenPaidRequest('${r.id}')">Reopen</button><button class="slim danger" onclick="deletePaidRequest('${r.id}')">Delete</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderBarChart(svgEl, items, opts = {}) {
+  const width = 700, height = 280, pad = { top: 14, right: 16, bottom: 30, left: 160 };
+  const values = items.map(d => Number(opts.value(d) || 0));
+  const max = Math.max(1, ...values);
+  const rowH = Math.max(24, Math.floor((height - pad.top - pad.bottom) / Math.max(items.length, 1)));
+  const bars = items.map((d, idx) => {
+    const y = pad.top + idx * rowH;
+    const barW = ((width - pad.left - pad.right) * (Number(opts.value(d) || 0) / max));
+    const label = escapeHtml(opts.label(d));
+    const valLabel = escapeHtml(opts.valueLabel ? opts.valueLabel(d) : formatNumber(opts.value(d),2));
+    const fill = opts.fill || '#6ea8fe';
+    return `
+      <text x="12" y="${y + 16}" fill="#cfe0ff" font-size="12">${label}</text>
+      <rect x="${pad.left}" y="${y}" width="${barW}" height="16" rx="8" fill="${fill}" opacity="0.85"></rect>
+      <text x="${Math.min(width - pad.right, pad.left + barW + 8)}" y="${y + 13}" fill="#eef3ff" font-size="11">${valLabel}</text>`;
+  }).join('');
+  svgEl.innerHTML = items.length ? bars : `<text x="12" y="24" fill="#a8b4d4" font-size="12">No data yet</text>`;
+}
+
+function renderCharts(openEnriched) {
+  const topPriority = openEnriched.slice(0, 8);
+  renderBarChart(els.chartPriority, topPriority, {
+    value: d => d._metrics.priorityScore,
+    label: d => `${d.rank}. ${d.requestTitle}`.slice(0,34),
+    valueLabel: d => formatNumber(d._metrics.priorityScore, 6),
+    fill: '#6ea8fe'
+  });
+
+  const byAssetMap = new Map();
+  openEnriched.forEach(r => {
+    const name = r._metrics.asset?.project_name || r._metrics.asset?.raw_name || 'Unknown';
+    byAssetMap.set(name, (byAssetMap.get(name) || 0) + Number(r._metrics.lostRevenueDay || 0));
+  });
+  const byAsset = [...byAssetMap.entries()].map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value).slice(0,8);
+  renderBarChart(els.chartAssetExposure, byAsset, {
+    value: d => d.value,
+    label: d => d.name.slice(0,34),
+    valueLabel: d => formatCurrency(d.value),
+    fill: '#7ee0c3'
+  });
+
+  const buckets = [
+    { name:'Mandatory', value: openEnriched.filter(r => r._metrics.mandatory).length, fill:'#ff6b6b' },
+    { name:'Pay soon', value: openEnriched.filter(r => !r._metrics.mandatory && r._metrics.paySoon).length, fill:'#ffc857' },
+    { name:'Economics', value: openEnriched.filter(r => !r._metrics.mandatory && !r._metrics.paySoon && (r._metrics.lostRevenueDay || 0) > 0).length, fill:'#6ea8fe' },
+    { name:'Risk/monitor', value: openEnriched.filter(r => !r._metrics.mandatory && !r._metrics.paySoon && (r._metrics.lostRevenueDay || 0) <= 0).length, fill:'#6dd28c' }
+  ];
+  const width = 700, height = 280, pad = { top: 18, right: 20, bottom: 40, left: 50 };
+  const max = Math.max(1, ...buckets.map(b => b.value));
+  const barW = 110;
+  const gap = 40;
+  els.chartBuckets.innerHTML = buckets.map((b, idx) => {
+    const x = pad.left + idx * (barW + gap);
+    const h = ((height - pad.top - pad.bottom) * (b.value / max));
+    const y = height - pad.bottom - h;
+    return `
+      <rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="10" fill="${b.fill}" opacity="0.9"></rect>
+      <text x="${x + barW/2}" y="${height - 14}" fill="#cfe0ff" font-size="12" text-anchor="middle">${escapeHtml(b.name)}</text>
+      <text x="${x + barW/2}" y="${y - 6}" fill="#eef3ff" font-size="12" text-anchor="middle">${b.value}</text>`;
+  }).join('');
+}
+
+function refreshUi() {
+  const enriched = enrichRequests();
+  renderSelectedAssetMeta(getSelectedAsset());
+  renderPreview();
+  renderKpis(enriched.open, enriched.paid);
+  renderOpenTable(enriched.open);
+  renderPaidTable(enriched.paid);
+  renderCharts(enriched.open);
+  saveState();
+}
+
+function clearForm() {
+  state.selectedRequestId = null;
+  els.requestTitle.value = '';
+  els.requestDescription.value = '';
+  els.requestAmount.value = '';
+  els.productionEffect.value = '';
+  els.secLikelihood.value = '2';
+  els.secImpact.value = '3';
+  els.hseLikelihood.value = '2';
+  els.hseImpact.value = '3';
+  renderPreview();
+  refreshUi();
+}
+
+function validateRequest(payload) {
+  if (!payload.assetId) return 'Select an asset.';
+  if (!payload.requestTitle) return 'Enter a request name.';
+  if (!(payload.requestAmount > 0)) return 'Enter a request amount greater than zero.';
+  if (payload.productionEffectPct < 0 || payload.productionEffectPct > 100) return 'Production effect must be between 0 and 100%.';
+  return null;
+}
+
+function addOrUpdateRequest(mode) {
+  const payload = getFormPayload();
+  const err = validateRequest(payload);
+  if (err) { alert(err); return; }
+  if (mode === 'update') {
+    if (!state.selectedRequestId) { alert('Select an existing request first.'); return; }
+    state.openRequests = state.openRequests.map(r => r.id === state.selectedRequestId ? { ...r, ...payload, updatedAt: new Date().toISOString() } : r);
+  } else {
+    const id = `${todayIso()}-${slugify(payload.requestTitle)}-${Math.random().toString(36).slice(2,7)}`;
+    state.openRequests.push({
+      id,
+      ...payload,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'open'
+    });
+    state.selectedRequestId = id;
+  }
+  refreshUi();
+}
+
+window.editRequest = function(id) {
+  const req = state.openRequests.find(r => r.id === id);
+  if (!req) return;
+  state.selectedRequestId = id;
+  els.assetSearch.value = '';
+  populateAssetSelect('');
+  els.assetSelect.value = req.assetId;
+  state.selectedAssetId = req.assetId;
+  renderSelectedAssetMeta(getSelectedAsset());
+  els.requestTitle.value = req.requestTitle || '';
+  els.requestDescription.value = req.requestDescription || '';
+  els.requestAmount.value = req.requestAmount ?? '';
+  els.productionEffect.value = req.productionEffectPct ?? '';
+  els.secLikelihood.value = String(req.secLikelihood || 1);
+  els.secImpact.value = String(req.secImpact || 1);
+  els.hseLikelihood.value = String(req.hseLikelihood || 1);
+  els.hseImpact.value = String(req.hseImpact || 1);
+  renderPreview();
+  refreshUi();
+};
+
+window.markPaid = function(id) {
+  const idx = state.openRequests.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  const req = state.openRequests[idx];
+  const enriched = computeDerived(req, state.openRequests.map(r => ({ ...r, _metrics: computeDerived(r) })));
+  state.openRequests.splice(idx, 1);
+  state.paidRequests.push({ ...req, paidAt: todayIso(), status: 'paid', finalRankAtPayment: req.rank || null, _metrics: enriched });
+  if (state.selectedRequestId === id) state.selectedRequestId = null;
+  refreshUi();
+};
+
+window.reopenPaidRequest = function(id) {
+  const idx = state.paidRequests.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  const req = state.paidRequests[idx];
+  state.paidRequests.splice(idx, 1);
+  const reopened = { ...req, status: 'open', reopenedAt: new Date().toISOString() };
+  delete reopened.paidAt;
+  delete reopened.finalRankAtPayment;
+  delete reopened._metrics;
+  state.openRequests.push(reopened);
+  refreshUi();
+};
+
+window.deleteOpenRequest = function(id) {
+  if (!confirm('Delete this open request?')) return;
+  state.openRequests = state.openRequests.filter(r => r.id !== id);
+  if (state.selectedRequestId === id) state.selectedRequestId = null;
+  refreshUi();
+};
+
+window.deletePaidRequest = function(id) {
+  if (!confirm('Delete this paid request from the archive?')) return;
+  state.paidRequests = state.paidRequests.filter(r => r.id !== id);
+  refreshUi();
+};
+
+function download(filename, content, mime='application/json') {
+  const blob = new Blob([content], { type:mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportOpenCsv() {
+  const enriched = enrichRequests().open;
+  const rows = [[
+    'rank','priority_class','request_title','asset','company','request_amount_eur','production_effect_pct','lost_kwh_day','lost_revenue_day_eur','payback_days','security_risk','hse_risk','priority_score','status'
+  ]];
+  enriched.forEach(r => rows.push([
+    r.rank,
+    r._metrics.priorityClass,
+    r.requestTitle,
+    r._metrics.asset?.raw_name || '',
+    r._metrics.asset?.company_display || '',
+    r.requestAmount,
+    r.productionEffectPct,
+    r._metrics.lostKwhDay ?? '',
+    r._metrics.lostRevenueDay ?? '',
+    r._metrics.paybackDays ?? '',
+    r._metrics.secRisk,
+    r._metrics.hseRisk,
+    r._metrics.priorityScore,
+    'open'
+  ]));
+  const csv = rows.map(row => row.map(value => {
+    const text = value === null || value === undefined ? '' : String(value);
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g,'""')}"` : text;
+  }).join(',')).join('\n');
+  download('sch_payment_priority_open_requests.csv', csv, 'text/csv;charset=utf-8');
+}
+
+function exportState() {
+  const payload = {
+    schema: { id:'sch.payment-priority.state', version:'1.0.0', exported_at:new Date().toISOString() },
+    config: state.config,
+    openRequests: state.openRequests,
+    paidRequests: state.paidRequests
+  };
+  download(`sch_payment_priority_state_${todayIso()}.json`, JSON.stringify(payload, null, 2), 'application/json');
+}
+
+function loadStateFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      state.openRequests = Array.isArray(data.openRequests) ? data.openRequests : [];
+      state.paidRequests = Array.isArray(data.paidRequests) ? data.paidRequests : [];
+      if (data.config?.type_economics) state.config = data.config;
+      buildAssetCatalog();
+      refreshUi();
+    } catch (err) {
+      alert('Could not load the JSON state file.');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function loadConfigFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data.type_economics) throw new Error('Missing type_economics');
+      state.config = data;
+      buildAssetCatalog();
+      refreshUi();
+    } catch (err) {
+      alert('Could not load the config JSON.');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function init() {
+  populateRiskSelect(els.secLikelihood, state.config.risk_scales.likelihood);
+  populateRiskSelect(els.secImpact, state.config.risk_scales.impact);
+  populateRiskSelect(els.hseLikelihood, state.config.risk_scales.likelihood);
+  populateRiskSelect(els.hseImpact, state.config.risk_scales.impact);
+  loadStateFromStorage();
+  buildAssetCatalog();
+  populateAssetSelect('');
+  clearForm();
+  refreshUi();
+
+  els.assetSearch.addEventListener('input', e => populateAssetSelect(e.target.value));
+  els.assetSelect.addEventListener('change', e => {
+    state.selectedAssetId = e.target.value;
+    renderSelectedAssetMeta(getSelectedAsset());
+    renderPreview();
+  });
+  [els.requestTitle, els.requestDescription, els.requestAmount, els.productionEffect, els.secLikelihood, els.secImpact, els.hseLikelihood, els.hseImpact].forEach(el => el.addEventListener('input', renderPreview));
+  [els.secLikelihood, els.secImpact, els.hseLikelihood, els.hseImpact].forEach(el => el.addEventListener('change', renderPreview));
+  els.addRequestBtn.addEventListener('click', () => addOrUpdateRequest('add'));
+  els.updateRequestBtn.addEventListener('click', () => addOrUpdateRequest('update'));
+  els.clearFormBtn.addEventListener('click', clearForm);
+  els.queueSearch.addEventListener('input', refreshUi);
+  els.queueFilter.addEventListener('change', refreshUi);
+  els.exportCsvBtn.addEventListener('click', exportOpenCsv);
+  els.exportStateBtn.addEventListener('click', exportState);
+  els.loadStateBtn.addEventListener('click', () => els.stateLoader.click());
+  els.loadConfigBtn.addEventListener('click', () => els.configLoader.click());
+  els.stateLoader.addEventListener('change', e => { if (e.target.files[0]) loadStateFile(e.target.files[0]); e.target.value=''; });
+  els.configLoader.addEventListener('change', e => { if (e.target.files[0]) loadConfigFile(e.target.files[0]); e.target.value=''; });
+  els.resetBtn.addEventListener('click', () => {
+    if (!confirm('Reset local state and return to the embedded defaults?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state.config = structuredCloneSafe(EMBEDDED_DATA.defaultConfig);
+    state.openRequests = [];
+    state.paidRequests = [];
+    state.selectedRequestId = null;
+    buildAssetCatalog();
+    populateAssetSelect('');
+    clearForm();
+    refreshUi();
+  });
+}
+
+init();
+</script>
+</body>
+</html>

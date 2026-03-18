@@ -1,0 +1,148 @@
+{
+  "schema": {
+    "id": "sch.payment-priority.config",
+    "version": "1.0.0",
+    "generated_at": "2026-03-18T05:59:19.060949Z"
+  },
+  "parameters": {
+    "currency": "EUR",
+    "high_risk_threshold": 16,
+    "medium_risk_threshold": 8,
+    "eps": 1e-06,
+    "weights": {
+      "exposure": 0.45,
+      "security": 0.275,
+      "hse": 0.275,
+      "payment_penalty": 1.0
+    }
+  },
+  "risk_scales": {
+    "likelihood": [
+      {
+        "value": 1,
+        "label": "1 - Rare",
+        "description": "Very unlikely in normal operation"
+      },
+      {
+        "value": 2,
+        "label": "2 - Unlikely",
+        "description": "Could happen but not expected"
+      },
+      {
+        "value": 3,
+        "label": "3 - Possible",
+        "description": "Realistic / may occur"
+      },
+      {
+        "value": 4,
+        "label": "4 - Likely",
+        "description": "Expected in many cases"
+      },
+      {
+        "value": 5,
+        "label": "5 - Almost certain",
+        "description": "Expected or already recurring"
+      }
+    ],
+    "impact": [
+      {
+        "value": 1,
+        "label": "1 - Negligible",
+        "description": "Very limited operational effect"
+      },
+      {
+        "value": 2,
+        "label": "2 - Minor",
+        "description": "Small disturbance, easy recovery"
+      },
+      {
+        "value": 3,
+        "label": "3 - Moderate",
+        "description": "Relevant impact, management attention needed"
+      },
+      {
+        "value": 4,
+        "label": "4 - Major",
+        "description": "Serious impact on operations or compliance"
+      },
+      {
+        "value": 5,
+        "label": "5 - Critical",
+        "description": "Severe / unacceptable impact"
+      }
+    ]
+  },
+  "type_economics": {
+    "PVS": {
+      "label": "PV plant",
+      "calc_mode": "mw_capacity",
+      "typical_cf": 0.15,
+      "value_per_kwh": 0.02,
+      "notes": "Workbook defaults for PV assets. Edit if you have better park economics."
+    },
+    "WND": {
+      "label": "Wind farm",
+      "calc_mode": "mw_capacity",
+      "typical_cf": 0.254,
+      "value_per_kwh": 0.098,
+      "notes": "Workbook defaults for wind assets. Edit if you have better park economics."
+    },
+    "DTC": {
+      "label": "Datacenter",
+      "calc_mode": "mw_capacity",
+      "typical_cf": 0.9,
+      "value_per_kwh": 0.12,
+      "notes": "Editable proxy for datacenter utilization/value. Validate with your operations team.",
+      "is_placeholder": true
+    },
+    "HTL": {
+      "label": "Hotel",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "No direct MW capacity in the current naming metric. Add a proxy method before using production-loss economics."
+    },
+    "HYP": {
+      "label": "Hydroponics",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+    },
+    "BCH": {
+      "label": "Biochar plant",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+    },
+    "BMS": {
+      "label": "Biomass plant",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+    },
+    "HYD": {
+      "label": "Hydrogen",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+    },
+    "BES": {
+      "label": "BESS",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "Storage needs a different economic model than simple production-loss CF."
+    },
+    "OTH": {
+      "label": "Other",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "Configure before use."
+    }
+  }
+}
