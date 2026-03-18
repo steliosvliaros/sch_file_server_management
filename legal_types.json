@@ -1,0 +1,37 @@
+{
+  "schema": {
+    "schema_id": "sch.fileserver.legal_types",
+    "schema_version": "1.0.0",
+    "generated_at": "2026-03-15T15:39:54+00:00"
+  },
+  "legal_types": [
+    {
+      "typ3": "AEE",
+      "label": "Anonymous Energy Company"
+    },
+    {
+      "typ3": "EPE",
+      "label": "Limited Liability Company"
+    },
+    {
+      "typ3": "EEE",
+      "label": "General Commercial Company"
+    },
+    {
+      "typ3": "OEE",
+      "label": "General Partnership"
+    },
+    {
+      "typ3": "IKE",
+      "label": "Private Company"
+    },
+    {
+      "typ3": "MIK",
+      "label": "Single Member Private Company"
+    },
+        {
+      "typ3": "ΜΑΕ",
+      "label": "Single Member Anonymous Company"
+    }
+  ]
+}

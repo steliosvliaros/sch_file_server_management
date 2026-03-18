@@ -1,0 +1,199 @@
+schema:
+  schema_id: sch.fileserver.governance
+  schema_version: 3.0.0
+  status: generated
+  role: exceptions_validation_and_remediation
+  file_name: governance_policy.generated.yaml
+  generated_from: master_policy.yaml
+  do_not_edit: true
+depends_on:
+  master_policy: master_policy.yaml
+refs:
+  constraints: master_policy.yaml#/constraints
+  special_asset_folders: master_policy.yaml#/special_asset_folders
+  dynamic_selectors: master_policy.yaml#/dynamic_selectors
+  route_output_contract: master_policy.yaml#/route_output_contract
+exception_classes:
+  REVIEW_AMBIGUITY:
+    description: Business meaning is unclear or route confidence is too low.
+    default_target_selector: same_workstream_misc_review
+  DUPLICATE_CONFLICT:
+    description: Two or more exact-hash copies exist and keeper selection is required.
+    default_target_folder_id: ASSET_SPECIAL_DUPLICATED
+  ARCHIVE_OR_OBSOLETE:
+    description: Superseded, cancelled, deprecated, or no-longer-live material.
+    default_target_policy: move_to_special_or_company_archive
+  LONG_PATH_TECHNICAL_EXCEPTION:
+    description: Path cannot be made compliant through normal shortening rules.
+    default_target_selector: same_workstream_misc_review
+  NONCANONICAL_PLACEMENT:
+    description: File sits in export, backup, temp, or other noncanonical location.
+    default_target_policy: reroute_to_canonical_or_review
+archive_rules:
+  deprecated_or_temp_extensions:
+  - .tmp
+  - .bak
+  - .old
+  - .orig
+  - .swp
+  - .lock
+  - .crdownload
+  - .part
+  - .dwl
+  - .dwl2
+  - .wbk
+  review_before_archive_extensions:
+  - .zip
+  - .msg
+  ignore_system_files:
+  - Thumbs.db
+  - .DS_Store
+  - desktop.ini
+  superseded_status_action:
+    action: keep_in_place_or_move
+    target_folder_id: ASSET_SPECIAL_SUPERSEDED
+  duplicated_hash_action:
+    action: review_then_move
+    target_folder_id: ASSET_SPECIAL_DUPLICATED
+  deprecated_material_action:
+    action: move
+    target_folder_id: ASSET_SPECIAL_DEPRECATED
+  backup_material_action:
+    action: move
+    target_folder_id: ASSET_SPECIAL_BACKUP
+  cancelled_asset_action:
+    action: move_asset_folder_to_company_archive_by_year
+normalization_policy:
+  canonical_output_language: english
+  canonical_output_script: latin
+  description_rules:
+  - lowercase_by_default
+  - allow_uppercase_counterparty_or_authority_tokens_only
+  - replace_spaces_with_hyphens
+  - remove_junk_tokens_like_copy_final_new_scan
+  - collapse_repeated_dashes
+  - trim_trailing_dots_and_spaces
+  - remove_forbidden_windows_chars
+  fin_cnt_description_builder:
+    single_counterparty: '{COUNTERPARTY}-{description}'
+    dual_counterparty: '{COUNTERPARTY}-to-{OTHER_COUNTERPARTY}-{description}'
+  transliteration:
+    enabled: true
+    note: Canonical filenames and folder names follow English/Latin normalized naming.
+path_policy:
+  source_of_truth_ref: '#/constraints'
+  soft_limits:
+    description_chars: 60
+    project_name_chars: 40
+    location_chars: 30
+  shortening_order:
+  - shorten_description
+  - shorten_project_name
+  - shorten_location
+  - apply_standard_abbreviations
+  - append_short_hash_suffix_if_needed
+  - move_to_same_workstream_misc_review_if_still_too_long
+  standard_abbreviations:
+    agreement: agr
+    application: appl
+    construction: constr
+    consultant: cons
+    contractor: ctr
+    correspondence: corr
+    deliverable: dlv
+    engineering: eng
+    invoice: inv
+    maintenance: maint
+    operations: ops
+    payment: pay
+    procurement: proc
+    submission: subm
+    subcontractor: subc
+  uniqueness:
+    on_collision: add_-h{HASH6}_before_extension
+review_policy:
+  review_queue_targets:
+    business_ambiguity:
+      selector: same_workstream_misc_review
+    duplicates:
+      folder_id: ASSET_SPECIAL_DUPLICATED
+    superseded:
+      folder_id: ASSET_SPECIAL_SUPERSEDED
+    deprecated:
+      folder_id: ASSET_SPECIAL_DEPRECATED
+    backup:
+      folder_id: ASSET_SPECIAL_BACKUP
+  review_triggers:
+  - missing_required_user_input
+  - fallback_route_used_with_low_context
+  - conflicting_workstream_evidence
+  - conflicting_doc_type_evidence
+  - stage_sensitive_doc_without_stage
+  - FIN_or_CNT_without_counterparty
+  - keeper_candidate_exceeds_hard_limits
+  - duplicate_group_has_multiple_strong_candidates
+duplicate_keeper_logic:
+  grouping_key: exact_file_hash
+  activation_condition:
+  - apply_only_when_two_or_more_files_share_exact_hash
+  - ignore_singletons
+  keeper_selection_priority:
+  - prefer_files_already_in_valid_workstream_first_asset_structure
+  - avoid_files_in_special_buckets_or_archive_or_99_EXPORTS
+  - prefer_paths_with_stronger_business_context
+  - prefer_filenames_closer_to_canonical_policy
+  - prefer_stronger_text_or_preview_evidence
+  - prefer_non_temp_non_system_files
+  - use_newest_reliable_modified_date_only_as_late_tiebreaker
+  - if_still_tied_choose_shortest_valid_canonical_path
+  - if_still_tied_choose_deterministically_by_sorted_absolute_path
+  special_path_penalties:
+    folder_names:
+    - _DUPLICATED
+    - _BACKUP
+    - _DEPRECATED
+    - _SUPERSEDED
+    - ARCHIVE
+    - OLD
+    - MISC
+    - REVIEW
+    - 99_EXPORTS
+  keeper_output:
+    duplicate_status: KEEPER
+    duplicate_role: CANONICAL_COPY
+  non_keeper_output:
+    action: move_to_special_folder
+    target_folder_id: ASSET_SPECIAL_DUPLICATED
+    duplicate_status: NON_KEEPER
+    duplicate_role: DUPLICATE_COPY
+  review_resolution_rule:
+  - if_confidence_is_insufficient_select_provisional_keeper
+  - require_manual_review_before_moving_non_keepers
+exports_policy:
+  export_workstream_folder_id: WS_EXPORTS
+  canonical_storage_allowed: false
+  allowed_uses:
+  - email_packs
+  - portal_upload_sets
+  - temporary_transmittal_bundles
+prohibited_patterns:
+- filing_master_records_directly_into_99_EXPORTS
+- creating_counterparty_subfolder_trees_under_workstreams
+- creating_phase_first_project_trees
+- leaving_exact_duplicates_in_parallel_live_locations
+- bypassing_canonical_filename_builder
+audit_log_contract:
+  required_fields:
+  - source_path
+  - proposed_folder_id
+  - canonical_filename
+  - confidence
+  - requires_review
+  - exception_class
+  - duplicate_group_id
+  - action_taken
+  - timestamp
+integrity_checks:
+- every_exception_target_folder_id_must_exist_in_special_asset_folders_or_workstreams
+- path_policy_source_of_truth_ref_must_point_to_constraints
+- route_output_contract_must_match_canonical_record_contract

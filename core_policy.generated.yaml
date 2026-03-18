@@ -1,0 +1,749 @@
+schema:
+  schema_id: sch.fileserver.core
+  schema_version: 3.0.0
+  status: generated
+  role: canonical_identity_and_structure
+  file_name: core_policy.generated.yaml
+  generated_from: master_policy.yaml
+  do_not_edit: true
+policy:
+  name: SCH Master File Server Policy - Core View
+  design_intent:
+  - Keep company folder, asset folder, TYPEID, and filename backbone stable.
+  - Keep workstream as the physical filing axis.
+  - Keep phase in filename and metadata, not as the main folder axis.
+  - Keep daily filing decisions simple.
+  - Keep FIN and CNT counterparties in filename and metadata, not in deep folder trees.
+  - Use one master policy as the only maintained source, and generate derived policy views automatically.
+patterns:
+  company_folder: '{NAMECODE}-{TYP3}-{VAT9}'
+  asset_folder: '{TYPEID}_{PROJECT_NAME}_{LOCATION}'
+  typeid: '{TYPE}{METRIC}-{SS}'
+  internal_filename: '{TYPEID}_{PHASE}_{DOCTYPE}_{DESCRIPTION}_{DATE}_{VERSION}_{STATUS}.{EXT}'
+  portable_export_filename: '{COMPANY_FOLDER}_{INTERNAL_FILENAME}'
+constraints:
+  max_full_path_chars: 240
+  max_filename_chars: 120
+  max_foldername_chars: 64
+  max_depth_segments: 12
+topology:
+  company_root:
+    id: COMPANY_ROOT
+    path_template: '{COMPANY_FOLDER}'
+    subfolders:
+      CORPORATE:
+        id: COMPANY_CORPORATE
+        name: CORPORATE
+        path_template: '{COMPANY_FOLDER}/CORPORATE'
+      TEMPLATES:
+        id: COMPANY_TEMPLATES
+        name: TEMPLATES
+        path_template: '{COMPANY_FOLDER}/TEMPLATES'
+      ARCHIVE:
+        id: COMPANY_ARCHIVE
+        name: ARCHIVE
+        path_template: '{COMPANY_FOLDER}/ARCHIVE'
+      ASSETS:
+        id: COMPANY_ASSETS
+        name: ASSETS
+        path_template: '{COMPANY_FOLDER}/ASSETS'
+  asset_root:
+    id: ASSET_ROOT
+    path_template: '{COMPANY_FOLDER}/ASSETS/{ASSET_FOLDER}'
+asset_status_files:
+- _STATUS_01_PIPELINE.txt
+- _STATUS_02_UNDER_DEVELOPMENT.txt
+- _STATUS_03_UNDER_CONSTRUCTION.txt
+- _STATUS_04_OPERATIONAL.txt
+special_asset_folders:
+  _SUPERSEDED:
+    id: ASSET_SPECIAL_SUPERSEDED
+    name: _SUPERSEDED
+    path_template: '{ASSET_ROOT}/_SUPERSEDED'
+  _DUPLICATED:
+    id: ASSET_SPECIAL_DUPLICATED
+    name: _DUPLICATED
+    path_template: '{ASSET_ROOT}/_DUPLICATED'
+  _DEPRECATED:
+    id: ASSET_SPECIAL_DEPRECATED
+    name: _DEPRECATED
+    path_template: '{ASSET_ROOT}/_DEPRECATED'
+  _BACKUP:
+    id: ASSET_SPECIAL_BACKUP
+    name: _BACKUP
+    path_template: '{ASSET_ROOT}/_BACKUP'
+enums:
+  phases:
+    FS: Feasibility
+    LA: Land_Acquisition
+    PM: Permitting
+    DE: Design_and_Engineering
+    FN: Financing
+    PR: Procurement
+    CN: Construction
+    CM: Commissioning_and_COD
+    OP: Operations
+    DC: Decommissioning
+  statuses:
+  - DRAFT
+  - REVIEW
+  - REVISED
+  - FINAL
+  - APPROVED
+  - SIGNED
+  - SENT
+  - RECEIVED
+  - SUPERSEDED
+  - CANCELLED
+  deliverable_stages:
+  - CONCEPT
+  - PRELIM
+  - TENDER
+  - IFC
+  - SHOP
+  - ASBUILT
+  - RECORD
+  payment_categories:
+  - GENERAL
+  - LAND
+  - PERMIT_FEES
+  - DESIGN
+  - BANKING
+  - SUPPLIER
+  - IPC
+  - RETENTION
+  - O_M
+  - DECOM
+  contract_categories:
+  - GENERAL
+  - LAND
+  - CONSULTANT
+  - PERMITTING_SUPPORT
+  - TERM_SHEET
+  - PO
+  - SUPPLY
+  - SUBCONTRACT
+  - EPC
+  - O_M
+  correspondence_scopes:
+  - GENERAL
+  - PROJECT_CONTROLS
+  - PERMITTING
+  - TECHNICAL
+  - LENDER
+  - VENDOR
+  - SITE
+  - O_M
+  report_scopes:
+  - GENERAL
+  - PROJECT_CONTROLS
+  - TECHNICAL
+  - FINANCIAL
+  - QAQC
+  - HSE
+  - O_M
+  drawing_disciplines:
+  - GEN
+  - ARC
+  - STR
+  - CIV
+  - MEP
+  - EL
+  - ICT
+  - FIRE
+  - HVAC
+  - PIP
+  counterparty_roles:
+  - OWNER
+  - CONSULTANT
+  - LENDER
+  - SUPPLIER
+  - CONTRACTOR
+  - SUBCONTRACTOR
+  - OPERATOR
+type_catalog:
+  PVS:
+    label: PV_plant
+    characteristic: capacity
+    base_unit: MW
+    allowed_input_units:
+    - MW
+    - kW
+    - kWp
+    metric_encoding: convert to MW, then encode as XXpYYY
+    example: 15.473 MW -> 15p473
+  WND:
+    label: Wind_farm
+    characteristic: capacity
+    base_unit: MW
+    allowed_input_units:
+    - MW
+    - kW
+    metric_encoding: convert to MW, then encode as XXpYYY
+    example: 2.000 MW -> 02p000
+  DTC:
+    label: Datacenter
+    characteristic: contracted_it_load
+    base_unit: MW
+    allowed_input_units:
+    - MW
+    - kW
+    metric_encoding: convert to MW, then encode as XXpYYY
+    example: 3.200 MW -> 03p200
+  HTL:
+    label: Hotel
+    characteristic: beds
+    base_unit: beds
+    allowed_input_units:
+    - beds
+    metric_encoding: integer beds encoded as XXpYYY
+    example: 70 beds -> 00p070
+  HYP:
+    label: Hydroponics
+    characteristic: cultivation_area
+    base_unit: m2
+    allowed_input_units:
+    - m2
+    - ha
+    metric_encoding: convert to m2, then encode as XXpYYY
+    example: 7000 m2 -> 07p000
+  BCH:
+    label: Biochar_plant
+    characteristic: output_capacity
+    base_unit: tpy
+    allowed_input_units:
+    - tpy
+    metric_encoding: integer tpy encoded as XXpYYY
+    example: 2500 tpy -> 02p500
+  BMS:
+    label: Biomass_plant
+    characteristic: output_capacity
+    base_unit: tpy
+    allowed_input_units:
+    - tpy
+    metric_encoding: integer tpy encoded as XXpYYY
+    example: 12500 tpy -> 12p500
+  HYD:
+    label: Hydrogen
+    characteristic: production
+    base_unit: kg_day
+    allowed_input_units:
+    - kg/day
+    metric_encoding: integer kg/day encoded as XXpYYY
+    example: 3000 kg/day -> 03p000
+  BES:
+    label: BESS
+    characteristic: energy_capacity
+    base_unit: kWh
+    allowed_input_units:
+    - MWh
+    - kWh
+    metric_encoding: convert to kWh, then encode as XXpYYY
+    example: 12.5 MWh -> 12p500
+  OTH:
+    label: Other
+    characteristic: user_defined
+    base_unit: unit
+    allowed_input_units:
+    - unit
+    metric_encoding: integer unit encoded as XXpYYY
+    example: 42 -> 00p042
+doc_type_catalog:
+  PER:
+    label: Permit_or_License
+    routing_family: fixed
+    stage_sensitive: false
+    counterparty_sensitive: false
+  DRWTEC:
+    label: Technical_Drawing
+    routing_family: by_stage
+    stage_sensitive: true
+    counterparty_sensitive: false
+  SDYTEC:
+    label: Technical_Study
+    routing_family: by_stage
+    stage_sensitive: true
+    counterparty_sensitive: false
+  FIN:
+    label: Finance_Document
+    routing_family: by_workstream
+    stage_sensitive: false
+    counterparty_sensitive: true
+  CNT:
+    label: Contract_Document
+    routing_family: by_workstream
+    stage_sensitive: false
+    counterparty_sensitive: true
+  COR:
+    label: Correspondence
+    routing_family: by_workstream_with_fallback
+    stage_sensitive: false
+    counterparty_sensitive: false
+  REP:
+    label: Report
+    routing_family: by_workstream_with_fallback
+    stage_sensitive: false
+    counterparty_sensitive: false
+  MIN:
+    label: Minutes
+    routing_family: by_workstream_with_fallback
+    stage_sensitive: false
+    counterparty_sensitive: false
+  DAT:
+    label: Data_File
+    routing_family: by_workstream_with_fallback
+    stage_sensitive: false
+    counterparty_sensitive: false
+  IMG:
+    label: Image_or_Photo
+    routing_family: by_workstream_with_fallback
+    stage_sensitive: false
+    counterparty_sensitive: false
+  QAQC:
+    label: QAQC_Record
+    routing_family: fixed
+    stage_sensitive: false
+    counterparty_sensitive: false
+  HSE:
+    label: HSE_Record
+    routing_family: fixed
+    stage_sensitive: false
+    counterparty_sensitive: false
+field_sets:
+  user_required_base:
+  - asset
+  - workstream
+  - phase
+  - doc_type
+  - description
+  - date
+  - version
+  - status
+  user_required_by_doc_type:
+    FIN:
+    - counterparty_name
+    CNT:
+    - counterparty_name
+    DRWTEC:
+    - deliverable_stage
+    SDYTEC:
+    - deliverable_stage
+  system_derived:
+  - company_folder
+  - asset_folder
+  - type
+  - metric
+  - ss
+  - owner_or_project
+  optional_metadata:
+  - other_counterparty_name
+  - payment_category
+  - contract_category
+  - correspondence_scope
+  - report_scope
+  - drawing_discipline
+  - counterparty_role
+master_data_rules:
+  company_master:
+    company_id:
+      autogenerated: true
+      prefix: CMP
+      format: CMP-0001
+    display_name:
+      required: true
+      description: Human-friendly company name.
+    company_root_path:
+      required: false
+      description: Filesystem path before COMPANY_FOLDER used for total path-length checking and real storage location.
+    namecode:
+      autogenerated: true
+      allowed_chars: letters_only
+      case: uppercase
+      max_length: 6
+      source: display_name_or_user_input
+    typ3:
+      input_mode: dropdown_from_legal_types_json
+      required: true
+    vat9:
+      required: true
+      format: 9_digits_zero_padded
+    company_folder:
+      autogenerated: true
+      pattern: '{NAMECODE}-{TYP3}-{VAT9}'
+  asset_master:
+    asset_id:
+      autogenerated: true
+      prefix: AST
+      format: AST-0001
+    company_id:
+      input_mode: dropdown_from_company_master
+      required: true
+    type:
+      input_mode: dropdown_from_asset_types_json
+      required: true
+    metric:
+      autogenerated: true
+      source: calculated_from_type_input_value_and_input_unit
+    project_name:
+      required: true
+      case: lowercase
+    location:
+      required: true
+      case: uppercase
+    typeid:
+      autogenerated: true
+      pattern: '{TYPE}{METRIC}-{SS}'
+    asset_folder:
+      autogenerated: true
+      pattern: '{TYPEID}_{PROJECT_NAME}_{LOCATION}'
+filename_rules:
+  description:
+    separator: '-'
+    spaces_allowed: false
+    default_case: lowercase
+    uppercase_exceptions:
+    - counterparty_tokens
+    - approved_authority_tokens
+  date_format: YYYYMMDD
+  version_format: vNN
+  fin_cnt_prefix_rule:
+    single_counterparty: '{COUNTERPARTY}-{description}'
+    dual_counterparty: '{COUNTERPARTY}-to-{OTHER_COUNTERPARTY}-{description}'
+  portable_export_rule: Use only for exports, portals, and email packs; do not rename originals.
+workstreams:
+  AM:
+    code: AM
+    label: Asset_Master
+    root_folder:
+      id: WS_AM
+      name: 00_ASSET_MASTER
+      path_template: '{ASSET_ROOT}/00_ASSET_MASTER'
+    misc_review_folder:
+      id: WS_AM_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/00_ASSET_MASTER/99_MISC_REVIEW'
+    subfolders:
+      IDENTITY_REGISTERS:
+        id: WS_AM_IDENTITY_REGISTERS
+        name: 01_IDENTITY_REGISTERS
+        path_template: '{ASSET_ROOT}/00_ASSET_MASTER/01_IDENTITY_REGISTERS'
+      MASTER_DATA:
+        id: WS_AM_MASTER_DATA
+        name: 02_MASTER_DATA
+        path_template: '{ASSET_ROOT}/00_ASSET_MASTER/02_MASTER_DATA'
+      STATUS_MILESTONES:
+        id: WS_AM_STATUS_MILESTONES
+        name: 03_STATUS_MILESTONES
+        path_template: '{ASSET_ROOT}/00_ASSET_MASTER/03_STATUS_MILESTONES'
+  PCD:
+    code: PCD
+    label: Project_Controls_and_Development
+    root_folder:
+      id: WS_PCD
+      name: 01_DEVELOPMENT
+      path_template: '{ASSET_ROOT}/01_DEVELOPMENT'
+    misc_review_folder:
+      id: WS_PCD_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/01_DEVELOPMENT/99_MISC_REVIEW'
+    subfolders:
+      PROGRAMME_WBS:
+        id: WS_PCD_PROGRAMME_WBS
+        name: 01_PROGRAMME_WBS
+        path_template: '{ASSET_ROOT}/01_DEVELOPMENT/01_PROGRAMME_WBS'
+      PROGRESS_REPORTING:
+        id: WS_PCD_PROGRESS_REPORTING
+        name: 02_PROGRESS_REPORTING
+        path_template: '{ASSET_ROOT}/01_DEVELOPMENT/02_PROGRESS_REPORTING'
+      COST_RISK_CHANGE:
+        id: WS_PCD_COST_RISK_CHANGE
+        name: 03_COST_RISK_CHANGE
+        path_template: '{ASSET_ROOT}/01_DEVELOPMENT/03_COST_RISK_CHANGE'
+      MEETINGS_ACTIONS:
+        id: WS_PCD_MEETINGS_ACTIONS
+        name: 04_MEETINGS_ACTIONS
+        path_template: '{ASSET_ROOT}/01_DEVELOPMENT/04_MEETINGS_ACTIONS'
+  LS:
+    code: LS
+    label: Land_and_Site
+    root_folder:
+      id: WS_LS
+      name: 02_LAND_SITE
+      path_template: '{ASSET_ROOT}/02_LAND_SITE'
+    misc_review_folder:
+      id: WS_LS_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/02_LAND_SITE/99_MISC_REVIEW'
+    subfolders:
+      OWNERSHIP_SURVEYS:
+        id: WS_LS_OWNERSHIP_SURVEYS
+        name: 01_OWNERSHIP_SURVEYS
+        path_template: '{ASSET_ROOT}/02_LAND_SITE/01_OWNERSHIP_SURVEYS'
+      AGREEMENTS:
+        id: WS_LS_AGREEMENTS
+        name: 02_AGREEMENTS
+        path_template: '{ASSET_ROOT}/02_LAND_SITE/02_AGREEMENTS'
+      SITE_INVESTIGATIONS:
+        id: WS_LS_SITE_INVESTIGATIONS
+        name: 03_SITE_INVESTIGATIONS
+        path_template: '{ASSET_ROOT}/02_LAND_SITE/03_SITE_INVESTIGATIONS'
+      PAYMENTS_COMPENSATIONS:
+        id: WS_LS_PAYMENTS_COMPENSATIONS
+        name: 04_PAYMENTS_COMPENSATIONS
+        path_template: '{ASSET_ROOT}/02_LAND_SITE/04_PAYMENTS_COMPENSATIONS'
+  PMT:
+    code: PMT
+    label: Permitting_and_Approvals
+    root_folder:
+      id: WS_PMT
+      name: 03_PERMITTING_APPROVALS
+      path_template: '{ASSET_ROOT}/03_PERMITTING_APPROVALS'
+    misc_review_folder:
+      id: WS_PMT_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/03_PERMITTING_APPROVALS/99_MISC_REVIEW'
+    subfolders:
+      PERMITS_LICENSES:
+        id: WS_PMT_PERMITS_LICENSES
+        name: 01_PERMITS_LICENSES
+        path_template: '{ASSET_ROOT}/03_PERMITTING_APPROVALS/01_PERMITS_LICENSES'
+      SUBMISSIONS_RESPONSES:
+        id: WS_PMT_SUBMISSIONS_RESPONSES
+        name: 02_SUBMISSIONS_RESPONSES
+        path_template: '{ASSET_ROOT}/03_PERMITTING_APPROVALS/02_SUBMISSIONS_RESPONSES'
+      SUPPORT_CONTRACTS:
+        id: WS_PMT_SUPPORT_CONTRACTS
+        name: 03_SUPPORT_CONTRACTS
+        path_template: '{ASSET_ROOT}/03_PERMITTING_APPROVALS/03_SUPPORT_CONTRACTS'
+      FEES_PAYMENTS:
+        id: WS_PMT_FEES_PAYMENTS
+        name: 04_FEES_PAYMENTS
+        path_template: '{ASSET_ROOT}/03_PERMITTING_APPROVALS/04_FEES_PAYMENTS'
+  TDE:
+    code: TDE
+    label: Technical_Design
+    root_folder:
+      id: WS_TDE
+      name: 04_TECHNICAL_DESIGN
+      path_template: '{ASSET_ROOT}/04_TECHNICAL_DESIGN'
+    misc_review_folder:
+      id: WS_TDE_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/04_TECHNICAL_DESIGN/99_MISC_REVIEW'
+    subfolders:
+      STUDIES:
+        id: WS_TDE_STUDIES
+        name: 01_STUDIES
+        path_template: '{ASSET_ROOT}/04_TECHNICAL_DESIGN/01_STUDIES'
+      DRAWINGS:
+        id: WS_TDE_DRAWINGS
+        name: 02_DRAWINGS
+        path_template: '{ASSET_ROOT}/04_TECHNICAL_DESIGN/02_DRAWINGS'
+      MODELS_CALCULATIONS:
+        id: WS_TDE_MODELS_CALCULATIONS
+        name: 03_MODELS_CALCULATIONS
+        path_template: '{ASSET_ROOT}/04_TECHNICAL_DESIGN/03_MODELS_CALCULATIONS'
+      CONSULTANT_CONTRACTS:
+        id: WS_TDE_CONSULTANT_CONTRACTS
+        name: 04_CONSULTANT_CONTRACTS
+        path_template: '{ASSET_ROOT}/04_TECHNICAL_DESIGN/04_CONSULTANT_CONTRACTS'
+      PAYMENTS:
+        id: WS_TDE_PAYMENTS
+        name: 05_PAYMENTS
+        path_template: '{ASSET_ROOT}/04_TECHNICAL_DESIGN/05_PAYMENTS'
+  PRC:
+    code: PRC
+    label: Commercial_and_Procurement
+    root_folder:
+      id: WS_PRC
+      name: 05_COMMERCIAL_PROCUREMENT
+      path_template: '{ASSET_ROOT}/05_COMMERCIAL_PROCUREMENT'
+    misc_review_folder:
+      id: WS_PRC_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/05_COMMERCIAL_PROCUREMENT/99_MISC_REVIEW'
+    subfolders:
+      RFQ_BIDS_EVALUATION:
+        id: WS_PRC_RFQ_BIDS_EVALUATION
+        name: 01_RFQ_BIDS_EVALUATION
+        path_template: '{ASSET_ROOT}/05_COMMERCIAL_PROCUREMENT/01_RFQ_BIDS_EVALUATION'
+      PURCHASE_ORDERS_SUPPLY_CONTRACTS:
+        id: WS_PRC_PURCHASE_ORDERS_SUPPLY_CONTRACTS
+        name: 02_PURCHASE_ORDERS_SUPPLY_CONTRACTS
+        path_template: '{ASSET_ROOT}/05_COMMERCIAL_PROCUREMENT/02_PURCHASE_ORDERS_SUPPLY_CONTRACTS'
+      DELIVERIES_EXPEDITING:
+        id: WS_PRC_DELIVERIES_EXPEDITING
+        name: 03_DELIVERIES_EXPEDITING
+        path_template: '{ASSET_ROOT}/05_COMMERCIAL_PROCUREMENT/03_DELIVERIES_EXPEDITING'
+      PAYMENTS:
+        id: WS_PRC_PAYMENTS
+        name: 04_PAYMENTS
+        path_template: '{ASSET_ROOT}/05_COMMERCIAL_PROCUREMENT/04_PAYMENTS'
+  FNI:
+    code: FNI
+    label: Finance_and_Insurance
+    root_folder:
+      id: WS_FNI
+      name: 06_FINANCE_INSURANCE
+      path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE'
+    misc_review_folder:
+      id: WS_FNI_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE/99_MISC_REVIEW'
+    subfolders:
+      BUDGETS_CASHFLOW:
+        id: WS_FNI_BUDGETS_CASHFLOW
+        name: 01_BUDGETS_CASHFLOW
+        path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE/01_BUDGETS_CASHFLOW'
+      BANKS_INSURANCE:
+        id: WS_FNI_BANKS_INSURANCE
+        name: 02_BANKS_INSURANCE
+        path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE/02_BANKS_INSURANCE'
+      PAYABLES:
+        id: WS_FNI_PAYABLES
+        name: 03_PAYABLES
+        path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE/03_PAYABLES'
+      RECEIVABLES:
+        id: WS_FNI_RECEIVABLES
+        name: 04_RECEIVABLES
+        path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE/04_RECEIVABLES'
+      TAX_STATUTORY:
+        id: WS_FNI_TAX_STATUTORY
+        name: 05_TAX_STATUTORY
+        path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE/05_TAX_STATUTORY'
+      COST_REPORTING:
+        id: WS_FNI_COST_REPORTING
+        name: 06_COST_REPORTING
+        path_template: '{ASSET_ROOT}/06_FINANCE_INSURANCE/06_COST_REPORTING'
+  CND:
+    code: CND
+    label: Construction_Delivery
+    root_folder:
+      id: WS_CND
+      name: 07_CONSTRUCTION_DELIVERY
+      path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY'
+    misc_review_folder:
+      id: WS_CND_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/99_MISC_REVIEW'
+    subfolders:
+      DRAWINGS:
+        id: WS_CND_DRAWINGS
+        name: 01_DRAWINGS
+        path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/01_DRAWINGS'
+      SITE_DIARY_PROGRESS:
+        id: WS_CND_SITE_DIARY_PROGRESS
+        name: 02_SITE_DIARY_PROGRESS
+        path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/02_SITE_DIARY_PROGRESS'
+      BOQ_BOM_QUANTITIES:
+        id: WS_CND_BOQ_BOM_QUANTITIES
+        name: 03_BOQ_BOM_QUANTITIES
+        path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/03_BOQ_BOM_QUANTITIES'
+      CONTRACTS_SUBCONTRACTS:
+        id: WS_CND_CONTRACTS_SUBCONTRACTS
+        name: 04_CONTRACTS_SUBCONTRACTS
+        path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/04_CONTRACTS_SUBCONTRACTS'
+      PAYMENTS_IPC_COST:
+        id: WS_CND_PAYMENTS_IPC_COST
+        name: 05_PAYMENTS_IPC_COST
+        path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/05_PAYMENTS_IPC_COST'
+      QAQC_HSE:
+        id: WS_CND_QAQC_HSE
+        name: 06_QAQC_HSE
+        path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/06_QAQC_HSE'
+      HANDOVER_CLOSEOUT:
+        id: WS_CND_HANDOVER_CLOSEOUT
+        name: 07_HANDOVER_CLOSEOUT
+        path_template: '{ASSET_ROOT}/07_CONSTRUCTION_DELIVERY/07_HANDOVER_CLOSEOUT'
+  OPM:
+    code: OPM
+    label: Operations_and_Maintenance
+    root_folder:
+      id: WS_OPM
+      name: 08_OPERATIONS_MAINTENANCE
+      path_template: '{ASSET_ROOT}/08_OPERATIONS_MAINTENANCE'
+    misc_review_folder:
+      id: WS_OPM_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/08_OPERATIONS_MAINTENANCE/99_MISC_REVIEW'
+    subfolders:
+      ASSET_DOCUMENTS:
+        id: WS_OPM_ASSET_DOCUMENTS
+        name: 01_ASSET_DOCUMENTS
+        path_template: '{ASSET_ROOT}/08_OPERATIONS_MAINTENANCE/01_ASSET_DOCUMENTS'
+      SERVICE_CONTRACTS:
+        id: WS_OPM_SERVICE_CONTRACTS
+        name: 02_SERVICE_CONTRACTS
+        path_template: '{ASSET_ROOT}/08_OPERATIONS_MAINTENANCE/02_SERVICE_CONTRACTS'
+      PAYMENTS:
+        id: WS_OPM_PAYMENTS
+        name: 03_PAYMENTS
+        path_template: '{ASSET_ROOT}/08_OPERATIONS_MAINTENANCE/03_PAYMENTS'
+      REPORTING_EVENTS:
+        id: WS_OPM_REPORTING_EVENTS
+        name: 04_REPORTING_EVENTS
+        path_template: '{ASSET_ROOT}/08_OPERATIONS_MAINTENANCE/04_REPORTING_EVENTS'
+  DCM:
+    code: DCM
+    label: Decommissioning
+    root_folder:
+      id: WS_DCM
+      name: 09_DECOMMISSIONING
+      path_template: '{ASSET_ROOT}/09_DECOMMISSIONING'
+    misc_review_folder:
+      id: WS_DCM_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '{ASSET_ROOT}/09_DECOMMISSIONING/99_MISC_REVIEW'
+    subfolders:
+      STUDIES_PERMITS:
+        id: WS_DCM_STUDIES_PERMITS
+        name: 01_STUDIES_PERMITS
+        path_template: '{ASSET_ROOT}/09_DECOMMISSIONING/01_STUDIES_PERMITS'
+      CLOSING_AGREEMENTS:
+        id: WS_DCM_CLOSING_AGREEMENTS
+        name: 02_CLOSING_AGREEMENTS
+        path_template: '{ASSET_ROOT}/09_DECOMMISSIONING/02_CLOSING_AGREEMENTS'
+      PAYMENTS:
+        id: WS_DCM_PAYMENTS
+        name: 03_PAYMENTS
+        path_template: '{ASSET_ROOT}/09_DECOMMISSIONING/03_PAYMENTS'
+      DISPOSAL_SALE_RECORDS:
+        id: WS_DCM_DISPOSAL_SALE_RECORDS
+        name: 04_DISPOSAL_SALE_RECORDS
+        path_template: '{ASSET_ROOT}/09_DECOMMISSIONING/04_DISPOSAL_SALE_RECORDS'
+  EXPORTS:
+    code: EXPORTS
+    label: Exports
+    root_folder:
+      id: WS_EXPORTS
+      name: 99_EXPORTS
+      path_template: '{ASSET_ROOT}/99_EXPORTS'
+    misc_review_folder: null
+    subfolders: {}
+dynamic_selectors:
+  same_workstream_misc_review:
+    description: Resolve to the 99_MISC_REVIEW folder under the same workstream as the proposed canonical route.
+  same_workstream_root:
+    description: Resolve to the root folder of the same workstream as the proposed canonical route.
+canonical_record_contract:
+  required_output_fields:
+  - source_path
+  - company_folder
+  - asset_folder
+  - type
+  - metric
+  - ss
+  - workstream
+  - phase
+  - doc_type
+  - target_folder_id
+  - canonical_filename
+  - metadata
+  - confidence
+  - requires_review
+  - exception_class
+non_goals:
+- Do not create phase-first trees.
+- Do not create counterparty subfolder hierarchies under workstreams.
+- Do not allow uncontrolled custom subfolders in canonical storage.
+- Do not use 99_EXPORTS as the final canonical home.

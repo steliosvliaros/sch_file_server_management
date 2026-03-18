@@ -1,0 +1,172 @@
+{
+  "schema": {
+    "schema_id": "sch.fileserver.asset_types",
+    "schema_version": "1.0.0",
+    "generated_from": "master_policy.yaml",
+    "generated_at": "2026-03-15T15:39:54+00:00"
+  },
+  "asset_types": [
+    {
+      "type_code": "PVS",
+      "label": "PV_plant",
+      "characteristic": "capacity",
+      "display_unit": "MW",
+      "base_value_unit": "kW",
+      "allowed_input_units": [
+        "MW",
+        "kW",
+        "kWp"
+      ],
+      "input_to_base_multiplier": {
+        "MW": 1000,
+        "kW": 1,
+        "kWp": 1
+      },
+      "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "15.473 MW -> 15p473"
+    },
+    {
+      "type_code": "WND",
+      "label": "Wind_farm",
+      "characteristic": "capacity",
+      "display_unit": "MW",
+      "base_value_unit": "kW",
+      "allowed_input_units": [
+        "MW",
+        "kW"
+      ],
+      "input_to_base_multiplier": {
+        "MW": 1000,
+        "kW": 1
+      },
+      "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "2.000 MW -> 02p000"
+    },
+    {
+      "type_code": "DTC",
+      "label": "Datacenter",
+      "characteristic": "contracted_it_load",
+      "display_unit": "MW",
+      "base_value_unit": "kW",
+      "allowed_input_units": [
+        "MW",
+        "kW"
+      ],
+      "input_to_base_multiplier": {
+        "MW": 1000,
+        "kW": 1
+      },
+      "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "3.200 MW -> 03p200"
+    },
+    {
+      "type_code": "HTL",
+      "label": "Hotel",
+      "characteristic": "beds",
+      "display_unit": "beds",
+      "base_value_unit": "beds",
+      "allowed_input_units": [
+        "beds"
+      ],
+      "input_to_base_multiplier": {
+        "beds": 1
+      },
+      "metric_rule": "Convert input to integer beds, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "70 beds -> 00p070"
+    },
+    {
+      "type_code": "HYP",
+      "label": "Hydroponics",
+      "characteristic": "cultivation_area",
+      "display_unit": "m2",
+      "base_value_unit": "m2",
+      "allowed_input_units": [
+        "m2",
+        "ha"
+      ],
+      "input_to_base_multiplier": {
+        "m2": 1,
+        "ha": 10000
+      },
+      "metric_rule": "Convert input to integer m2, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "7000 m2 -> 07p000"
+    },
+    {
+      "type_code": "BCH",
+      "label": "Biochar_plant",
+      "characteristic": "output_capacity",
+      "display_unit": "tpy",
+      "base_value_unit": "tpy",
+      "allowed_input_units": [
+        "tpy"
+      ],
+      "input_to_base_multiplier": {
+        "tpy": 1
+      },
+      "metric_rule": "Convert input to integer tpy, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "2500 tpy -> 02p500"
+    },
+    {
+      "type_code": "BMS",
+      "label": "Biomass_plant",
+      "characteristic": "output_capacity",
+      "display_unit": "tpy",
+      "base_value_unit": "tpy",
+      "allowed_input_units": [
+        "tpy"
+      ],
+      "input_to_base_multiplier": {
+        "tpy": 1
+      },
+      "metric_rule": "Convert input to integer tpy, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "12500 tpy -> 12p500"
+    },
+    {
+      "type_code": "HYD",
+      "label": "Hydrogen",
+      "characteristic": "production",
+      "display_unit": "kg/day",
+      "base_value_unit": "kg/day",
+      "allowed_input_units": [
+        "kg/day"
+      ],
+      "input_to_base_multiplier": {
+        "kg/day": 1
+      },
+      "metric_rule": "Convert input to integer kg/day, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "3000 kg/day -> 03p000"
+    },
+    {
+      "type_code": "BES",
+      "label": "BESS",
+      "characteristic": "energy_capacity",
+      "display_unit": "kWh",
+      "base_value_unit": "kWh",
+      "allowed_input_units": [
+        "MWh",
+        "kWh"
+      ],
+      "input_to_base_multiplier": {
+        "MWh": 1000,
+        "kWh": 1
+      },
+      "metric_rule": "Convert input to integer kWh, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "12.5 MWh -> 12p500"
+    },
+    {
+      "type_code": "OTH",
+      "label": "Other",
+      "characteristic": "user_defined",
+      "display_unit": "unit",
+      "base_value_unit": "unit",
+      "allowed_input_units": [
+        "unit"
+      ],
+      "input_to_base_multiplier": {
+        "unit": 1
+      },
+      "metric_rule": "Convert input to integer units, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "42 -> 00p042"
+    }
+  ]
+}

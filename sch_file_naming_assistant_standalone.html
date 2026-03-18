@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCH File Naming Assistant</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #111827;
+      --soft: #f3f4f6;
+      --ok: #065f46;
+      --warn: #92400e;
+      --bad: #991b1b;
+      --info: #1d4ed8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap { max-width: 1300px; margin: 0 auto; padding: 24px; }
+    .hero h1 { margin: 0 0 8px; font-size: 30px; }
+    .hero p { margin: 0 0 14px; color: var(--muted); line-height: 1.5; }
+    .toolbar, .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .toolbar { margin-bottom: 18px; }
+    .grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+    .card h2 { margin: 0 0 8px; font-size: 20px; }
+    .subhead { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.45; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+    .full { grid-column: 1 / -1; }
+    label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+    input, select {
+      width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; font-size: 14px; background: white; color: var(--text);
+    }
+    input[readonly] { background: #f9fafb; }
+    .hint { margin-top: 6px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .result-box { background: var(--soft); border:1px solid var(--line); border-radius: 16px; padding:14px; margin-bottom:14px; }
+    .result-title { font-size:12px; color: var(--muted); margin-bottom:6px; text-transform: uppercase; letter-spacing: .05em; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-word; line-height: 1.45; font-size: 14px; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:10px; }
+    .ok { background:#ecfdf5; color:var(--ok); }
+    .warn { background:#fff7ed; color:var(--warn); }
+    .bad { background:#fef2f2; color:var(--bad); }
+    .info { background:#eff6ff; color:var(--info); }
+    .small { font-size: 12px; color: var(--muted); line-height: 1.55; }
+    .two-col { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    button {
+      border:0; border-radius:12px; padding:11px 14px; background:var(--accent); color:white; cursor:pointer; font-weight:600;
+    }
+    button.secondary { background:white; color:var(--text); border:1px solid var(--line); }
+    .hidden { display:none; }
+    @media (max-width: 960px) { .grid, .two-col, .form-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>SCH File Naming Assistant</h1>
+      <p>Load <span class="mono">policy.json</span>, <span class="mono">company_master.json</span>, and <span class="mono">assets_master.json</span> from the same working folder, then generate the canonical filename and destination folder.</p>
+    </div>
+
+    <div class="toolbar">
+      <button id="openFolderBtn">Open working folder</button>
+      <button id="autoloadBtn" class="secondary">Auto-load same folder</button>
+      <button id="loadPolicyBtn" class="secondary">Load policy.json</button>
+      <button id="loadCompaniesBtn" class="secondary">Load company_master.json</button>
+      <button id="loadAssetsBtn" class="secondary">Load assets_master.json</button>
+      <input id="policyFileInput" class="hidden" type="file" accept="application/json,.json" />
+      <input id="companiesFileInput" class="hidden" type="file" accept="application/json,.json" />
+      <input id="assetsFileInput" class="hidden" type="file" accept="application/json,.json" />
+    </div>
+
+    <div id="statusBadge" class="pill info">Load a working folder or the three JSON files.</div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>File details</h2>
+        <div class="subhead">Company and asset come from the master JSON files. Company root path is used in total path-length validation.</div>
+        <div class="form-grid">
+          <div>
+            <label for="companySelect">Company</label>
+            <select id="companySelect"></select>
+          </div>
+          <div>
+            <label for="assetSelect">Asset</label>
+            <select id="assetSelect"></select>
+          </div>
+
+          <div class="full">
+            <label for="companyRootPath">Absolute company root path</label>
+            <input id="companyRootPath" readonly />
+            <div class="hint">Comes from <span class="mono">company_master.json</span> or inherited asset data.</div>
+          </div>
+          <div>
+            <label for="companyFolder">Company folder</label>
+            <input id="companyFolder" readonly />
+          </div>
+          <div>
+            <label for="assetFolder">Asset folder</label>
+            <input id="assetFolder" readonly />
+          </div>
+          <div>
+            <label for="typeId">TYPEID</label>
+            <input id="typeId" readonly />
+          </div>
+          <div>
+            <label for="ext">Extension</label>
+            <input id="ext" value="pdf" />
+          </div>
+
+          <div>
+            <label for="workstream">Workstream</label>
+            <select id="workstream"></select>
+          </div>
+          <div>
+            <label for="phase">Phase</label>
+            <select id="phase"></select>
+          </div>
+          <div>
+            <label for="docType">Doc type</label>
+            <select id="docType"></select>
+          </div>
+          <div id="stageWrap" style="display:none;">
+            <label for="deliverableStage">Deliverable stage</label>
+            <select id="deliverableStage"></select>
+          </div>
+
+          <div id="counterpartyWrap" style="display:none;">
+            <label for="counterparty">Counterparty</label>
+            <input id="counterparty" placeholder="HABITATIO" />
+          </div>
+          <div id="otherCounterpartyWrap" style="display:none;">
+            <label for="otherCounterparty">Other counterparty</label>
+            <input id="otherCounterparty" placeholder="EXINTAVELONIS" />
+          </div>
+
+          <div class="full">
+            <label for="description">Description</label>
+            <input id="description" value="design-invoice" />
+          </div>
+          <div>
+            <label for="date">Date</label>
+            <input id="date" value="20260315" />
+          </div>
+          <div>
+            <label for="version">Version</label>
+            <input id="version" value="v01" />
+          </div>
+          <div>
+            <label for="status">Status</label>
+            <select id="status"></select>
+          </div>
+          <div>
+            <label for="forceReview">Force review?</label>
+            <select id="forceReview">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions" style="margin-top: 12px;">
+          <button id="generateBtn">Generate</button>
+          <button id="resetBtn" class="secondary">Reset defaults</button>
+          <button id="copyFileBtn" class="secondary">Copy filename</button>
+          <button id="copyFolderBtn" class="secondary">Copy folder</button>
+          <button id="copyPathBtn" class="secondary">Copy full path</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Result</h2>
+        <div id="reviewBadge" class="pill info">Waiting for data</div>
+        <div class="result-box">
+          <div class="result-title">Target folder</div>
+          <div id="targetFolder" class="mono"></div>
+        </div>
+        <div class="result-box">
+          <div class="result-title">Canonical filename</div>
+          <div id="fileName" class="mono"></div>
+        </div>
+        <div class="result-box">
+          <div class="result-title">Full destination path</div>
+          <div id="fullPath" class="mono"></div>
+        </div>
+        <div class="two-col">
+          <div class="result-box">
+            <div class="result-title">Routing explanation</div>
+            <div id="explanation" class="small"></div>
+          </div>
+          <div class="result-box">
+            <div class="result-title">Validation</div>
+            <div id="validation" class="small"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      policy: null,
+      companies: [],
+      assets: [],
+      directoryHandle: null
+    };
+
+    const els = {
+      companySelect: document.getElementById('companySelect'),
+      assetSelect: document.getElementById('assetSelect'),
+      companyRootPath: document.getElementById('companyRootPath'),
+      companyFolder: document.getElementById('companyFolder'),
+      assetFolder: document.getElementById('assetFolder'),
+      typeId: document.getElementById('typeId'),
+      ext: document.getElementById('ext'),
+      workstream: document.getElementById('workstream'),
+      phase: document.getElementById('phase'),
+      docType: document.getElementById('docType'),
+      deliverableStage: document.getElementById('deliverableStage'),
+      stageWrap: document.getElementById('stageWrap'),
+      counterpartyWrap: document.getElementById('counterpartyWrap'),
+      otherCounterpartyWrap: document.getElementById('otherCounterpartyWrap'),
+      counterparty: document.getElementById('counterparty'),
+      otherCounterparty: document.getElementById('otherCounterparty'),
+      description: document.getElementById('description'),
+      date: document.getElementById('date'),
+      version: document.getElementById('version'),
+      status: document.getElementById('status'),
+      forceReview: document.getElementById('forceReview'),
+      targetFolder: document.getElementById('targetFolder'),
+      fileName: document.getElementById('fileName'),
+      fullPath: document.getElementById('fullPath'),
+      explanation: document.getElementById('explanation'),
+      validation: document.getElementById('validation'),
+      reviewBadge: document.getElementById('reviewBadge'),
+      statusBadge: document.getElementById('statusBadge'),
+      openFolderBtn: document.getElementById('openFolderBtn'),
+      autoloadBtn: document.getElementById('autoloadBtn'),
+      loadPolicyBtn: document.getElementById('loadPolicyBtn'),
+      loadCompaniesBtn: document.getElementById('loadCompaniesBtn'),
+      loadAssetsBtn: document.getElementById('loadAssetsBtn'),
+      policyFileInput: document.getElementById('policyFileInput'),
+      companiesFileInput: document.getElementById('companiesFileInput'),
+      assetsFileInput: document.getElementById('assetsFileInput'),
+      generateBtn: document.getElementById('generateBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      copyFileBtn: document.getElementById('copyFileBtn'),
+      copyFolderBtn: document.getElementById('copyFolderBtn'),
+      copyPathBtn: document.getElementById('copyPathBtn')
+    };
+
+    function setStatus(message, cls = 'info') {
+      els.statusBadge.className = `pill ${cls}`;
+      els.statusBadge.textContent = message;
+    }
+
+    function fillSelect(select, entries, labelFn, valueFn) {
+      select.innerHTML = entries.map((entry, idx) => {
+        const value = valueFn ? valueFn(entry, idx) : (typeof entry === 'string' ? entry : entry.value ?? idx);
+        const label = labelFn ? labelFn(entry, idx) : (typeof entry === 'string' ? entry : entry.label ?? String(value));
+        return `<option value="${escapeHtml(String(value))}">${escapeHtml(String(label))}</option>`;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+    }
+
+    function normalizeText(value) {
+      return (value || '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Za-z0-9\s\-_/]/g, '')
+        .trim()
+        .replace(/[_\s]+/g, '-')
+        .replace(/-+/g, '-')
+        .toLowerCase();
+    }
+
+    function normalizeCounterparty(value) {
+      return (value || '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Za-z0-9\s\-]/g, '')
+        .trim()
+        .replace(/[\s]+/g, '-')
+        .replace(/-+/g, '-')
+        .toUpperCase();
+    }
+
+    function normalizePath(path) {
+      return (path || '').replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '');
+    }
+
+    function getFolderIndex() {
+      return state.policy?.core?.folder_index || {};
+    }
+
+    function getSelectedCompany() {
+      return state.companies.find(c => c.company_id === els.companySelect.value) || null;
+    }
+
+    function getSelectedAsset() {
+      return state.assets.find(a => a.asset_id === els.assetSelect.value) || null;
+    }
+
+    function refreshCompanySelect() {
+      const active = state.companies.length ? state.companies : [];
+      fillSelect(els.companySelect, active, c => `${c.display_name || c.company_folder || c.company_id} — ${c.company_folder || ''}` , c => c.company_id || '');
+      if (!active.length) {
+        els.companySelect.innerHTML = '<option value="">No companies loaded</option>';
+      }
+    }
+
+    function refreshAssetSelect() {
+      const company = getSelectedCompany();
+      const filtered = company ? state.assets.filter(a => a.company_id === company.company_id) : [];
+      fillSelect(els.assetSelect, filtered, a => `${a.typeid || ''} — ${a.project_name || ''} — ${a.location || ''}`, a => a.asset_id || '');
+      if (!filtered.length) {
+        els.assetSelect.innerHTML = '<option value="">No assets for selected company</option>';
+      }
+      applySelectedRecords();
+    }
+
+    function applySelectedRecords() {
+      const company = getSelectedCompany();
+      const asset = getSelectedAsset();
+      const rootPath = asset?.absolute_company_root_path || company?.absolute_company_root_path || company?.company_root_path || '';
+      els.companyRootPath.value = rootPath;
+      els.companyFolder.value = asset?.company_folder || company?.company_folder || '';
+      els.assetFolder.value = asset?.asset_folder || '';
+      els.typeId.value = asset?.typeid || '';
+      if (!asset && state.assets.length && company) {
+        // attempt auto-pick first asset for company
+        const first = state.assets.find(a => a.company_id === company.company_id);
+        if (first) {
+          els.assetSelect.value = first.asset_id;
+          els.assetFolder.value = first.asset_folder || '';
+          els.typeId.value = first.typeid || '';
+          els.companyFolder.value = first.company_folder || company.company_folder || '';
+          els.companyRootPath.value = first.absolute_company_root_path || company.absolute_company_root_path || company.company_root_path || '';
+        }
+      }
+    }
+
+    function updateConditionalFields() {
+      const docType = els.docType.value;
+      const docMeta = state.policy?.core?.doc_type_catalog?.[docType] || {};
+      els.stageWrap.style.display = docMeta.stage_sensitive ? 'block' : 'none';
+      els.counterpartyWrap.style.display = docMeta.counterparty_sensitive ? 'block' : 'none';
+      els.otherCounterpartyWrap.style.display = docMeta.counterparty_sensitive ? 'block' : 'none';
+    }
+
+    function buildDescription(docType, desc, cp, otherCp) {
+      const baseDesc = normalizeText(desc);
+      const docMeta = state.policy?.core?.doc_type_catalog?.[docType] || {};
+      if (!docMeta.counterparty_sensitive) return baseDesc;
+      const c = normalizeCounterparty(cp);
+      const o = normalizeCounterparty(otherCp);
+      if (!c) return baseDesc;
+      return o ? `${c}-to-${o}-${baseDesc}` : `${c}-${baseDesc}`;
+    }
+
+    function resolveRoute(docType, workstream, stage) {
+      const entry = state.policy?.routing?.route_registry?.[docType];
+      const folderIndex = getFolderIndex();
+      if (!entry) return { folderId: null, folderPath: '', reason: 'Doc type not found in route registry.', mode: 'unresolved' };
+      if (entry.mode === 'fixed') {
+        return { folderId: entry.target_folder_id, folderPath: folderIndex[entry.target_folder_id] || '', reason: `${docType} uses a fixed route.`, mode: entry.mode };
+      }
+      if (entry.mode === 'by_stage') {
+        const folderId = entry.stage_routes?.[stage] || entry.fallback_folder_id;
+        return { folderId, folderPath: folderIndex[folderId] || '', reason: `${docType} uses ${entry.mode} and resolved with stage ${stage || 'fallback'}.`, mode: entry.mode };
+      }
+      const folderId = entry.workstream_routes?.[workstream] || entry.fallback_folder_id;
+      return { folderId, folderPath: folderIndex[folderId] || '', reason: `${docType} uses ${entry.mode} and resolved by workstream ${workstream}.`, mode: entry.mode };
+    }
+
+    function validate(filename, fullPath, issues) {
+      const out = [...issues];
+      const limits = state.policy?.core?.constraints || {};
+      if (limits.max_filename_chars && filename.length > limits.max_filename_chars) out.push(`Filename is ${filename.length} chars; limit is ${limits.max_filename_chars}`);
+      if (limits.max_full_path_chars && fullPath.length > limits.max_full_path_chars) out.push(`Full path is ${fullPath.length} chars; limit is ${limits.max_full_path_chars}`);
+      const depth = fullPath.split('/').filter(Boolean).length;
+      if (limits.max_depth_segments && depth > limits.max_depth_segments) out.push(`Path depth is ${depth}; limit is ${limits.max_depth_segments}`);
+      return out;
+    }
+
+    function generate() {
+      if (!state.policy) {
+        els.reviewBadge.className = 'pill info';
+        els.reviewBadge.textContent = 'Waiting for policy.json';
+        els.validation.innerHTML = '<div>• Load policy.json first.</div>';
+        return;
+      }
+      const companyRootPath = normalizePath(els.companyRootPath.value.trim());
+      const companyFolder = els.companyFolder.value.trim();
+      const assetFolder = els.assetFolder.value.trim();
+      const typeId = els.typeId.value.trim();
+      const ext = normalizeText(els.ext.value || 'pdf').replace(/\-/g, '') || 'pdf';
+      const workstream = els.workstream.value;
+      const phase = els.phase.value;
+      const docType = els.docType.value;
+      const stage = els.deliverableStage.value;
+      const description = buildDescription(docType, els.description.value, els.counterparty.value, els.otherCounterparty.value);
+      const date = (els.date.value || '').replace(/[^0-9]/g, '');
+      const version = els.version.value.trim();
+      const status = els.status.value;
+
+      const issues = [];
+      if (!companyRootPath) issues.push('Missing absolute company root path');
+      if (!companyFolder) issues.push('Missing company folder');
+      if (!assetFolder) issues.push('Missing asset folder');
+      if (!typeId) issues.push('Missing TYPEID');
+      if (!workstream) issues.push('Missing workstream');
+      if (!phase) issues.push('Missing phase');
+      if (!docType) issues.push('Missing doc type');
+      if (!description) issues.push('Missing description');
+      if (!date || date.length !== 8) issues.push('Date should be YYYYMMDD');
+      if (!version || !/^v\d\d$/i.test(version)) issues.push('Version should look like v01');
+      if (!status) issues.push('Missing status');
+      if ((docType === 'DRWTEC' || docType === 'SDYTEC') && !stage) issues.push('Missing deliverable stage');
+      if ((docType === 'FIN' || docType === 'CNT') && !normalizeCounterparty(els.counterparty.value)) issues.push('Missing counterparty');
+
+      const route = resolveRoute(docType, workstream, stage);
+      if (!route.folderId || !route.folderPath) issues.push('Could not resolve target folder from policy route registry');
+
+      const filename = `${typeId}_${phase}_${docType}_${description}_${date}_${version}_${status}.${ext}`;
+      const fullFolder = normalizePath(`${companyRootPath}/${companyFolder}/ASSETS/${assetFolder}/${route.folderPath || ''}`);
+      const fullPath = normalizePath(`${fullFolder}/${filename}`);
+      const allIssues = validate(filename, fullPath, issues);
+      const manualReview = allIssues.length > 0 || els.forceReview.value === 'yes';
+
+      els.targetFolder.textContent = fullFolder;
+      els.fileName.textContent = filename;
+      els.fullPath.textContent = fullPath;
+      els.reviewBadge.className = `pill ${manualReview ? (allIssues.some(i => i.includes('limit')) ? 'bad' : 'warn') : 'ok'}`;
+      els.reviewBadge.textContent = manualReview ? 'Needs manual review before filing' : 'Ready for canonical filing';
+
+      const explanationLines = [
+        `Route mode: ${route.mode || 'unresolved'}`,
+        `Folder id: ${route.folderId || 'not resolved'}`,
+        route.reason,
+        (docType === 'FIN' || docType === 'CNT') ? 'Counterparty naming rule applied.' : 'Standard description normalization applied.'
+      ];
+      els.explanation.innerHTML = explanationLines.map(line => `<div>• ${escapeHtml(line)}</div>`).join('');
+
+      if (allIssues.length) {
+        els.validation.innerHTML = allIssues.map(line => `<div>• ${escapeHtml(line)}</div>`).join('');
+      } else {
+        const limits = state.policy.core.constraints;
+        const depth = fullPath.split('/').filter(Boolean).length;
+        els.validation.innerHTML = `
+          <div>• Filename length: ${filename.length}/${limits.max_filename_chars}</div>
+          <div>• Full path length: ${fullPath.length}/${limits.max_full_path_chars}</div>
+          <div>• Path depth: ${depth}/${limits.max_depth_segments}</div>`;
+      }
+    }
+
+    function resetDefaults() {
+      els.ext.value = 'pdf';
+      els.phase.value = 'DE';
+      els.docType.value = 'FIN';
+      els.deliverableStage.value = 'IFC';
+      els.counterparty.value = 'HABITATIO';
+      els.otherCounterparty.value = '';
+      els.description.value = 'design-invoice';
+      els.date.value = '20260315';
+      els.version.value = 'v01';
+      els.forceReview.value = 'no';
+      updateConditionalFields();
+      if (els.status.options.length) els.status.value = 'FINAL';
+      generate();
+    }
+
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); } catch (_) {}
+    }
+
+    async function readJsonFile(file) {
+      const text = await file.text();
+      return JSON.parse(text);
+    }
+
+    async function readJsonFromHandle(dirHandle, filename) {
+      const handle = await dirHandle.getFileHandle(filename);
+      const file = await handle.getFile();
+      return readJsonFile(file);
+    }
+
+    function loadPolicyObject(obj) {
+      state.policy = obj;
+      fillSelect(els.workstream, Object.entries(obj.core.workstreams), ([code, ws]) => `${code} — ${ws.root_folder.name}`, ([code]) => code);
+      fillSelect(els.phase, Object.entries(obj.core.enums.phases), ([code, label]) => `${code} — ${label}`, ([code]) => code);
+      fillSelect(els.docType, Object.entries(obj.core.doc_type_catalog), ([code, meta]) => `${code} — ${meta.label}`, ([code]) => code);
+      fillSelect(els.deliverableStage, obj.core.enums.deliverable_stages, v => v, v => v);
+      fillSelect(els.status, obj.core.enums.statuses, v => v, v => v);
+      if (obj.core.enums.statuses.includes('FINAL')) els.status.value = 'FINAL';
+      if (Object.prototype.hasOwnProperty.call(obj.core.workstreams, 'TDE')) els.workstream.value = 'TDE';
+      updateConditionalFields();
+    }
+
+    function loadCompaniesObject(obj) {
+      state.companies = Array.isArray(obj?.companies) ? obj.companies : [];
+      refreshCompanySelect();
+    }
+
+    function loadAssetsObject(obj) {
+      state.assets = Array.isArray(obj?.assets) ? obj.assets : [];
+      refreshAssetSelect();
+    }
+
+    async function openWorkingFolder() {
+      if (!window.showDirectoryPicker) {
+        setStatus('This browser does not support folder access. Use the manual JSON load buttons.', 'warn');
+        return;
+      }
+      try {
+        const dirHandle = await window.showDirectoryPicker();
+        state.directoryHandle = dirHandle;
+        const [policyObj, companyObj, assetsObj] = await Promise.all([
+          readJsonFromHandle(dirHandle, 'policy.json'),
+          readJsonFromHandle(dirHandle, 'company_master.json'),
+          readJsonFromHandle(dirHandle, 'assets_master.json')
+        ]);
+        loadPolicyObject(policyObj);
+        loadCompaniesObject(companyObj);
+        loadAssetsObject(assetsObj);
+        if (state.companies.length) els.companySelect.value = state.companies[0].company_id || '';
+        refreshAssetSelect();
+        resetDefaults();
+        setStatus('Loaded policy.json, company_master.json, and assets_master.json from the selected folder.', 'ok');
+      } catch (err) {
+        setStatus(`Load failed: ${err.message}`, 'bad');
+      }
+    }
+
+    async function autoLoadSameFolder() {
+      if (location.protocol === 'file:') {
+        setStatus('Auto-load from the same folder is blocked under file:// in most browsers. Use Open working folder or manual JSON load.', 'warn');
+        return;
+      }
+      try {
+        const [policyResp, companyResp, assetsResp] = await Promise.all([
+          fetch('./policy.json', { cache: 'no-store' }),
+          fetch('./company_master.json', { cache: 'no-store' }),
+          fetch('./assets_master.json', { cache: 'no-store' })
+        ]);
+        if (!policyResp.ok || !companyResp.ok || !assetsResp.ok) {
+          throw new Error('One or more JSON files were not found next to the HTML file.');
+        }
+        const [policyObj, companyObj, assetsObj] = await Promise.all([policyResp.json(), companyResp.json(), assetsResp.json()]);
+        loadPolicyObject(policyObj);
+        loadCompaniesObject(companyObj);
+        loadAssetsObject(assetsObj);
+        if (state.companies.length) els.companySelect.value = state.companies[0].company_id || '';
+        refreshAssetSelect();
+        resetDefaults();
+        setStatus('Auto-loaded JSON files from the same folder.', 'ok');
+      } catch (err) {
+        setStatus(`Auto-load failed: ${err.message}`, 'bad');
+      }
+    }
+
+    function bindFileInput(button, input, onLoad, successText) {
+      button.addEventListener('click', () => input.click());
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const obj = await readJsonFile(file);
+          onLoad(obj);
+          if (state.companies.length) els.companySelect.value = state.companies[0].company_id || els.companySelect.value;
+          refreshAssetSelect();
+          generate();
+          setStatus(successText, 'ok');
+        } catch (err) {
+          setStatus(`Load failed: ${err.message}`, 'bad');
+        } finally {
+          input.value = '';
+        }
+      });
+    }
+
+    els.companySelect.addEventListener('change', () => { refreshAssetSelect(); generate(); });
+    els.assetSelect.addEventListener('change', () => { applySelectedRecords(); generate(); });
+    els.docType.addEventListener('change', () => { updateConditionalFields(); generate(); });
+    els.workstream.addEventListener('change', generate);
+    els.phase.addEventListener('change', generate);
+    els.deliverableStage.addEventListener('change', generate);
+    els.counterparty.addEventListener('input', generate);
+    els.otherCounterparty.addEventListener('input', generate);
+    els.description.addEventListener('input', generate);
+    els.date.addEventListener('input', generate);
+    els.version.addEventListener('input', generate);
+    els.status.addEventListener('change', generate);
+    els.ext.addEventListener('input', generate);
+    els.forceReview.addEventListener('change', generate);
+
+    els.openFolderBtn.addEventListener('click', openWorkingFolder);
+    els.autoloadBtn.addEventListener('click', autoLoadSameFolder);
+    bindFileInput(els.loadPolicyBtn, els.policyFileInput, loadPolicyObject, 'Loaded policy.json manually.');
+    bindFileInput(els.loadCompaniesBtn, els.companiesFileInput, loadCompaniesObject, 'Loaded company_master.json manually.');
+    bindFileInput(els.loadAssetsBtn, els.assetsFileInput, loadAssetsObject, 'Loaded assets_master.json manually.');
+
+    els.generateBtn.addEventListener('click', generate);
+    els.resetBtn.addEventListener('click', resetDefaults);
+    els.copyFileBtn.addEventListener('click', () => copyText(els.fileName.textContent));
+    els.copyFolderBtn.addEventListener('click', () => copyText(els.targetFolder.textContent));
+    els.copyPathBtn.addEventListener('click', () => copyText(els.fullPath.textContent));
+
+    // Initial passive defaults so the UI is not stuck in warning state.
+    els.companySelect.innerHTML = '<option value="">Load company_master.json</option>';
+    els.assetSelect.innerHTML = '<option value="">Load assets_master.json</option>';
+    els.workstream.innerHTML = '<option value="">Load policy.json</option>';
+    els.phase.innerHTML = '<option value="">Load policy.json</option>';
+    els.docType.innerHTML = '<option value="">Load policy.json</option>';
+    els.deliverableStage.innerHTML = '<option value="">Load policy.json</option>';
+    els.status.innerHTML = '<option value="">Load policy.json</option>';
+    els.targetFolder.textContent = '';
+    els.fileName.textContent = '';
+    els.fullPath.textContent = '';
+    els.explanation.innerHTML = '<div>• No policy loaded yet.</div>';
+    els.validation.innerHTML = '<div>• Load the JSON files first.</div>';
+  </script>
+</body>
+</html>

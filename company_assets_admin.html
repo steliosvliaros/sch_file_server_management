@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCH Company & Asset Admin</title>
+  <style>
+    :root { --bg:#f6f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --accent:#111827; --soft:#f3f4f6; --ok:#065f46; --warn:#92400e; --bad:#991b1b; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter, Arial, sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:1400px; margin:0 auto; padding:24px; }
+    h1 { margin:0 0 8px; font-size:30px; }
+    .muted,.small { color:var(--muted); line-height:1.5; }
+    .small { font-size:12px; }
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 18px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,.05); }
+    .card h2 { margin:0 0 12px; font-size:20px; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .full { grid-column:1/-1; }
+    label { display:block; font-size:13px; font-weight:700; margin-bottom:6px; }
+    input, select, textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 12px; font-size:14px; background:#fff; color:var(--text); }
+    input[readonly] { background:#f9fafb; }
+    textarea { min-height:80px; resize:vertical; }
+    button { border:0; border-radius:12px; padding:10px 14px; background:var(--accent); color:#fff; cursor:pointer; font-weight:700; }
+    button.secondary { background:#fff; color:var(--text); border:1px solid var(--line); }
+    button.warn { background:#b91c1c; }
+    .badge { display:inline-block; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; }
+    .ok { background:#ecfdf5; color:var(--ok); }
+    .warnb { background:#fff7ed; color:var(--warn); }
+    .bad { background:#fef2f2; color:var(--bad); }
+    .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break:break-word; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th,td { padding:10px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+    .panel { background:var(--soft); border:1px solid var(--line); border-radius:16px; padding:14px; }
+    .inline-row { display:flex; gap:8px; align-items:center; }
+    @media (max-width:1000px) { .grid,.form-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>SCH Company & Asset Admin</h1>
+    <div class="muted">Open the working folder that contains <span class="mono">company_master.json</span>, <span class="mono">assets_master.json</span>, <span class="mono">legal_types.json</span>, and <span class="mono">asset_types.json</span>. This tool can add, edit, delete, and save companies and assets.</div>
+
+    <div class="toolbar">
+      <button id="openFolderBtn">Open working folder</button>
+      <button id="reloadBtn" class="secondary">Reload current folder</button>
+      <button id="downloadCompaniesBtn" class="secondary">Download company_master.json</button>
+      <button id="downloadAssetsBtn" class="secondary">Download assets_master.json</button>
+      <span id="statusBadge" class="badge warnb">No folder loaded yet</span>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Companies</h2>
+        <div class="toolbar">
+          <button id="newCompanyBtn">New company</button>
+          <button id="saveCompanyBtn" class="secondary">Save company</button>
+          <button id="deleteCompanyBtn" class="warn">Delete company</button>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label for="companySelect">Company record</label>
+            <select id="companySelect"></select>
+          </div>
+          <div>
+            <label for="companyId">Company ID</label>
+            <input id="companyId" readonly />
+          </div>
+          <div class="full">
+            <label for="displayName">Display name</label>
+            <input id="displayName" />
+          </div>
+          <div class="full">
+            <label for="absoluteCompanyRootPath">Absolute company root path</label>
+            <input id="absoluteCompanyRootPath" placeholder="D:/SCH_SERVER or //NAS01/Projects" />
+            <div class="small">Required manual field. Enter the real absolute root path used for this company so path-length checks are accurate. If you want native folder picking instead of manual typing, use the helper script provided separately.</div>
+          </div>
+          <div>
+            <label for="namecode">NAMECODE</label>
+            <input id="namecode" maxlength="6" />
+            <div class="small">Letters only, uppercase, max 6.</div>
+          </div>
+          <div>
+            <label for="typ3">TYP3</label>
+            <select id="typ3"></select>
+          </div>
+          <div>
+            <label for="vat9">VAT9</label>
+            <input id="vat9" maxlength="9" />
+          </div>
+          <div>
+            <label for="companyActive">Active</label>
+            <select id="companyActive"><option value="true">Yes</option><option value="false">No</option></select>
+          </div>
+          <div class="full">
+            <label for="companyFolder">Company folder</label>
+            <input id="companyFolder" readonly />
+          </div>
+          <div class="full">
+            <label for="companyNotes">Notes</label>
+            <textarea id="companyNotes"></textarea>
+          </div>
+        </div>
+
+        <div class="panel small">Company folder is always generated as <span class="mono">{NAMECODE}-{TYP3}-{VAT9}</span>.</div>
+
+        <h2 style="margin-top:18px;">Company list</h2>
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Absolute root path</th><th>Folder</th><th>Active</th></tr></thead>
+          <tbody id="companiesTable"></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Assets</h2>
+        <div class="toolbar">
+          <button id="newAssetBtn">New asset</button>
+          <button id="saveAssetBtn" class="secondary">Save asset</button>
+          <button id="deleteAssetBtn" class="warn">Delete asset</button>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label for="assetSelect">Asset record</label>
+            <select id="assetSelect"></select>
+          </div>
+          <div>
+            <label for="assetId">Asset ID</label>
+            <input id="assetId" readonly />
+          </div>
+          <div>
+            <label for="assetCompany">Company</label>
+            <select id="assetCompany"></select>
+          </div>
+          <div>
+            <label for="assetType">Type</label>
+            <select id="assetType"></select>
+          </div>
+          <div>
+            <label for="inputValue">Input value</label>
+            <input id="inputValue" type="number" step="0.001" />
+          </div>
+          <div>
+            <label for="inputUnit">Input unit</label>
+            <select id="inputUnit"></select>
+          </div>
+          <div>
+            <label for="metric">Metric</label>
+            <input id="metric" readonly />
+          </div>
+          <div>
+            <label for="ss">SS</label>
+            <input id="ss" value="01" maxlength="2" />
+          </div>
+          <div>
+            <label for="typeid">TYPEID</label>
+            <input id="typeid" readonly />
+          </div>
+          <div>
+            <label for="lifecycleStatus">Lifecycle status</label>
+            <select id="lifecycleStatus"><option value="active">active</option><option value="pipeline">pipeline</option><option value="construction">construction</option><option value="operational">operational</option><option value="archived">archived</option></select>
+          </div>
+          <div class="full">
+            <label for="projectName">Project name</label>
+            <input id="projectName" />
+            <div class="small">Stored as lowercase only.</div>
+          </div>
+          <div>
+            <label for="location">Location</label>
+            <input id="location" />
+            <div class="small">Stored as uppercase only.</div>
+          </div>
+          <div>
+            <label for="assetActive">Active</label>
+            <select id="assetActive"><option value="true">Yes</option><option value="false">No</option></select>
+          </div>
+          <div class="full">
+            <label for="assetFolder">Asset folder</label>
+            <input id="assetFolder" readonly />
+          </div>
+          <div class="full">
+            <label for="assetNotes">Notes</label>
+            <textarea id="assetNotes"></textarea>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div id="assetRuleSummary" class="small"></div>
+        </div>
+
+        <h2 style="margin-top:18px;">Asset list</h2>
+        <table>
+          <thead><tr><th>ID</th><th>TYPEID</th><th>Company</th><th>Asset folder</th><th>Active</th></tr></thead>
+          <tbody id="assetsTable"></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      directoryHandle: null,
+      legalTypes: { legal_types: [
+        { typ3:'AEE', label:'Anonymous Energy Company' },
+        { typ3:'EPE', label:'Limited Liability Company' },
+        { typ3:'EEE', label:'General Commercial Company' },
+        { typ3:'OEE', label:'General Partnership' },
+        { typ3:'IKE', label:'Private Company' },
+        { typ3:'MIK', label:'Single Member Private Company' }
+      ]},
+      assetTypes: { asset_types: [
+        { type_code:'PVS', label:'PV plant', characteristic:'capacity', allowed_input_units:['MW','kW','kWp'], input_to_base_multiplier:{ MW:1000, kW:1, kWp:1 }, metric_rule:'Convert input to kW integer, then encode XXpYYY.', example:'15.473 MW -> 15p473' },
+        { type_code:'DTC', label:'Datacenter', characteristic:'contracted IT load', allowed_input_units:['MW','kW'], input_to_base_multiplier:{ MW:1000, kW:1 }, metric_rule:'Convert input to kW integer, then encode XXpYYY.', example:'3.200 MW -> 03p200' },
+        { type_code:'HYP', label:'Hydroponics', characteristic:'cultivation area', allowed_input_units:['m2','ha'], input_to_base_multiplier:{ m2:1, ha:10000 }, metric_rule:'Convert input to integer m2, then encode XXpYYY.', example:'7000 m2 -> 07p000' }
+      ]},
+      companies: { schema:{ generated_at:new Date().toISOString() }, companies:[] },
+      assets: { schema:{ generated_at:new Date().toISOString() }, assets:[] },
+      currentCompanyIndex: -1,
+      currentAssetIndex: -1,
+    };
+
+    const $ = id => document.getElementById(id);
+    const companyEls = {
+      select: $('companySelect'), id: $('companyId'), displayName: $('displayName'), absoluteRootPath: $('absoluteCompanyRootPath'), namecode: $('namecode'), typ3: $('typ3'), vat9: $('vat9'), active: $('companyActive'), folder: $('companyFolder'), notes: $('companyNotes')
+    };
+    const assetEls = {
+      select: $('assetSelect'), id: $('assetId'), company: $('assetCompany'), type: $('assetType'), inputValue: $('inputValue'), inputUnit: $('inputUnit'), metric: $('metric'), ss: $('ss'), typeid: $('typeid'), lifecycleStatus: $('lifecycleStatus'), projectName: $('projectName'), location: $('location'), active: $('assetActive'), folder: $('assetFolder'), notes: $('assetNotes')
+    };
+
+    function setStatus(text, cls='warnb') { const el=$('statusBadge'); el.textContent=text; el.className=`badge ${cls}`; }
+    function slug(value) { return String(value||'').normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9\s\-_]/g,'').trim().replace(/[_\s]+/g,'-').replace(/-+/g,'-').replace(/^[-_]+|[-_]+$/g,''); }
+    function normalizeNamecode(value,fallback='') { return String(value||fallback||'').replace(/[^A-Za-z]/g,'').toUpperCase().slice(0,6); }
+    function normalizeProjectName(value) { return slug(value).toLowerCase(); }
+    function normalizeLocation(value) { return slug(value).toUpperCase(); }
+    function padVat(value) { return String(value||'').replace(/\D/g,'').padStart(9,'0').slice(0,9); }
+    function padSs(value) { const d=String(value||'').replace(/\D/g,'').slice(-2); return d ? d.padStart(2,'0') : '01'; }
+    function buildCompanyFolder(namecode,typ3,vat9) { return `${normalizeNamecode(namecode)}-${String(typ3||'').toUpperCase()}-${padVat(vat9)}`; }
+    function buildAssetFolder(typeid,projectName,location) { return `${typeid}_${normalizeProjectName(projectName)}_${normalizeLocation(location)}`; }
+    function nextRecordId(items,prefix,key) { let max=0; (items||[]).forEach(item=>{ const m=String(item?.[key]||'').toUpperCase().match(new RegExp(`^${prefix}-(\d+)$`)); if(m) max=Math.max(max,Number(m[1])); }); return `${prefix}-${String(max+1).padStart(4,'0')}`; }
+    function assetTypeMap() { return Object.fromEntries((state.assetTypes.asset_types||[]).map(x=>[x.type_code,x])); }
+    function companyById(id) { return (state.companies.companies||[]).find(c=>c.company_id===id) || null; }
+    function computeMetric(typeCode,inputValue,inputUnit) { const rule=assetTypeMap()[typeCode]; const n=Number(inputValue); if(!rule||!Number.isFinite(n)) return ''; const mult=Number((rule.input_to_base_multiplier||{})[inputUnit]); if(!Number.isFinite(mult)) return ''; const total=Math.round(n*mult); const left=Math.floor(total/1000); const right=total%1000; return `${String(left).padStart(2,'0')}p${String(right).padStart(3,'0')}`; }
+    function buildTypeId(typeCode,metric,ss) { return `${String(typeCode||'').toUpperCase()}${metric}-${padSs(ss)}`; }
+    function fillSelect(selectEl, options, formatter) { selectEl.innerHTML = options.map(opt => { const value = typeof opt==='string' ? opt : opt.value; const label = formatter ? formatter(opt) : (typeof opt==='string' ? opt : opt.label); return `<option value="${value}">${label}</option>`; }).join(''); }
+
+    function refreshReferenceDropdowns() {
+      fillSelect(companyEls.typ3, (state.legalTypes.legal_types||[]).map(row=>({ value:row.typ3, label:`${row.typ3} — ${row.label}` })));
+      fillSelect(assetEls.type, (state.assetTypes.asset_types||[]).map(row=>({ value:row.type_code, label:`${row.type_code} — ${row.label}` })));
+      fillSelect(assetEls.company, (state.companies.companies||[]).map(row=>({ value:row.company_id, label:`${row.company_id} — ${row.display_name}` })));
+      updateAssetUnits();
+    }
+    function refreshCompanySelect() { const rows=state.companies.companies||[]; companyEls.select.innerHTML = rows.length ? rows.map((row,i)=>`<option value="${i}">${row.company_id} — ${row.display_name}</option>`).join('') : '<option value="">No companies yet</option>'; }
+    function refreshAssetSelect() { const rows=state.assets.assets||[]; assetEls.select.innerHTML = rows.length ? rows.map((row,i)=>`<option value="${i}">${row.asset_id} — ${row.typeid || '(no TYPEID yet)'}</option>`).join('') : '<option value="">No assets yet</option>'; }
+    function renderTables() {
+      $('companiesTable').innerHTML = (state.companies.companies||[]).map(row=>`<tr><td>${row.company_id}</td><td>${row.display_name}</td><td class="mono">${row.absolute_company_root_path||row.company_root_path||''}</td><td class="mono">${row.company_folder||''}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+      $('assetsTable').innerHTML = (state.assets.assets||[]).map(row=>`<tr><td>${row.asset_id}</td><td class="mono">${row.typeid||''}</td><td>${row.company_id||''}</td><td class="mono">${row.asset_folder||''}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+    }
+
+    function computeCompanyDerivedFields() {
+      companyEls.id.value = companyEls.id.value.trim() || nextRecordId(state.companies.companies,'CMP','company_id');
+      companyEls.namecode.value = normalizeNamecode(companyEls.namecode.value, companyEls.displayName.value);
+      companyEls.vat9.value = padVat(companyEls.vat9.value);
+      companyEls.absoluteRootPath.value = String(companyEls.absoluteRootPath.value||'').trim().replace(/\\/g,'/').replace(/\/+/g,'/').replace(/\/$/,'');
+      companyEls.folder.value = buildCompanyFolder(companyEls.namecode.value, companyEls.typ3.value, companyEls.vat9.value);
+    }
+    function computeAssetDerivedFields() {
+      assetEls.id.value = assetEls.id.value.trim() || nextRecordId(state.assets.assets,'AST','asset_id');
+      assetEls.projectName.value = normalizeProjectName(assetEls.projectName.value);
+      assetEls.location.value = normalizeLocation(assetEls.location.value);
+      assetEls.ss.value = padSs(assetEls.ss.value);
+      assetEls.metric.value = computeMetric(assetEls.type.value, assetEls.inputValue.value, assetEls.inputUnit.value);
+      assetEls.typeid.value = assetEls.metric.value ? buildTypeId(assetEls.type.value, assetEls.metric.value, assetEls.ss.value) : '';
+      assetEls.folder.value = assetEls.typeid.value ? buildAssetFolder(assetEls.typeid.value, assetEls.projectName.value, assetEls.location.value) : '';
+    }
+
+    function updateAssetUnits() {
+      const rule=assetTypeMap()[assetEls.type.value];
+      const units=rule ? rule.allowed_input_units : [];
+      fillSelect(assetEls.inputUnit, units);
+      if (units.length && !units.includes(assetEls.inputUnit.value)) assetEls.inputUnit.value = units[0];
+      $('assetRuleSummary').innerHTML = rule ? `<div><strong>${rule.label}</strong> — characteristic: ${rule.characteristic}</div><div>Allowed units: ${rule.allowed_input_units.join(', ')}</div><div>Metric rule: ${rule.metric_rule}</div><div>Example: <span class="mono">${rule.example}</span></div>` : 'No asset type selected.';
+      computeAssetDerivedFields();
+    }
+
+    function loadCompanyForm(index) {
+      state.currentCompanyIndex = index;
+      const row=(state.companies.companies||[])[index];
+      if(!row) return;
+      companyEls.select.value = String(index);
+      companyEls.id.value = row.company_id || '';
+      companyEls.displayName.value = row.display_name || '';
+      companyEls.absoluteRootPath.value = (row.absolute_company_root_path || row.company_root_path || '').replace(/\\/g,'/');
+      companyEls.namecode.value = normalizeNamecode(row.namecode || row.display_name || '');
+      companyEls.typ3.value = row.typ3 || (state.legalTypes.legal_types?.[0]?.typ3 || '');
+      companyEls.vat9.value = row.vat9 || '';
+      companyEls.active.value = String(Boolean(row.is_active));
+      companyEls.notes.value = row.notes || '';
+      computeCompanyDerivedFields();
+    }
+    function loadAssetForm(index) {
+      state.currentAssetIndex = index;
+      const row=(state.assets.assets||[])[index];
+      if(!row) return;
+      assetEls.select.value = String(index);
+      assetEls.id.value = row.asset_id || '';
+      assetEls.company.value = row.company_id || (state.companies.companies?.[0]?.company_id || '');
+      assetEls.type.value = row.type || (state.assetTypes.asset_types?.[0]?.type_code || '');
+      updateAssetUnits();
+      assetEls.inputValue.value = row.input_value ?? '';
+      assetEls.inputUnit.value = row.input_unit || assetEls.inputUnit.value;
+      assetEls.ss.value = row.ss || '01';
+      assetEls.lifecycleStatus.value = row.lifecycle_status || 'active';
+      assetEls.projectName.value = normalizeProjectName(row.project_name || '');
+      assetEls.location.value = normalizeLocation(row.location || '');
+      assetEls.active.value = String(Boolean(row.is_active));
+      assetEls.notes.value = row.notes || '';
+      computeAssetDerivedFields();
+    }
+
+    function newCompany() {
+      state.currentCompanyIndex = -1;
+      companyEls.id.value = nextRecordId(state.companies.companies,'CMP','company_id');
+      companyEls.displayName.value = '';
+      companyEls.absoluteRootPath.value = '';
+      companyEls.namecode.value = '';
+      companyEls.typ3.value = state.legalTypes.legal_types?.[0]?.typ3 || '';
+      companyEls.vat9.value = '';
+      companyEls.active.value = 'true';
+      companyEls.notes.value = '';
+      computeCompanyDerivedFields();
+    }
+    function newAsset() {
+      state.currentAssetIndex = -1;
+      assetEls.id.value = nextRecordId(state.assets.assets,'AST','asset_id');
+      assetEls.company.value = state.companies.companies?.[0]?.company_id || '';
+      assetEls.type.value = state.assetTypes.asset_types?.[0]?.type_code || '';
+      updateAssetUnits();
+      assetEls.inputValue.value = '';
+      assetEls.ss.value = '01';
+      assetEls.lifecycleStatus.value = 'active';
+      assetEls.projectName.value = '';
+      assetEls.location.value = '';
+      assetEls.active.value = 'true';
+      assetEls.notes.value = '';
+      computeAssetDerivedFields();
+    }
+
+    function saveCompanyRecord() {
+      computeCompanyDerivedFields();
+      if (!companyEls.absoluteRootPath.value.trim()) {
+        setStatus('absolute_company_root_path is required', 'bad');
+        return false;
+      }
+      const row = { company_id:companyEls.id.value, display_name:companyEls.displayName.value.trim() || companyEls.namecode.value, absolute_company_root_path:companyEls.absoluteRootPath.value, namecode:companyEls.namecode.value, typ3:companyEls.typ3.value, vat9:companyEls.vat9.value, company_folder:companyEls.folder.value, is_active:companyEls.active.value==='true', notes:companyEls.notes.value.trim() };
+      if (state.currentCompanyIndex >= 0) state.companies.companies[state.currentCompanyIndex] = row; else { state.companies.companies.push(row); state.currentCompanyIndex = state.companies.companies.length - 1; }
+      state.companies.schema.generated_at = new Date().toISOString();
+      refreshCompanySelect(); refreshReferenceDropdowns(); renderTables(); loadCompanyForm(state.currentCompanyIndex); setStatus('Company saved', 'ok');
+      return true;
+    }
+    function saveAssetRecord() {
+      computeAssetDerivedFields();
+      const company = companyById(assetEls.company.value);
+      const row = { asset_id:assetEls.id.value, company_id:assetEls.company.value, company_folder:company ? company.company_folder : '', absolute_company_root_path:company ? (company.absolute_company_root_path || '') : '', type:assetEls.type.value, input_value:assetEls.inputValue.value === '' ? '' : Number(assetEls.inputValue.value), input_unit:assetEls.inputUnit.value, metric:assetEls.metric.value, ss:assetEls.ss.value, typeid:assetEls.typeid.value, project_name:assetEls.projectName.value, location:assetEls.location.value, asset_folder:assetEls.folder.value, lifecycle_status:assetEls.lifecycleStatus.value, is_active:assetEls.active.value==='true', notes:assetEls.notes.value.trim() };
+      if (state.currentAssetIndex >= 0) state.assets.assets[state.currentAssetIndex] = row; else { state.assets.assets.push(row); state.currentAssetIndex = state.assets.assets.length - 1; }
+      state.assets.schema.generated_at = new Date().toISOString();
+      refreshAssetSelect(); renderTables(); loadAssetForm(state.currentAssetIndex); setStatus('Asset saved', 'ok');
+    }
+    function deleteCurrentCompany() {
+      if (state.currentCompanyIndex < 0) return;
+      const companyId = state.companies.companies[state.currentCompanyIndex]?.company_id;
+      state.companies.companies.splice(state.currentCompanyIndex,1);
+      state.assets.assets = (state.assets.assets||[]).filter(a => a.company_id !== companyId);
+      refreshCompanySelect(); refreshAssetSelect(); refreshReferenceDropdowns(); renderTables();
+      if (state.companies.companies.length) loadCompanyForm(0); else newCompany();
+      if (state.assets.assets.length) loadAssetForm(0); else newAsset();
+      setStatus('Company deleted', 'ok');
+    }
+    function deleteCurrentAsset() {
+      if (state.currentAssetIndex < 0) return;
+      state.assets.assets.splice(state.currentAssetIndex,1);
+      refreshAssetSelect(); renderTables();
+      if (state.assets.assets.length) loadAssetForm(0); else newAsset();
+      setStatus('Asset deleted', 'ok');
+    }
+
+    async function readJsonFileFromDirectory(dirHandle, filename) { const handle = await dirHandle.getFileHandle(filename); const file = await handle.getFile(); return JSON.parse(await file.text()); }
+    async function writeJsonFileToDirectory(dirHandle, filename, data) { const handle = await dirHandle.getFileHandle(filename, { create:true }); const writable = await handle.createWritable(); await writable.write(JSON.stringify(data, null, 2) + "\n"); await writable.close(); }
+
+    async function openWorkingFolder() {
+      if (!window.showDirectoryPicker) { setStatus('Browser does not support folder access. Use Chrome or Edge.', 'bad'); return; }
+      try { state.directoryHandle = await window.showDirectoryPicker(); await loadAllFromCurrentFolder(); }
+      catch (err) { if (err && err.name !== 'AbortError') setStatus(`Open folder failed: ${err.message}`, 'bad'); }
+    }
+    async function loadAllFromCurrentFolder() {
+      if (!state.directoryHandle) return;
+      try {
+        state.legalTypes = await readJsonFileFromDirectory(state.directoryHandle, 'legal_types.json');
+        state.assetTypes = await readJsonFileFromDirectory(state.directoryHandle, 'asset_types.json');
+        state.companies = await readJsonFileFromDirectory(state.directoryHandle, 'company_master.json');
+        state.assets = await readJsonFileFromDirectory(state.directoryHandle, 'assets_master.json');
+        if (!state.companies.companies) state.companies.companies = [];
+        if (!state.assets.assets) state.assets.assets = [];
+        refreshReferenceDropdowns(); refreshCompanySelect(); refreshAssetSelect(); renderTables();
+        if (state.companies.companies.length) loadCompanyForm(0); else newCompany();
+        if (state.assets.assets.length) loadAssetForm(0); else newAsset();
+        setStatus('Working folder loaded', 'ok');
+      } catch (err) {
+        setStatus(`Load failed: ${err.message}`, 'bad');
+      }
+    }
+    async function saveJsonFilesToCurrentFolder(which) {
+      if (!state.directoryHandle) { setStatus('No folder loaded. Use download buttons or open a folder first.', 'bad'); return; }
+      try {
+        if (which === 'companies' || which === 'all') await writeJsonFileToDirectory(state.directoryHandle, 'company_master.json', state.companies);
+        if (which === 'assets' || which === 'all') await writeJsonFileToDirectory(state.directoryHandle, 'assets_master.json', state.assets);
+        setStatus('Saved back to working folder', 'ok');
+      } catch (err) {
+        setStatus(`Save failed: ${err.message}`, 'bad');
+      }
+    }
+    function downloadJson(filename, data) { const blob=new Blob([JSON.stringify(data,null,2)+"\n"], { type:'application/json' }); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
+
+    $('openFolderBtn').addEventListener('click', openWorkingFolder);
+    $('reloadBtn').addEventListener('click', loadAllFromCurrentFolder);
+    $('downloadCompaniesBtn').addEventListener('click', ()=>downloadJson('company_master.json', state.companies));
+    $('downloadAssetsBtn').addEventListener('click', ()=>downloadJson('assets_master.json', state.assets));
+    $('newCompanyBtn').addEventListener('click', newCompany);
+    $('saveCompanyBtn').addEventListener('click', async ()=>{ if (saveCompanyRecord()) await saveJsonFilesToCurrentFolder('companies'); });
+    $('deleteCompanyBtn').addEventListener('click', async ()=>{ deleteCurrentCompany(); await saveJsonFilesToCurrentFolder('all'); });
+    $('newAssetBtn').addEventListener('click', newAsset);
+    $('saveAssetBtn').addEventListener('click', async ()=>{ saveAssetRecord(); await saveJsonFilesToCurrentFolder('assets'); });
+    $('deleteAssetBtn').addEventListener('click', async ()=>{ deleteCurrentAsset(); await saveJsonFilesToCurrentFolder('assets'); });
+    companyEls.select.addEventListener('change', e=>loadCompanyForm(Number(e.target.value)));
+    assetEls.select.addEventListener('change', e=>loadAssetForm(Number(e.target.value)));
+    [companyEls.displayName, companyEls.namecode, companyEls.typ3, companyEls.vat9].forEach(el=>el.addEventListener('input', computeCompanyDerivedFields));
+    [assetEls.type, assetEls.inputValue, assetEls.inputUnit, assetEls.ss, assetEls.projectName, assetEls.location].forEach(el=>el.addEventListener('input', computeAssetDerivedFields));
+    assetEls.type.addEventListener('change', updateAssetUnits);
+
+    refreshReferenceDropdowns(); refreshCompanySelect(); refreshAssetSelect(); newCompany(); newAsset(); renderTables();
+  </script>
+</body>
+</html>

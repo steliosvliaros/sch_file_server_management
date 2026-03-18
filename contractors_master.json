@@ -1,0 +1,408 @@
+{
+  "schema": {
+    "version": "1.0",
+    "generated_at": "2026-03-16T06:15:33.900900Z",
+    "source_files": [
+      "03_contractor_master.xlsx"
+    ],
+    "notes": "Imported from contractor master workbook. canonical_name is the uppercase token used by the SCH HTML naming tools."
+  },
+  "contractors": [
+    {
+      "contractor_id": "CTR-0001",
+      "display_name": "ΣΤΡΙΛΙΓΚΑΣ ΕΛΕΥΘΕΡΙΟΣ ΕΜΜΑΝΟΥΗΛ",
+      "canonical_name": "STRILIGKAS",
+      "aliases": [
+        "ΣΤΡΙΛΙΓΚΑΣ ΕΛΕΥΘΕΡΙΟΣ ΕΜΜΑΝΟΥΗΛ",
+        "STRILIGKAS-ELEFTHERIOS-EMMANOUIL",
+        "STRILIGKAS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "021090524",
+      "phone_1": "210 3212623",
+      "phone_2": "",
+      "source_numeric_code": "5000018",
+      "source_filesystem_stem": "STRILIGKAS-ELEFTHERIOS-EMMANOUIL",
+      "source_row": 2
+    },
+    {
+      "contractor_id": "CTR-0002",
+      "display_name": "ΣΑΜΑΡΑΣ & ΣΥΝΕΡΓΑΤΕΣ Ε.Π.Ε.",
+      "canonical_name": "SAMARAS",
+      "aliases": [
+        "ΣΑΜΑΡΑΣ & ΣΥΝΕΡΓΑΤΕΣ Ε.Π.Ε.",
+        "SAMARAS-SYNERGATES-EPE",
+        "SAMARAS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "999768134",
+      "phone_1": "2310 552562",
+      "phone_2": "",
+      "source_numeric_code": "5001057",
+      "source_filesystem_stem": "SAMARAS-SYNERGATES-EPE",
+      "source_row": 3
+    },
+    {
+      "contractor_id": "CTR-0003",
+      "display_name": "STFNLAB OE",
+      "canonical_name": "STFNLAB",
+      "aliases": [
+        "STFNLAB OE",
+        "STFNLAB-OE",
+        "STFNLAB"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "801163777",
+      "phone_1": "210 8983738",
+      "phone_2": "6944 845 315",
+      "source_numeric_code": "5001650",
+      "source_filesystem_stem": "STFNLAB-OE",
+      "source_row": 4
+    },
+    {
+      "contractor_id": "CTR-0004",
+      "display_name": "LIVINGSCAPES MATHIOUDAKIS IKE",
+      "canonical_name": "LIVINGSCAPES",
+      "aliases": [
+        "LIVINGSCAPES MATHIOUDAKIS IKE",
+        "LIVINGSCAPES-MATHIOUDAKIS-IKE",
+        "LIVINGSCAPES"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "801533676",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5001784",
+      "source_filesystem_stem": "LIVINGSCAPES-MATHIOUDAKIS-IKE",
+      "source_row": 5
+    },
+    {
+      "contractor_id": "CTR-0005",
+      "display_name": "HOXHA KASTRIOT",
+      "canonical_name": "HOXHA",
+      "aliases": [
+        "HOXHA KASTRIOT",
+        "HOXHA-KASTRIOT",
+        "HOXHA"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "300465913",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5001828",
+      "source_filesystem_stem": "HOXHA-KASTRIOT",
+      "source_row": 6
+    },
+    {
+      "contractor_id": "CTR-0006",
+      "display_name": "ΛΑΚΩΝΙΚΗ Ε.Ε",
+      "canonical_name": "LAKONIKI",
+      "aliases": [
+        "ΛΑΚΩΝΙΚΗ Ε.Ε",
+        "LAKONIKI-EE",
+        "LAKONIKI"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "801859990",
+      "phone_1": "210 3471604",
+      "phone_2": "",
+      "source_numeric_code": "50063130",
+      "source_filesystem_stem": "LAKONIKI-EE",
+      "source_row": 7
+    },
+    {
+      "contractor_id": "CTR-0007",
+      "display_name": "ΚΟΛΟΚΟΤΡΩΝΗ ΜΑΡΙΑ ΔΙΟΝΥΣΙΟΣ",
+      "canonical_name": "KOLOKOTRONI-M-D",
+      "aliases": [
+        "ΚΟΛΟΚΟΤΡΩΝΗ ΜΑΡΙΑ ΔΙΟΝΥΣΙΟΣ",
+        "KOLOKOTRONI-MARIA-DIONYSIOS",
+        "KOLOKOTRONI-M-D"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "115040439",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "50063138",
+      "source_filesystem_stem": "KOLOKOTRONI-MARIA-DIONYSIOS",
+      "source_row": 8
+    },
+    {
+      "contractor_id": "CTR-0008",
+      "display_name": "ΚΟΛΟΚΟΤΡΩΝΗΣ ΝΙΚΟΣ",
+      "canonical_name": "KOLOKOTRONIS-N",
+      "aliases": [
+        "ΚΟΛΟΚΟΤΡΩΝΗΣ ΝΙΚΟΣ",
+        "KOLOKOTRONIS-NIKOS",
+        "KOLOKOTRONIS-N"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "145884033",
+      "phone_1": "",
+      "phone_2": "27210-77615",
+      "source_numeric_code": "5010409",
+      "source_filesystem_stem": "KOLOKOTRONIS-NIKOS",
+      "source_row": 9
+    },
+    {
+      "contractor_id": "CTR-0009",
+      "display_name": "ΜΗΛΙΩΡΗΣ ΑΛΚΗΣ ΓΙΑΝΝΗΣ",
+      "canonical_name": "MILIORIS",
+      "aliases": [
+        "ΜΗΛΙΩΡΗΣ ΑΛΚΗΣ ΓΙΑΝΝΗΣ",
+        "MILIORIS-ALKIS-GIANNIS",
+        "MILIORIS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "068335850",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5010546",
+      "source_filesystem_stem": "MILIORIS-ALKIS-GIANNIS",
+      "source_row": 10
+    },
+    {
+      "contractor_id": "CTR-0010",
+      "display_name": "ANALYSIS-VITA ΜΕΛΕΤΙΚΗ ΚΑΤΑΣΚΕΥΑΣΤΙΚΗ ΕΤΑΙΡΕΙΑ",
+      "canonical_name": "ANALYSIS",
+      "aliases": [
+        "ANALYSIS-VITA ΜΕΛΕΤΙΚΗ ΚΑΤΑΣΚΕΥΑΣΤΙΚΗ ΕΤΑΙΡΕΙΑ",
+        "ANALYSIS-VITA-MELETIKI-KATASKEVASTIKI-ETAIREIA",
+        "ANALYSIS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "998038489",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5011041",
+      "source_filesystem_stem": "ANALYSIS-VITA-MELETIKI-KATASKEVASTIKI-ETAIREIA",
+      "source_row": 11
+    },
+    {
+      "contractor_id": "CTR-0011",
+      "display_name": "ΚΑΛΑΠΟΘΑΡΑΚΟΣ ΚΩΝΣΤ ΔΡΑΚΟΥΛΗΣ",
+      "canonical_name": "KALAPOTHARAKOS",
+      "aliases": [
+        "ΚΑΛΑΠΟΘΑΡΑΚΟΣ ΚΩΝΣΤ ΔΡΑΚΟΥΛΗΣ",
+        "KALAPOTHARAKOS-KONST-DRAKOULIS",
+        "KALAPOTHARAKOS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "049529489",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5011158",
+      "source_filesystem_stem": "KALAPOTHARAKOS-KONST-DRAKOULIS",
+      "source_row": 12
+    },
+    {
+      "contractor_id": "CTR-0012",
+      "display_name": "ΠΑΡΑΦΟΡΟΥ ΕΥΜΟΡΦΙΑ",
+      "canonical_name": "PARAFOROU",
+      "aliases": [
+        "ΠΑΡΑΦΟΡΟΥ ΕΥΜΟΡΦΙΑ",
+        "PARAFOROU-EVMORFIA",
+        "PARAFOROU"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "150564425",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5011166",
+      "source_filesystem_stem": "PARAFOROU-EVMORFIA",
+      "source_row": 13
+    },
+    {
+      "contractor_id": "CTR-0013",
+      "display_name": "KISHTA ARJANA",
+      "canonical_name": "KISHTA",
+      "aliases": [
+        "KISHTA ARJANA",
+        "KISHTA-ARJANA",
+        "KISHTA"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "300465925",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5700160",
+      "source_filesystem_stem": "KISHTA-ARJANA",
+      "source_row": 14
+    },
+    {
+      "contractor_id": "CTR-0014",
+      "display_name": "ΜΠΕΜΠΕΤΙΔΗΣ Μ ΚΑΙ ΣΙΑ ΟΕ",
+      "canonical_name": "BEMPETIDIS",
+      "aliases": [
+        "ΜΠΕΜΠΕΤΙΔΗΣ Μ ΚΑΙ ΣΙΑ ΟΕ",
+        "BEMPETIDIS-M-KAI-SIA-OE",
+        "BEMPETIDIS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "998927324",
+      "phone_1": "2105323113",
+      "phone_2": "",
+      "source_numeric_code": "5700173",
+      "source_filesystem_stem": "BEMPETIDIS-M-KAI-SIA-OE",
+      "source_row": 15
+    },
+    {
+      "contractor_id": "CTR-0015",
+      "display_name": "ΣΚΡΕΚΗΣ ΑΕ",
+      "canonical_name": "SKREKIS",
+      "aliases": [
+        "ΣΚΡΕΚΗΣ ΑΕ",
+        "SKREKIS-AE",
+        "SKREKIS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "094507357",
+      "phone_1": "2109613972",
+      "phone_2": "2109600107",
+      "source_numeric_code": "5700174",
+      "source_filesystem_stem": "SKREKIS-AE",
+      "source_row": 16
+    },
+    {
+      "contractor_id": "CTR-0016",
+      "display_name": "ΑΦΟΙ ΛΙΒΕΡΑΚΟΥ",
+      "canonical_name": "LIVERAKOU",
+      "aliases": [
+        "ΑΦΟΙ ΛΙΒΕΡΑΚΟΥ",
+        "AFOI-LIVERAKOU",
+        "LIVERAKOU"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "081762411",
+      "phone_1": "27330-91291",
+      "phone_2": "",
+      "source_numeric_code": "5000157",
+      "source_filesystem_stem": "AFOI-LIVERAKOU",
+      "source_row": 17
+    },
+    {
+      "contractor_id": "CTR-0017",
+      "display_name": "GREEN ENERGY SOURCE ΟΕ",
+      "canonical_name": "GREEN-ENERGY-SOURCE",
+      "aliases": [
+        "GREEN ENERGY SOURCE ΟΕ",
+        "GREEN-ENERGY-SOURCE-OE",
+        "GREEN-ENERGY-SOURCE"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "802038480",
+      "phone_1": "6949703316",
+      "phone_2": "",
+      "source_numeric_code": "5001830",
+      "source_filesystem_stem": "GREEN-ENERGY-SOURCE-OE",
+      "source_row": 18
+    },
+    {
+      "contractor_id": "CTR-0018",
+      "display_name": "ΚΟΙΛΑΚΟΣ ΣΤΑΜΑΤΙΟΣ ΓΕΩΡΓΙΟΣ",
+      "canonical_name": "KOILAKOS-S-G",
+      "aliases": [
+        "ΚΟΙΛΑΚΟΣ ΣΤΑΜΑΤΙΟΣ ΓΕΩΡΓΙΟΣ",
+        "KOILAKOS-STAMATIOS-GEORGIOS",
+        "KOILAKOS-S-G"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "300258950",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5010314",
+      "source_filesystem_stem": "KOILAKOS-STAMATIOS-GEORGIOS",
+      "source_row": 19
+    },
+    {
+      "contractor_id": "CTR-0019",
+      "display_name": "ΑΦΟΙ ΑΝΑΓΝΩΣΤΟΥ Ο.Ε",
+      "canonical_name": "ANAGNOSTOU",
+      "aliases": [
+        "ΑΦΟΙ ΑΝΑΓΝΩΣΤΟΥ Ο.Ε",
+        "AFOI-ANAGNOSTOU-OE",
+        "ANAGNOSTOU"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "998781240",
+      "phone_1": "22610-81000",
+      "phone_2": "",
+      "source_numeric_code": "5010358",
+      "source_filesystem_stem": "AFOI-ANAGNOSTOU-OE",
+      "source_row": 20
+    },
+    {
+      "contractor_id": "CTR-0020",
+      "display_name": "ΤΖΑΙΛΕΑΣ Θ.ΙΩΑΝΝΗΣ",
+      "canonical_name": "TZAILEAS",
+      "aliases": [
+        "ΤΖΑΙΛΕΑΣ Θ.ΙΩΑΝΝΗΣ",
+        "TZAILEAS-TH-IOANNIS",
+        "TZAILEAS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "115026200",
+      "phone_1": "212-2134063",
+      "phone_2": "6972868416",
+      "source_numeric_code": "5010377",
+      "source_filesystem_stem": "TZAILEAS-TH-IOANNIS",
+      "source_row": 21
+    },
+    {
+      "contractor_id": "CTR-0021",
+      "display_name": "ΕΞΗΝΤΑΒΕΛΩΝΗΣ ΙΩΑΝΝΗΣ ΜΙΚΕ - ΥΔΡΑΥΛΙΚΗ-ΚΑΤΑΣΚΕΥΑΣΤΙΚΗ",
+      "canonical_name": "EXINTAVELONIS",
+      "aliases": [
+        "ΕΞΗΝΤΑΒΕΛΩΝΗΣ ΙΩΑΝΝΗΣ ΜΙΚΕ - ΥΔΡΑΥΛΙΚΗ-ΚΑΤΑΣΚΕΥΑΣΤΙΚΗ",
+        "EXINTAVELONIS-IOANNIS-MIKE-YDRAVLIKI-KATASKEVASTIKI",
+        "EXINTAVELONIS"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "800854634",
+      "phone_1": "6977361568",
+      "phone_2": "2721-114656",
+      "source_numeric_code": "5011052",
+      "source_filesystem_stem": "EXINTAVELONIS-IOANNIS-MIKE-YDRAVLIKI-KATASKEVASTIKI",
+      "source_row": 22
+    },
+    {
+      "contractor_id": "CTR-0022",
+      "display_name": "MNP ΚΑΤΑΣΚΕΥΕΣ ΕΕ",
+      "canonical_name": "MNP",
+      "aliases": [
+        "MNP ΚΑΤΑΣΚΕΥΕΣ ΕΕ",
+        "MNP-KATASKEVES-EE",
+        "MNP"
+      ],
+      "is_active": true,
+      "notes": "Imported from 03_contractor_master.xlsx",
+      "vat9": "801520564",
+      "phone_1": "",
+      "phone_2": "",
+      "source_numeric_code": "5011101",
+      "source_filesystem_stem": "MNP-KATASKEVES-EE",
+      "source_row": 23
+    }
+  ]
+}
