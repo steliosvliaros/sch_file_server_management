@@ -285,6 +285,9 @@
   </div>
 
   <script>
+    const FIXED_WORKING_FOLDER_PATH = '\\\\192.168.200.4\\Files\\4EENER-AEE-998808360\\ASSETS\\04_TECHNICAL_DESIGN\\05_PAYMENTS';
+    const EXPECTED_WORKING_FOLDER_NAME = '05_PAYMENTS';
+
     const state = {
       directoryHandle: null,
       legalTypes: { legal_types: [
@@ -635,6 +638,9 @@
     async function loadAllFromCurrentFolder() {
       if (!state.directoryHandle) return;
       try {
+        if (state.directoryHandle?.name && state.directoryHandle.name !== EXPECTED_WORKING_FOLDER_NAME) {
+          setStatus(`Selected folder is ${state.directoryHandle.name}. Expected ${EXPECTED_WORKING_FOLDER_NAME} at ${FIXED_WORKING_FOLDER_PATH}.`, 'warnb');
+        }
         state.legalTypes = await readJsonFileFromDirectory(state.directoryHandle, 'legal_types.json');
         state.assetTypes = await readJsonFileFromDirectory(state.directoryHandle, 'asset_types.json');
         state.companies = await readJsonFileFromDirectory(state.directoryHandle, 'company_master.json');
@@ -648,7 +654,7 @@
         if (state.companies.companies.length) loadCompanyForm(0); else newCompany();
         if (state.assets.assets.length) loadAssetForm(0); else newAsset();
         if (state.contractors.contractors.length) loadContractorForm(0); else newContractor();
-        setStatus('Working folder loaded', 'ok');
+        setStatus(`Working folder loaded: ${FIXED_WORKING_FOLDER_PATH}`, 'ok');
       } catch (err) {
         setStatus(`Load failed: ${err.message}`, 'bad');
       }
@@ -673,7 +679,7 @@
         if (!allowed) return false;
         state.directoryHandle = handle;
         await loadAllFromCurrentFolder();
-        setStatus('Restored last working folder automatically', 'ok');
+        setStatus(`Restored last working folder automatically: ${FIXED_WORKING_FOLDER_PATH}`, 'ok');
         return true;
       } catch (_) {
         await clearStoredHandle().catch(() => null);
@@ -710,6 +716,7 @@
 
     async function init() {
       refreshReferenceDropdowns(); refreshCompanySelect(); refreshAssetSelect(); refreshContractorSelect(); newCompany(); newAsset(); newContractor(); renderTables();
+      setStatus(`No folder loaded yet (expected: ${FIXED_WORKING_FOLDER_PATH})`, 'warnb');
       await restoreWorkingFolder();
     }
 

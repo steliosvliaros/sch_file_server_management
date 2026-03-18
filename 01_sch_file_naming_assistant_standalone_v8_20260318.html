@@ -318,6 +318,7 @@
     const HANDLE_DB_NAME = 'sch-folder-handles';
     const HANDLE_STORE_NAME = 'settings';
     const HANDLE_KEY = 'file-naming-assistant-working-folder';
+    const FIXED_COMPANY_ROOT_PATH = '\\\\192.168.200.4\\Files\\4EENER-AEE-998808360\\ASSETS\\04_TECHNICAL_DESIGN\\05_PAYMENTS';
 
     const finStemCatalog = [
       { greek: 'ΤΠΥ', stem: 'service-invoice' },
@@ -415,7 +416,18 @@
     }
 
     function normalizePath(path) {
-      return (path || '').replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '');
+      const raw = String(path || '').trim();
+      if (!raw) return '';
+      const hasUncPrefix = raw.startsWith('\\\\') || raw.startsWith('//');
+      const normalized = raw.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '');
+      return hasUncPrefix ? `//${normalized.replace(/^\/+/, '')}` : normalized;
+    }
+
+    function toWindowsPath(path) {
+      const normalized = normalizePath(path);
+      if (!normalized) return '';
+      if (normalized.startsWith('//')) return `\\\\${normalized.slice(2).replace(/\//g, '\\')}`;
+      return normalized.replace(/\//g, '\\');
     }
 
     function getFolderIndex() {
@@ -451,7 +463,7 @@
     function applySelectedRecords() {
       const company = getSelectedCompany();
       const asset = getSelectedAsset();
-      const rootPath = asset?.absolute_company_root_path || company?.absolute_company_root_path || company?.company_root_path || '';
+      const rootPath = FIXED_COMPANY_ROOT_PATH;
       els.companyRootPath.value = rootPath;
       els.companyFolder.value = asset?.company_folder || company?.company_folder || '';
       els.assetFolder.value = asset?.asset_folder || '';
@@ -464,7 +476,7 @@
           els.assetFolder.value = first.asset_folder || '';
           els.typeId.value = first.typeid || '';
           els.companyFolder.value = first.company_folder || company.company_folder || '';
-          els.companyRootPath.value = first.absolute_company_root_path || company.absolute_company_root_path || company.company_root_path || '';
+          els.companyRootPath.value = FIXED_COMPANY_ROOT_PATH;
         }
       }
     }
@@ -669,7 +681,7 @@
         els.validation.innerHTML = '<div>• Load policy.json first.</div>';
         return;
       }
-      const companyRootPath = normalizePath(els.companyRootPath.value.trim());
+      const companyRootPath = normalizePath(FIXED_COMPANY_ROOT_PATH);
       const companyFolder = els.companyFolder.value.trim();
       const assetFolder = els.assetFolder.value.trim();
       const typeId = els.typeId.value.trim();
@@ -708,14 +720,14 @@
       if (!route.folderId || !route.folderPath) issues.push('Could not resolve target folder from policy route registry');
 
       const filename = `${typeId}_${phase}_${docType}_${description}_${date}_${version}_${status}.${ext}`;
-      const fullFolder = normalizePath(`${companyRootPath}/${companyFolder}/ASSETS/${assetFolder}/${route.folderPath || ''}`);
+      const fullFolder = normalizePath(`${companyRootPath}/${route.folderPath || ''}`);
       const fullPath = normalizePath(`${fullFolder}/${filename}`);
       const allIssues = validate(filename, fullPath, issues);
       const manualReview = allIssues.length > 0 || els.forceReview.value === 'yes';
 
-      els.targetFolder.textContent = fullFolder;
+      els.targetFolder.textContent = toWindowsPath(fullFolder);
       els.fileName.textContent = filename;
-      els.fullPath.textContent = fullPath;
+      els.fullPath.textContent = toWindowsPath(fullPath);
       els.reviewBadge.className = `pill ${manualReview ? (allIssues.some(i => i.includes('limit')) ? 'bad' : 'warn') : 'ok'}`;
       els.reviewBadge.textContent = manualReview ? 'Needs manual review before filing' : 'Ready for canonical filing';
 
