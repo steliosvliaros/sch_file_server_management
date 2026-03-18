@@ -1,19 +1,27 @@
 {
   "schema": {
     "id": "sch.payment-priority.config",
-    "version": "1.0.0",
-    "generated_at": "2026-03-18T05:59:19.060949Z"
+    "version": "2.0.0",
+    "generated_at": "2026-03-18T07:06:16.416916Z"
   },
   "parameters": {
     "currency": "EUR",
     "high_risk_threshold": 16,
     "medium_risk_threshold": 8,
-    "eps": 1e-06,
+    "business_override_label": "Critical business obligation",
+    "absolute_scales": {
+      "exposure_day_full_score": 5000,
+      "efficiency_horizon_days": 30,
+      "efficiency_ratio_full_score": 1.0,
+      "risk_matrix_max": 25,
+      "amount_soft_penalty_reference_eur": 50000
+    },
     "weights": {
-      "exposure": 0.45,
-      "security": 0.275,
-      "hse": 0.275,
-      "payment_penalty": 1.0
+      "exposure": 0.35,
+      "security": 0.2,
+      "hse": 0.2,
+      "efficiency": 0.2,
+      "cost_penalty": 0.05
     }
   },
   "risk_scales": {
@@ -78,21 +86,21 @@
       "calc_mode": "mw_capacity",
       "typical_cf": 0.15,
       "value_per_kwh": 0.02,
-      "notes": "Workbook defaults for PV assets. Edit if you have better park economics."
+      "notes": "Workbook defaults for PV assets. Replace with park-specific economics if available."
     },
     "WND": {
       "label": "Wind farm",
       "calc_mode": "mw_capacity",
       "typical_cf": 0.254,
       "value_per_kwh": 0.098,
-      "notes": "Workbook defaults for wind assets. Edit if you have better park economics."
+      "notes": "Workbook defaults for wind assets. Replace with park-specific economics if available."
     },
     "DTC": {
       "label": "Datacenter",
       "calc_mode": "mw_capacity",
       "typical_cf": 0.9,
       "value_per_kwh": 0.12,
-      "notes": "Editable proxy for datacenter utilization/value. Validate with your operations team.",
+      "notes": "Proxy datacenter economics. Validate with operations/finance before relying on exposure figures.",
       "is_placeholder": true
     },
     "HTL": {
@@ -100,35 +108,35 @@
       "calc_mode": "disabled",
       "typical_cf": 0.0,
       "value_per_kwh": 0.0,
-      "notes": "No direct MW capacity in the current naming metric. Add a proxy method before using production-loss economics."
+      "notes": "No direct production-loss model configured yet for hotels."
     },
     "HYP": {
       "label": "Hydroponics",
       "calc_mode": "disabled",
       "typical_cf": 0.0,
       "value_per_kwh": 0.0,
-      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+      "notes": "Add a type-specific economic model before using production-loss calculations."
     },
     "BCH": {
       "label": "Biochar plant",
       "calc_mode": "disabled",
       "typical_cf": 0.0,
       "value_per_kwh": 0.0,
-      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+      "notes": "Add a type-specific economic model before using production-loss calculations."
     },
     "BMS": {
       "label": "Biomass plant",
       "calc_mode": "disabled",
       "typical_cf": 0.0,
       "value_per_kwh": 0.0,
-      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+      "notes": "Add a type-specific economic model before using production-loss calculations."
     },
     "HYD": {
       "label": "Hydrogen",
       "calc_mode": "disabled",
       "typical_cf": 0.0,
       "value_per_kwh": 0.0,
-      "notes": "Needs a proxy energy/output model before using lost-kWh calculations."
+      "notes": "Add a type-specific economic model before using production-loss calculations."
     },
     "BES": {
       "label": "BESS",

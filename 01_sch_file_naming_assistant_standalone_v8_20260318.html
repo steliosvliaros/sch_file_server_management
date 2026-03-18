@@ -315,6 +315,10 @@
       copyPathBtn: document.getElementById('copyPathBtn')
     };
 
+    const HANDLE_DB_NAME = 'sch-folder-handles';
+    const HANDLE_STORE_NAME = 'settings';
+    const HANDLE_KEY = 'file-naming-assistant-working-folder';
+
     const finStemCatalog = [
       { greek: 'ΤΠΥ', stem: 'service-invoice' },
       { greek: 'ΤΔΑ', stem: 'invoice-delivery-note' },
@@ -767,6 +771,57 @@
       return JSON.parse(text);
     }
 
+    function openHandleDb() {
+      if (!window.indexedDB) return Promise.resolve(null);
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(HANDLE_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(HANDLE_STORE_NAME)) db.createObjectStore(HANDLE_STORE_NAME);
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('Could not open IndexedDB.'));
+      });
+    }
+
+    async function readStoredHandle() {
+      const db = await openHandleDb();
+      if (!db) return null;
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE_NAME, 'readonly');
+        const request = tx.objectStore(HANDLE_STORE_NAME).get(HANDLE_KEY);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error('Could not read stored folder handle.'));
+      }).finally(() => db.close());
+    }
+
+    async function writeStoredHandle(handle) {
+      const db = await openHandleDb();
+      if (!db) return;
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE_NAME, 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || new Error('Could not store folder handle.'));
+        tx.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
+      }).finally(() => db.close());
+    }
+
+    async function clearStoredHandle() {
+      const db = await openHandleDb();
+      if (!db) return;
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE_NAME, 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || new Error('Could not clear stored folder handle.'));
+        tx.objectStore(HANDLE_STORE_NAME).delete(HANDLE_KEY);
+      }).finally(() => db.close());
+    }
+
+    async function hasDirectoryPermission(handle, mode='read') {
+      if (!handle || !handle.queryPermission) return false;
+      return (await handle.queryPermission({ mode })) === 'granted';
+    }
+
     async function readJsonFromHandle(dirHandle, filename) {
       const handle = await dirHandle.getFileHandle(filename);
       const file = await handle.getFile();
@@ -801,6 +856,24 @@
       populateCounterpartySelects();
     }
 
+    async function loadWorkingFolderFromHandle(dirHandle, source='manual') {
+      state.directoryHandle = dirHandle;
+      const [policyObj, companyObj, assetsObj, contractorsObj] = await Promise.all([
+        readJsonFromHandle(dirHandle, 'policy.json'),
+        readJsonFromHandle(dirHandle, 'company_master.json'),
+        readJsonFromHandle(dirHandle, 'assets_master.json'),
+        readJsonFromHandle(dirHandle, 'contractors_master.json')
+      ]);
+      loadPolicyObject(policyObj);
+      loadCompaniesObject(companyObj);
+      loadAssetsObject(assetsObj);
+      loadContractorsObject(contractorsObj);
+      if (state.companies.length) els.companySelect.value = state.companies[0].company_id || '';
+      refreshAssetSelect();
+      resetDefaults();
+      setStatus(source === 'restored' ? 'Restored last working folder automatically.' : 'Loaded policy.json, company_master.json, and assets_master.json from the selected folder.', 'ok');
+    }
+
     async function openWorkingFolder() {
       if (!window.showDirectoryPicker) {
         setStatus('This browser does not support folder access. Use the manual JSON load buttons.', 'warn');
@@ -808,23 +881,25 @@
       }
       try {
         const dirHandle = await window.showDirectoryPicker();
-        state.directoryHandle = dirHandle;
-        const [policyObj, companyObj, assetsObj, contractorsObj] = await Promise.all([
-          readJsonFromHandle(dirHandle, 'policy.json'),
-          readJsonFromHandle(dirHandle, 'company_master.json'),
-          readJsonFromHandle(dirHandle, 'assets_master.json'),
-          readJsonFromHandle(dirHandle, 'contractors_master.json')
-        ]);
-        loadPolicyObject(policyObj);
-        loadCompaniesObject(companyObj);
-        loadAssetsObject(assetsObj);
-        loadContractorsObject(contractorsObj);
-        if (state.companies.length) els.companySelect.value = state.companies[0].company_id || '';
-        refreshAssetSelect();
-        resetDefaults();
-        setStatus('Loaded policy.json, company_master.json, and assets_master.json from the selected folder.', 'ok');
+        await writeStoredHandle(dirHandle).catch(() => null);
+        await loadWorkingFolderFromHandle(dirHandle, 'manual');
       } catch (err) {
         setStatus(`Load failed: ${err.message}`, 'bad');
+      }
+    }
+
+    async function restoreWorkingFolder() {
+      if (!window.showDirectoryPicker) return false;
+      try {
+        const handle = await readStoredHandle();
+        if (!handle) return false;
+        const allowed = await hasDirectoryPermission(handle, 'read');
+        if (!allowed) return false;
+        await loadWorkingFolderFromHandle(handle, 'restored');
+        return true;
+      } catch (_) {
+        await clearStoredHandle().catch(() => null);
+        return false;
       }
     }
 
@@ -908,22 +983,27 @@
     els.copyFolderBtn.addEventListener('click', () => copyText(els.targetFolder.textContent));
     els.copyPathBtn.addEventListener('click', () => copyText(els.fullPath.textContent));
 
-    // Initial passive defaults so the UI is not stuck in warning state.
-    els.companySelect.innerHTML = '<option value="">Load company_master.json</option>';
-    els.assetSelect.innerHTML = '<option value="">Load assets_master.json</option>';
-    els.counterparty.innerHTML = '<option value="">Load contractors_master.json</option>';
-    els.otherCounterparty.innerHTML = '<option value="">Load contractors_master.json</option>';
-    els.finStem.innerHTML = '<option value="">Load policy.json</option>';
-    els.workstream.innerHTML = '<option value="">Load policy.json</option>';
-    els.phase.innerHTML = '<option value="">Load policy.json</option>';
-    els.docType.innerHTML = '<option value="">Load policy.json</option>';
-    els.deliverableStage.innerHTML = '<option value="">Load policy.json</option>';
-    els.status.innerHTML = '<option value="">Load policy.json</option>';
-    els.targetFolder.textContent = '';
-    els.fileName.textContent = '';
-    els.fullPath.textContent = '';
-    els.explanation.innerHTML = '<div>• No policy loaded yet.</div>';
-    els.validation.innerHTML = '<div>• Load the JSON files first.</div>';
+    async function init() {
+      // Initial passive defaults so the UI is not stuck in warning state.
+      els.companySelect.innerHTML = '<option value="">Load company_master.json</option>';
+      els.assetSelect.innerHTML = '<option value="">Load assets_master.json</option>';
+      els.counterparty.innerHTML = '<option value="">Load contractors_master.json</option>';
+      els.otherCounterparty.innerHTML = '<option value="">Load contractors_master.json</option>';
+      els.finStem.innerHTML = '<option value="">Load policy.json</option>';
+      els.workstream.innerHTML = '<option value="">Load policy.json</option>';
+      els.phase.innerHTML = '<option value="">Load policy.json</option>';
+      els.docType.innerHTML = '<option value="">Load policy.json</option>';
+      els.deliverableStage.innerHTML = '<option value="">Load policy.json</option>';
+      els.status.innerHTML = '<option value="">Load policy.json</option>';
+      els.targetFolder.textContent = '';
+      els.fileName.textContent = '';
+      els.fullPath.textContent = '';
+      els.explanation.innerHTML = '<div>• No policy loaded yet.</div>';
+      els.validation.innerHTML = '<div>• Load the JSON files first.</div>';
+      await restoreWorkingFolder();
+    }
+
+    init().catch(err => setStatus(`Initialization failed: ${err.message}`, 'bad'));
   </script>
 </body>
 </html>
