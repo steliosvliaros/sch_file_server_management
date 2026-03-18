@@ -379,8 +379,6 @@ const JOBS_SCHEMA_VERSION = '2.0.0';
 const HANDLE_DB_NAME = 'sch-payment-priority-board';
 const HANDLE_STORE_NAME = 'settings';
 const HANDLE_KEY = 'working-folder-handle';
-const FIXED_WORKING_FOLDER_PATH = '\\\\192.168.200.4\\Files\\4EENER-AEE-998808360\\ASSETS\\04_TECHNICAL_DESIGN\\05_PAYMENTS';
-const EXPECTED_WORKING_FOLDER_NAME = '05_PAYMENTS';
 const dom = {};
 const _charts = {};
 const DEFAULT_CONFIG = {
@@ -546,7 +544,7 @@ function setStatus(message, kind='alert'){
   dom.statusMessage.textContent = message;
 }
 function updateStatusChips(){
-  dom.statusFolder.textContent = state.folderHandle ? FIXED_WORKING_FOLDER_PATH : `Not connected (expected: ${FIXED_WORKING_FOLDER_PATH})`;
+  dom.statusFolder.textContent = state.folderHandle ? (state.folderHandle.name || 'Connected') : 'Not connected';
   const requiredLoaded = ['assets','companies','assetTypes','config'].filter(k => state.loaded[k]).length;
   dom.statusMasters.textContent = requiredLoaded + ' / 4 required loaded';
   dom.statusJobsFile.textContent = state.loaded.jobs ? `${state.jobs.length} requests loaded` : 'Not loaded yet';
@@ -1226,9 +1224,6 @@ async function readFolderJson(name, optional=false){
 }
 async function loadWorkingFolderFromHandle(handle, source='manual'){
   state.folderHandle = handle;
-  if (state.folderHandle?.name && state.folderHandle.name !== EXPECTED_WORKING_FOLDER_NAME) {
-    setStatus(`Selected folder is ${state.folderHandle.name}. Expected ${EXPECTED_WORKING_FOLDER_NAME} at ${FIXED_WORKING_FOLDER_PATH}.`, 'note');
-  }
   const assets = await readFolderJson('assets_master.json');
   const companies = await readFolderJson('company_master.json');
   const assetTypes = await readFolderJson('asset_types.json');
@@ -1248,7 +1243,7 @@ async function loadWorkingFolderFromHandle(handle, source='manual'){
   state.loaded.contractors = !!contractors;
   state.loaded.legalTypes = !!legal;
   const prefix = source === 'restored' ? 'Restored working folder' : 'Loaded working folder';
-  setStatus(jobs ? `${prefix} from ${FIXED_WORKING_FOLDER_PATH} with existing ${JOBS_FILENAME}.` : `${prefix} from ${FIXED_WORKING_FOLDER_PATH}. No jobs file existed yet. It will be created on first save.`, 'good');
+  setStatus(jobs ? `${prefix} ${state.folderHandle.name} and existing ${JOBS_FILENAME}.` : `${prefix} ${state.folderHandle.name}. No jobs file existed yet. It will be created on first save.`, 'good');
   clearForm();
   renderAll();
 }

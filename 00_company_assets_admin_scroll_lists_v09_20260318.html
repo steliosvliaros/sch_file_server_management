@@ -285,9 +285,6 @@
   </div>
 
   <script>
-    const FIXED_WORKING_FOLDER_PATH = '\\\\192.168.200.4\\Files\\4EENER-AEE-998808360\\ASSETS\\04_TECHNICAL_DESIGN\\05_PAYMENTS';
-    const EXPECTED_WORKING_FOLDER_NAME = '05_PAYMENTS';
-
     const state = {
       directoryHandle: null,
       legalTypes: { legal_types: [
@@ -332,6 +329,14 @@
     function splitAliases(value) { return String(value||'').split(';').map(x=>x.trim()).filter(Boolean); }
     function padVat(value) { return String(value||'').replace(/\D/g,'').padStart(9,'0').slice(0,9); }
     function padSs(value) { const d=String(value||'').replace(/\D/g,'').slice(-2); return d ? d.padStart(2,'0') : '01'; }
+    function normalizeAbsoluteRootPath(value) {
+      const raw = String(value||'').trim();
+      if (!raw) return '';
+      const hasUncPrefix = raw.startsWith('\\\\') || raw.startsWith('//');
+      const normalized = raw.replace(/\\/g,'/').replace(/\/+/g,'/').replace(/\/$/,'');
+      const uncAware = hasUncPrefix ? `//${normalized.replace(/^\/+/, '')}` : normalized;
+      return uncAware.startsWith('//') ? `\\\\${uncAware.slice(2).replace(/\//g,'\\')}` : uncAware.replace(/\//g,'\\');
+    }
     function buildCompanyFolder(namecode,typ3,vat9) { return `${normalizeNamecode(namecode)}-${String(typ3||'').toUpperCase()}-${padVat(vat9)}`; }
     function buildAssetFolder(typeid,projectName,location) { return `${typeid}_${normalizeProjectName(projectName)}_${normalizeLocation(location)}`; }
     function nextRecordId(items,prefix,key) { let max=0; (items||[]).forEach(item=>{ const m=String(item?.[key]||'').toUpperCase().match(new RegExp(`^${prefix}-(\\d+)$`)); if(m) max=Math.max(max,Number(m[1])); }); return `${prefix}-${String(max+1).padStart(4,'0')}`; }
@@ -384,7 +389,7 @@
       return selected;
     }
     function renderTables() {
-      $('companiesTable').innerHTML = getFilteredCompanies().map(({row})=>`<tr><td>${row.company_id}</td><td>${row.display_name}</td><td class="mono">${row.absolute_company_root_path||row.company_root_path||''}</td><td class="mono">${row.company_folder||''}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+      $('companiesTable').innerHTML = getFilteredCompanies().map(({row})=>`<tr><td>${row.company_id}</td><td>${row.display_name}</td><td class="mono">${normalizeAbsoluteRootPath(row.absolute_company_root_path||row.company_root_path||'')}</td><td class="mono">${row.company_folder||''}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
       $('assetsTable').innerHTML = getFilteredAssets().map(({row})=>`<tr><td>${row.asset_id}</td><td class="mono">${row.typeid||''}</td><td>${row.company_id||''}</td><td class="mono">${row.asset_folder||''}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
       $('contractorsTable').innerHTML = getFilteredContractors().map(({row})=>`<tr><td>${row.contractor_id}</td><td>${row.display_name||''}</td><td class="mono">${row.canonical_name||''}</td><td>${(row.aliases||[]).join('; ')}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
     }
@@ -393,7 +398,7 @@
       companyEls.id.value = companyEls.id.value.trim() || nextRecordId(state.companies.companies,'CMP','company_id');
       companyEls.namecode.value = normalizeNamecode(companyEls.namecode.value, companyEls.displayName.value);
       companyEls.vat9.value = padVat(companyEls.vat9.value);
-      companyEls.absoluteRootPath.value = String(companyEls.absoluteRootPath.value||'').trim().replace(/\\/g,'/').replace(/\/+/g,'/').replace(/\/$/,'');
+      companyEls.absoluteRootPath.value = normalizeAbsoluteRootPath(companyEls.absoluteRootPath.value);
       companyEls.folder.value = buildCompanyFolder(companyEls.namecode.value, companyEls.typ3.value, companyEls.vat9.value);
     }
     function computeAssetDerivedFields(options={}) {
@@ -425,7 +430,7 @@
       companyEls.select.value = String(index);
       companyEls.id.value = row.company_id || '';
       companyEls.displayName.value = row.display_name || '';
-      companyEls.absoluteRootPath.value = (row.absolute_company_root_path || row.company_root_path || '').replace(/\\/g,'/');
+      companyEls.absoluteRootPath.value = normalizeAbsoluteRootPath(row.absolute_company_root_path || row.company_root_path || '');
       companyEls.namecode.value = normalizeNamecode(row.namecode || row.display_name || '');
       companyEls.typ3.value = row.typ3 || (state.legalTypes.legal_types?.[0]?.typ3 || '');
       companyEls.vat9.value = row.vat9 || '';
@@ -638,9 +643,6 @@
     async function loadAllFromCurrentFolder() {
       if (!state.directoryHandle) return;
       try {
-        if (state.directoryHandle?.name && state.directoryHandle.name !== EXPECTED_WORKING_FOLDER_NAME) {
-          setStatus(`Selected folder is ${state.directoryHandle.name}. Expected ${EXPECTED_WORKING_FOLDER_NAME} at ${FIXED_WORKING_FOLDER_PATH}.`, 'warnb');
-        }
         state.legalTypes = await readJsonFileFromDirectory(state.directoryHandle, 'legal_types.json');
         state.assetTypes = await readJsonFileFromDirectory(state.directoryHandle, 'asset_types.json');
         state.companies = await readJsonFileFromDirectory(state.directoryHandle, 'company_master.json');
@@ -650,11 +652,19 @@
         if (!state.companies.companies) state.companies.companies = [];
         if (!state.assets.assets) state.assets.assets = [];
         if (!state.contractors.contractors) state.contractors.contractors = [];
+        state.companies.companies = state.companies.companies.map(row => ({
+          ...row,
+          absolute_company_root_path: normalizeAbsoluteRootPath(row.absolute_company_root_path || row.company_root_path || '')
+        }));
+        state.assets.assets = state.assets.assets.map(row => ({
+          ...row,
+          absolute_company_root_path: normalizeAbsoluteRootPath(row.absolute_company_root_path || '')
+        }));
         refreshReferenceDropdowns(); refreshCompanySelect(); refreshAssetSelect(); refreshContractorSelect(); renderTables();
         if (state.companies.companies.length) loadCompanyForm(0); else newCompany();
         if (state.assets.assets.length) loadAssetForm(0); else newAsset();
         if (state.contractors.contractors.length) loadContractorForm(0); else newContractor();
-        setStatus(`Working folder loaded: ${FIXED_WORKING_FOLDER_PATH}`, 'ok');
+        setStatus('Working folder loaded', 'ok');
       } catch (err) {
         setStatus(`Load failed: ${err.message}`, 'bad');
       }
@@ -679,7 +689,7 @@
         if (!allowed) return false;
         state.directoryHandle = handle;
         await loadAllFromCurrentFolder();
-        setStatus(`Restored last working folder automatically: ${FIXED_WORKING_FOLDER_PATH}`, 'ok');
+        setStatus('Restored last working folder automatically', 'ok');
         return true;
       } catch (_) {
         await clearStoredHandle().catch(() => null);
@@ -716,7 +726,6 @@
 
     async function init() {
       refreshReferenceDropdowns(); refreshCompanySelect(); refreshAssetSelect(); refreshContractorSelect(); newCompany(); newAsset(); newContractor(); renderTables();
-      setStatus(`No folder loaded yet (expected: ${FIXED_WORKING_FOLDER_PATH})`, 'warnb');
       await restoreWorkingFolder();
     }
 
