@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SCH Company & Asset Admin</title>
   <style>
-    :root { --bg:#f6f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --accent:#111827; --soft:#f3f4f6; --ok:#065f46; --warn:#92400e; --bad:#991b1b; }
+    :root { --bg:#f6f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --accent:#111827; --soft:#f3f4f6; --ok:#065f46; --warn:#92400e; --bad:#991b1b; --btn:#111827; --btn-text:#fff; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --line:#334155; --accent:#e2e8f0; --soft:#1a2332; --ok:#065f46; --warn:#92400e; --bad:#991b1b; --btn:#334155; --btn-text:#f1f5f9; }
+    }
     * { box-sizing:border-box; }
     body { margin:0; font-family:Inter, Arial, sans-serif; background:var(--bg); color:var(--text); }
     .wrap { max-width:1400px; margin:0 auto; padding:24px; }
@@ -19,14 +22,22 @@
     .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
     .full { grid-column:1/-1; }
     label { display:block; font-size:13px; font-weight:700; margin-bottom:6px; }
-    input, select, textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 12px; font-size:14px; background:#fff; color:var(--text); }
-    input[readonly] { background:#f9fafb; }
+    input, select, textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 12px; font-size:14px; background:var(--card); color:var(--text); }
+    input[readonly] { background:var(--soft); }
     textarea { min-height:80px; resize:vertical; }
-    button { border:0; border-radius:12px; padding:10px 14px; background:var(--accent); color:#fff; cursor:pointer; font-weight:700; }
-    button.secondary { background:#fff; color:var(--text); border:1px solid var(--line); }
-    button.warn { background:#b91c1c; }
+    button { border:0; border-radius:12px; padding:10px 14px; background:var(--btn); color:var(--btn-text); cursor:pointer; font-weight:700; }
+    button.secondary { background:var(--card); color:var(--text); border:1px solid var(--line); }
+    button.warn { background:#b91c1c; color:#fff; }
+    @media (prefers-color-scheme: dark) {
+      button.warn { background:#dc2626; }
+    }
     .badge { display:inline-block; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; }
     .ok { background:#ecfdf5; color:var(--ok); }
+    @media (prefers-color-scheme: dark) {
+      .ok { background:#064e3b; }
+      .warnb { background:#78350f; }
+      .bad { background:#7f1d1d; }
+    }
     .warnb { background:#fff7ed; color:var(--warn); }
     .bad { background:#fef2f2; color:var(--bad); }
     .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break:break-word; }
@@ -34,9 +45,9 @@
     th,td { padding:10px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
     th { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
     .panel { background:var(--soft); border:1px solid var(--line); border-radius:16px; padding:14px; }
-    .list-scroll { max-height:280px; overflow-y:auto; overflow-x:auto; border:1px solid var(--line); border-radius:16px; background:#fff; }
+    .list-scroll { max-height:280px; overflow-y:auto; overflow-x:auto; border:1px solid var(--line); border-radius:16px; background:var(--card); }
     .list-scroll table { margin:0; }
-    .list-scroll thead th { position:sticky; top:0; background:#fff; z-index:1; }
+    .list-scroll thead th { position:sticky; top:0; background:var(--card); z-index:1; }
     .inline-row { display:flex; gap:8px; align-items:center; }
     @media (max-width:1000px) { .grid,.form-grid { grid-template-columns:1fr; } }
   </style>
