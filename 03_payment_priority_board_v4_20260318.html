@@ -30,10 +30,15 @@
   --thead-bg:#ffffff;
   --thead-text:var(--muted);
   --row-border:var(--line);
-  --row-hover:#eef2ff;
+  --row-hover-outline:#94a3b8;
   --row-selected:#e8f7f2;
   --row-selected-outline:#7dd3b0;
   --chart-bg:#ffffff;
+  --chart-critical:#fc8d62;
+  --chart-soon:#ffd92f;
+  --chart-normal:#66c2a5;
+  --chart-bar:#8da0cb;
+  --chart-line:#e78ac3;
   --asset-card-bg:#ffffff;
   --tag-ok-bg:#ecfdf5;
   --tag-ok-text:var(--ok);
@@ -70,10 +75,15 @@
     --thead-bg:#ffffff;
     --thead-text:var(--muted);
     --row-border:var(--line);
-    --row-hover:#243244;
+    --row-hover-outline:#93c5fd;
     --row-selected:#193a34;
     --row-selected-outline:#4aa186;
     --chart-bg:#ffffff;
+    --chart-critical:#fc8d62;
+    --chart-soon:#ffd92f;
+    --chart-normal:#66c2a5;
+    --chart-bar:#8da0cb;
+    --chart-line:#e78ac3;
     --asset-card-bg:#ffffff;
     --tag-ok-bg:#064e3b;
     --tag-ok-text:#d1fae5;
@@ -148,8 +158,8 @@ textarea { min-height:96px; resize:vertical; }
 table { width:100%; border-collapse:collapse; min-width:1380px; }
 thead th { position:sticky; top:0; background:var(--thead-bg); color:var(--thead-text); font-size:12px; text-transform:uppercase; letter-spacing:.06em; text-align:left; padding:12px 10px; border-bottom:1px solid var(--border); z-index:1; }
 tbody td { padding:10px; border-bottom:1px solid var(--row-border); font-size:14px; vertical-align:top; }
-tbody tr[data-row-id] { cursor:pointer; transition:background .15s ease, box-shadow .15s ease; }
-tbody tr[data-row-id]:hover { background:var(--row-hover); }
+tbody tr[data-row-id] { cursor:pointer; transition:box-shadow .15s ease; }
+tbody tr[data-row-id]:hover { box-shadow:inset 0 0 0 2px var(--row-hover-outline); }
 tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px var(--row-selected-outline); }
 .chart-box { border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--chart-bg); }
 .approval-grid { display:grid; grid-template-columns:repeat(3,minmax(68px,1fr)); gap:6px; margin-bottom:8px; }
@@ -454,6 +464,19 @@ const charts = {
   amountByAsset: null,
   buckets: null,
 };
+let _companyMapCache = null;
+let _assetTypeMapCache = null;
+function invalidateLookupCaches(){ _companyMapCache = null; _assetTypeMapCache = null; }
+let _idb = null;
+function getIdb(){
+  if (_idb) return Promise.resolve(_idb);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('sch_ppb', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('kv');
+    req.onsuccess = () => { _idb = req.result; resolve(_idb); };
+    req.onerror = () => reject(req.error);
+  });
+}
 
 function q(id){ return document.getElementById(id); }
 function nowIso(){ return new Date().toISOString(); }
@@ -462,23 +485,27 @@ function round(v, d=2){ if (!Number.isFinite(v)) return null; const p = 10 ** d;
 function clamp(v, min=0, max=1){ return Math.max(min, Math.min(max, safeNumber(v, min))); }
 function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function formatNum(v, d=2){ if (!Number.isFinite(v)) return '-'; return Number(v).toLocaleString(undefined,{minimumFractionDigits:d, maximumFractionDigits:d}); }
-function formatCurrency(v){ if (!Number.isFinite(v)) return '-'; return Number(v).toLocaleString(undefined,{style:'currency', currency:'EUR', maximumFractionDigits:2}); }
+function formatCurrency(v){ if (!Number.isFinite(v)) return '-'; const currency = state?.config?.parameters?.currency || 'EUR'; return Number(v).toLocaleString(undefined,{style:'currency', currency, maximumFractionDigits:2}); }
 function formatDays(v){ if (!Number.isFinite(v) || v <= 0) return '-'; return formatNum(v,1) + ' d'; }
 function formatRatioX(v){ if (!Number.isFinite(v) || v <= 0) return '-'; return formatNum(v,2) + 'x'; }
-function uid(){ return 'REQ-' + Date.now() + '-' + Math.random().toString(36).slice(2,8).toUpperCase(); }
+function uid(){ return 'REQ-' + crypto.randomUUID().replace(/-/g,'').slice(0,12).toUpperCase(); }
 function structuredCloneSafe(obj){ return obj == null ? obj : JSON.parse(JSON.stringify(obj)); }
 function approvalDefaults(){
   return {
-    tech: { approved:false, approved_at:null },
-    econ: { approved:false, approved_at:null },
-    director: { approved:false, approved_at:null },
+    tech: { approved:false, approved_at:null, last_approved_at:null },
+    econ: { approved:false, approved_at:null, last_approved_at:null },
+    director: { approved:false, approved_at:null, last_approved_at:null },
   };
 }
 function normalizeApprovals(value){
   const base = approvalDefaults();
   ['tech','econ','director'].forEach(role => {
     const src = value?.[role] || {};
-    base[role] = { approved: !!src.approved, approved_at: src.approved_at || null };
+    base[role] = {
+      approved: !!src.approved,
+      approved_at: src.approved_at || null,
+      last_approved_at: src.last_approved_at || src.approved_at || null,
+    };
   });
   return base;
 }
@@ -508,9 +535,9 @@ function downloadText(filename, text, mime='application/json'){
   a.remove();
   URL.revokeObjectURL(url);
 }
-function readJsonFile(file){ return file.text().then(txt => JSON.parse(txt)); }
-function companyMap(){ return new Map((state.companies || []).map(x => [x.company_id, x])); }
-function assetTypeMap(){ return new Map((state.assetTypes || []).map(x => [x.type_code, x])); }
+async function readJsonFile(file){ const txt = await file.text(); try { return JSON.parse(txt); } catch(e){ throw new Error(`Invalid JSON in ${file.name || 'file'}: ${e.message}`); } }
+function companyMap(){ return _companyMapCache || (_companyMapCache = new Map((state.companies || []).map(x => [x.company_id, x]))); }
+function assetTypeMap(){ return _assetTypeMapCache || (_assetTypeMapCache = new Map((state.assetTypes || []).map(x => [x.type_code, x]))); }
 function mergedAssets(){ return [...(state.assets || []), ...(state.virtualAssets || [])]; }
 function configReady(){ return state.loaded.assets && state.loaded.companies && state.loaded.assetTypes && state.loaded.config; }
 function deepMerge(base, extra){
@@ -965,7 +992,6 @@ function rowTags(job){
   return html;
 }
 function renderTables(){
-  scoreJobs();
   const open = state.jobs.filter(j => j.status !== 'paid').sort((a,b) => safeNumber(a.rank,9999) - safeNumber(b.rank,9999));
   const paid = state.jobs.filter(j => j.status === 'paid').sort((a,b) => String(b.paid_at || '').localeCompare(String(a.paid_at || '')));
   dom.openTableBody.innerHTML = open.length ? open.map(job => `
@@ -986,9 +1012,9 @@ function renderTables(){
       <td>
         <div class="small" style="margin-bottom:8px;">${escapeHtml(approvalStatusLine(job))}</div>
         <div class="approval-grid">
-          <button class="secondary slim" data-action="approve-tech" data-id="${job.id}" ${job.approvals?.tech?.approved ? 'disabled' : ''}>Tech ${job.approvals?.tech?.approved ? '✓' : ''}</button>
-          <button class="secondary slim" data-action="approve-econ" data-id="${job.id}" ${job.approvals?.econ?.approved ? 'disabled' : ''}>Econ ${job.approvals?.econ?.approved ? '✓' : ''}</button>
-          <button class="secondary slim" data-action="approve-director" data-id="${job.id}" ${job.approvals?.director?.approved ? 'disabled' : ''}>Director ${job.approvals?.director?.approved ? '✓' : ''}</button>
+          <button class="secondary slim" data-action="approve-tech" data-id="${job.id}">Tech ${job.approvals?.tech?.approved ? '✓' : ''}</button>
+          <button class="secondary slim" data-action="approve-econ" data-id="${job.id}">Econ ${job.approvals?.econ?.approved ? '✓' : ''}</button>
+          <button class="secondary slim" data-action="approve-director" data-id="${job.id}">Director ${job.approvals?.director?.approved ? '✓' : ''}</button>
         </div>
         <div class="action-grid">
           <button class="warn slim" data-action="pay" data-id="${job.id}" ${approvalsComplete(job) ? '' : 'disabled'}>Mark paid</button>
@@ -1021,11 +1047,11 @@ function chartColorMap(){
     text: (css.getPropertyValue('--text') || '').trim() || '#1f2937',
     muted: (css.getPropertyValue('--muted') || '').trim() || '#6b7280',
     border: (css.getPropertyValue('--line') || '').trim() || '#e5e7eb',
-    mandatory: (css.getPropertyValue('--bad') || '').trim() || '#991b1b',
-    paySoon: (css.getPropertyValue('--warn') || '').trim() || '#92400e',
-    normal: (css.getPropertyValue('--ok') || '').trim() || '#065f46',
-    info: (css.getPropertyValue('--info') || '').trim() || '#1d4ed8',
-    accent: (css.getPropertyValue('--accent') || '').trim() || '#111827',
+    mandatory: (css.getPropertyValue('--chart-critical') || '').trim() || '#e11d48',
+    paySoon: (css.getPropertyValue('--chart-soon') || '').trim() || '#f59e0b',
+    normal: (css.getPropertyValue('--chart-normal') || '').trim() || '#14b8a6',
+    info: (css.getPropertyValue('--chart-bar') || '').trim() || '#0ea5e9',
+    accent: (css.getPropertyValue('--chart-line') || '').trim() || '#f43f5e',
   };
 }
 function priorityColor(priority, colors){
@@ -1053,52 +1079,58 @@ function drawCanvasFallback(canvas, message){
   ctx.fillText(message, 16, 30);
 }
 function renderCharts(){
-  const open = state.jobs.filter(j => j.status !== 'paid').sort((a,b) => safeNumber(b.priority_score) - safeNumber(a.priority_score));
-  const colors = chartColorMap();
-  destroyCharts();
-
   if (typeof window.Chart === 'undefined') {
     drawCanvasFallback(dom.chartPriority, 'Chart.js unavailable. Check internet/CDN access.');
     drawCanvasFallback(dom.chartAmountByAsset, 'Chart.js unavailable. Check internet/CDN access.');
     drawCanvasFallback(dom.chartBuckets, 'Chart.js unavailable. Check internet/CDN access.');
     return;
   }
-
+  const open = state.jobs.filter(j => j.status !== 'paid');
+  const colors = chartColorMap();
   Chart.defaults.color = colors.muted;
   Chart.defaults.borderColor = colors.border;
 
   const topExposure = [...open].sort((a,b) => safeNumber(b.total_exposure_day) - safeNumber(a.total_exposure_day)).slice(0, 10);
-  charts.priority = new Chart(dom.chartPriority.getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: topExposure.map(j => (j.title || 'Untitled').slice(0, 28)),
-      datasets: [{
-        label: 'Exposure/day (EUR)',
-        data: topExposure.map(j => safeNumber(j.total_exposure_day)),
-        backgroundColor: topExposure.map(j => priorityColor(j.priority_class, colors)),
-        borderRadius: 8,
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      indexAxis: 'y',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => {
-              const j = topExposure[ctx.dataIndex] || {};
-              return `${formatCurrency(j.total_exposure_day)} | Score ${formatNum(j.priority_score,2)} | ${j.priority_class || 'Normal'}`;
+  if (charts.priority) {
+    charts.priority.data.labels = topExposure.map(j => (j.title || 'Untitled').slice(0, 28));
+    charts.priority.data.datasets[0].data = topExposure.map(j => safeNumber(j.total_exposure_day));
+    charts.priority.data.datasets[0].backgroundColor = topExposure.map(j => priorityColor(j.priority_class, colors));
+    charts.priority.data.datasets[0].jobs = topExposure;
+    charts.priority.update('none');
+  } else {
+    charts.priority = new Chart(dom.chartPriority.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: topExposure.map(j => (j.title || 'Untitled').slice(0, 28)),
+        datasets: [{
+          label: 'Exposure/day (EUR)',
+          data: topExposure.map(j => safeNumber(j.total_exposure_day)),
+          backgroundColor: topExposure.map(j => priorityColor(j.priority_class, colors)),
+          borderRadius: 8,
+          jobs: topExposure,
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const j = ctx.dataset.jobs?.[ctx.dataIndex] || {};
+                return `${formatCurrency(j.total_exposure_day)} | Score ${formatNum(j.priority_score,2)} | ${j.priority_class || 'Normal'}`;
+              }
             }
           }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Daily exposure (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } },
+          y: { ticks: { color: colors.text } }
         }
-      },
-      scales: {
-        x: { title: { display: true, text: 'Daily exposure (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } },
-        y: { ticks: { color: colors.text } }
       }
-    }
-  });
+    });
+  }
 
   const byAsset = Object.values(open.reduce((acc, job) => {
     const key = job.asset_folder || 'Unknown';
@@ -1107,56 +1139,30 @@ function renderCharts(){
     acc[key].amount += safeNumber(job.request_amount);
     return acc;
   }, {})).sort((a,b) => b.exposure - a.exposure).slice(0,8);
-  charts.amountByAsset = new Chart(dom.chartAmountByAsset.getContext('2d'), {
-    data: {
-      labels: byAsset.map(x => x.label.slice(0, 24)),
-      datasets: [
-        {
-          type: 'bar',
-          label: 'Exposure/day',
-          data: byAsset.map(x => x.exposure),
-          yAxisID: 'yExposure',
-          backgroundColor: colors.info,
-          borderRadius: 8,
-        },
-        {
-          type: 'line',
-          label: 'Request amount',
-          data: byAsset.map(x => x.amount),
-          yAxisID: 'yAmount',
-          borderColor: colors.accent,
-          backgroundColor: colors.accent,
-          pointRadius: 3,
-          tension: 0.25,
-        }
-      ]
-    },
-    options: {
-      maintainAspectRatio: false,
-      scales: {
-        yExposure: {
-          type: 'linear',
-          position: 'left',
-          title: { display: true, text: 'Exposure/day (EUR)' },
-          ticks: { callback: (v) => formatCurrency(v) }
-        },
-        yAmount: {
-          type: 'linear',
-          position: 'right',
-          grid: { drawOnChartArea: false },
-          title: { display: true, text: 'Request amount (EUR)' },
-          ticks: { callback: (v) => formatCurrency(v) }
-        }
+  if (charts.amountByAsset) {
+    charts.amountByAsset.data.labels = byAsset.map(x => x.label.slice(0, 24));
+    charts.amountByAsset.data.datasets[0].data = byAsset.map(x => x.exposure);
+    charts.amountByAsset.data.datasets[1].data = byAsset.map(x => x.amount);
+    charts.amountByAsset.update('none');
+  } else {
+    charts.amountByAsset = new Chart(dom.chartAmountByAsset.getContext('2d'), {
+      data: {
+        labels: byAsset.map(x => x.label.slice(0, 24)),
+        datasets: [
+          { type: 'bar', label: 'Exposure/day', data: byAsset.map(x => x.exposure), yAxisID: 'yExposure', backgroundColor: colors.info, borderRadius: 8 },
+          { type: 'line', label: 'Request amount', data: byAsset.map(x => x.amount), yAxisID: 'yAmount', borderColor: colors.accent, backgroundColor: colors.accent, pointRadius: 3, tension: 0.25 }
+        ]
       },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}`
-          }
-        }
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          yExposure: { type: 'linear', position: 'left', title: { display: true, text: 'Exposure/day (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } },
+          yAmount: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Request amount (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } }
+        },
+        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}` } } }
       }
-    }
-  });
+    });
+  }
 
   const bubble = open.filter(j => Number.isFinite(j.payback_days) && safeNumber(j.payback_days) > 0).map(j => ({
     x: safeNumber(j.payback_days),
@@ -1164,56 +1170,65 @@ function renderCharts(){
     r: Math.max(4, Math.min(16, Math.sqrt(Math.max(0, safeNumber(j.request_amount))) / 18)),
     _job: j,
   }));
-  charts.buckets = new Chart(dom.chartBuckets.getContext('2d'), {
-    type: 'bubble',
-    data: {
-      datasets: [{
-        label: 'Requests',
-        data: bubble,
-        backgroundColor: bubble.map(p => priorityColor(p._job.priority_class, colors) + 'AA'),
-        borderColor: bubble.map(p => priorityColor(p._job.priority_class, colors)),
-        borderWidth: 1.5,
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: (items) => items?.length ? (items[0].raw?._job?.title || 'Request') : 'Request',
-            label: (ctx) => {
-              const j = ctx.raw?._job || {};
-              return `Payback ${formatDays(j.payback_days)} | Exposure/day ${formatCurrency(j.total_exposure_day)} | Amount ${formatCurrency(j.request_amount)}`;
-            },
-            afterLabel: (ctx) => {
-              const j = ctx.raw?._job || {};
-              return `${j.priority_class || 'Normal'} | Score ${formatNum(j.priority_score,2)}`;
+  if (charts.buckets) {
+    charts.buckets.data.datasets[0].data = bubble;
+    charts.buckets.data.datasets[0].backgroundColor = bubble.map(p => priorityColor(p._job.priority_class, colors) + 'AA');
+    charts.buckets.data.datasets[0].borderColor = bubble.map(p => priorityColor(p._job.priority_class, colors));
+    charts.buckets.update('none');
+  } else {
+    charts.buckets = new Chart(dom.chartBuckets.getContext('2d'), {
+      type: 'bubble',
+      data: {
+        datasets: [{
+          label: 'Requests',
+          data: bubble,
+          backgroundColor: bubble.map(p => priorityColor(p._job.priority_class, colors) + 'AA'),
+          borderColor: bubble.map(p => priorityColor(p._job.priority_class, colors)),
+          borderWidth: 1.5,
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => items?.length ? (items[0].raw?._job?.title || 'Request') : 'Request',
+              label: (ctx) => { const j = ctx.raw?._job || {}; return `Payback ${formatDays(j.payback_days)} | Exposure/day ${formatCurrency(j.total_exposure_day)} | Amount ${formatCurrency(j.request_amount)}`; },
+              afterLabel: (ctx) => { const j = ctx.raw?._job || {}; return `${j.priority_class || 'Normal'} | Score ${formatNum(j.priority_score,2)}`; }
             }
           }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Simple payback (days)' } },
+          y: { title: { display: true, text: 'Daily exposure (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } }
         }
-      },
-      scales: {
-        x: { title: { display: true, text: 'Simple payback (days)' } },
-        y: { title: { display: true, text: 'Daily exposure (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } }
       }
-    }
-  });
+    });
+  }
 }
 function renderAll(){
+  scoreJobs();
   refreshVirtualAssetsFromJobs();
+  invalidateLookupCaches();
   updateStatusChips();
   populateAssetSelect();
   refreshRiskDropdowns();
-  updateMetaPanel();
-  renderLivePreview();
   renderKpis();
   renderTables();
   renderCharts();
 }
-function fillFormFromJob(job){
+function renderAllNoCharts(){
+  scoreJobs();
   refreshVirtualAssetsFromJobs();
+  invalidateLookupCaches();
+  updateStatusChips();
   populateAssetSelect();
+  refreshRiskDropdowns();
+  renderKpis();
+  renderTables();
+}
+function fillFormFromJob(job){
   dom.assetSelect.value = job.asset_id || '';
   dom.requestTitle.value = job.title || '';
   dom.requestDescription.value = job.description || '';
@@ -1225,7 +1240,7 @@ function fillFormFromJob(job){
   dom.hseImpact.value = String(job.hse_impact ?? '');
   dom.businessCritical.checked = !!job.business_critical;
   state.selectedJobId = job.id;
-  renderAll();
+  renderAllNoCharts();
 }
 function clearForm(){
   dom.requestTitle.value = '';
@@ -1239,6 +1254,7 @@ function clearForm(){
   if (impact[2]) { dom.secImpact.value = String(impact[2].value); dom.hseImpact.value = String(impact[2].value); }
   state.selectedJobId = null;
   renderLivePreview();
+  scoreJobs();
   renderTables();
 }
 async function saveJobsToFolder(){
@@ -1270,6 +1286,7 @@ async function loadSingleFromFileInput(input, normalizer, setter, key, label){
     const data = await readJsonFile(file);
     setter(normalizer(data));
     state.loaded[key] = true;
+    invalidateLookupCaches();
     setStatus(`Loaded ${label} from ${file.name}.`, 'good');
     renderAll();
   } catch (err) {
@@ -1293,26 +1310,46 @@ function getApprovalConfig(role){
 }
 function requestApproval(job, role){
   const prereq = { tech: [], econ: ['tech'], director: ['tech','econ'] };
+  const dependents = { tech: ['econ','director'], econ: ['director'], director: [] };
+  const cfg = getApprovalConfig(role);
+  job.approvals = normalizeApprovals(job.approvals);
+  if (job.approvals?.[role]?.approved) {
+    const blocking = (dependents[role] || []).filter(name => job?.approvals?.[name]?.approved);
+    if (blocking.length) {
+      const labels = blocking.map(name => getApprovalConfig(name).label);
+      setStatus(`Revoke ${labels.join(' and ')} first before removing ${cfg.label}.`, 'alert');
+      return false;
+    }
+    const revokeEntered = window.prompt(`Enter ${cfg.label} keyword to revoke approval`);
+    if (revokeEntered == null) return false;
+    if (String(revokeEntered) !== String(cfg.keyword || '')) {
+      setStatus(`Wrong keyword for ${cfg.label}.`, 'alert');
+      return false;
+    }
+    job.approvals[role].approved = false;
+    job.approvals[role].approved_at = null;
+    job.updated_at = nowIso();
+    setStatus(`${cfg.label} revoked for ${job.title}.`, 'note');
+    renderAll();
+    autosaveJobs();
+    return true;
+  }
   const missing = (prereq[role] || []).filter(name => !job?.approvals?.[name]?.approved);
   if (missing.length) {
     setStatus(`Complete ${missing.join(' and ')} approval first.`, 'alert');
     return false;
   }
-  if (job?.approvals?.[role]?.approved) {
-    setStatus(`${getApprovalConfig(role).label} already recorded.`, 'note');
-    return false;
-  }
-  const cfg = getApprovalConfig(role);
   const entered = window.prompt(`Enter ${cfg.label} keyword`);
   if (entered == null) return false;
   if (String(entered) !== String(cfg.keyword || '')) {
     setStatus(`Wrong keyword for ${cfg.label}.`, 'alert');
     return false;
   }
-  job.approvals = normalizeApprovals(job.approvals);
+  const approvedAt = nowIso();
   job.approvals[role].approved = true;
-  job.approvals[role].approved_at = nowIso();
-  job.updated_at = nowIso();
+  job.approvals[role].approved_at = approvedAt;
+  job.approvals[role].last_approved_at = approvedAt;
+  job.updated_at = approvedAt;
   setStatus(`${cfg.label} recorded for ${job.title}.`, 'good');
   renderAll();
   autosaveJobs();
@@ -1320,51 +1357,44 @@ function requestApproval(job, role){
 }
 
 async function idbSet(key, value){
+  const db = await getIdb();
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('sch_ppb', 1);
-    req.onupgradeneeded = () => req.result.createObjectStore('kv');
-    req.onsuccess = () => {
-      const tx = req.result.transaction('kv', 'readwrite');
-      tx.objectStore('kv').put(value, key);
-      tx.oncomplete = () => { req.result.close(); resolve(); };
-      tx.onerror = () => { req.result.close(); reject(tx.error); };
-    };
-    req.onerror = () => reject(req.error);
+    const tx = db.transaction('kv', 'readwrite');
+    tx.objectStore('kv').put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
   });
 }
 async function idbGet(key){
+  const db = await getIdb();
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('sch_ppb', 1);
-    req.onupgradeneeded = () => req.result.createObjectStore('kv');
-    req.onsuccess = () => {
-      const tx = req.result.transaction('kv', 'readonly');
-      const r = tx.objectStore('kv').get(key);
-      r.onsuccess = () => { req.result.close(); resolve(r.result); };
-      r.onerror = () => { req.result.close(); reject(r.error); };
-    };
-    req.onerror = () => reject(req.error);
+    const tx = db.transaction('kv', 'readonly');
+    const r = tx.objectStore('kv').get(key);
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
   });
 }
 async function loadFromFolderHandle(){
-  const assets = await readFolderJson('assets_master.json');
-  const companies = await readFolderJson('company_master.json');
-  const assetTypes = await readFolderJson('asset_types.json');
-  const config = await readFolderJson('payment_priority_config.json');
-  const jobs = await readFolderJson(JOBS_FILENAME, true);
-  const contractors = await readFolderJson('contractors_master.json', true);
-  const legal = await readFolderJson('legal_types.json', true);
-  state.assets = normalizeAssets(assets);
-  state.companies = normalizeCompanies(companies);
-  state.assetTypes = normalizeAssetTypes(assetTypes);
-  state.config = normalizeConfig(config);
-  state.jobs = jobs ? normalizeJobs(jobs) : [];
-  state.contractors = contractors ? normalizeContractors(contractors) : [];
-  state.legalTypes = legal ? normalizeLegalTypes(legal) : [];
-  state.loaded.assets = state.loaded.companies = state.loaded.assetTypes = state.loaded.config = true;
-  state.loaded.jobs = !!jobs;
-  state.loaded.contractors = !!contractors;
-  state.loaded.legalTypes = !!legal;
-  setStatus(jobs ? `Loaded working folder ${state.folderHandle.name} and existing ${JOBS_FILENAME}.` : `Loaded working folder ${state.folderHandle.name}. No jobs file existed yet. It will be created on first save.`, 'good');
+  const [rawAssets, rawCompanies, rawAssetTypes, rawConfig, rawJobs, rawContractors, rawLegal] = await Promise.all([
+    readFolderJson('assets_master.json'),
+    readFolderJson('company_master.json'),
+    readFolderJson('asset_types.json'),
+    readFolderJson('payment_priority_config.json'),
+    readFolderJson(JOBS_FILENAME, true),
+    readFolderJson('contractors_master.json', true),
+    readFolderJson('legal_types.json', true),
+  ]);
+  const assets = normalizeAssets(rawAssets);
+  const companies = normalizeCompanies(rawCompanies);
+  const assetTypes = normalizeAssetTypes(rawAssetTypes);
+  const config = normalizeConfig(rawConfig);
+  const jobs = rawJobs ? normalizeJobs(rawJobs) : [];
+  const contractors = rawContractors ? normalizeContractors(rawContractors) : [];
+  const legalTypes = rawLegal ? normalizeLegalTypes(rawLegal) : [];
+  Object.assign(state, { assets, companies, assetTypes, config, jobs, contractors, legalTypes, virtualAssets: [] });
+  Object.assign(state.loaded, { assets: true, companies: true, assetTypes: true, config: true, jobs: !!rawJobs, contractors: !!rawContractors, legalTypes: !!rawLegal });
+  invalidateLookupCaches();
+  setStatus(rawJobs ? `Loaded working folder ${state.folderHandle.name} and existing ${JOBS_FILENAME}.` : `Loaded working folder ${state.folderHandle.name}. No jobs file existed yet. It will be created on first save.`, 'good');
   await idbSet('folderHandle', state.folderHandle).catch(() => {});
   clearForm();
   renderAll();
@@ -1471,14 +1501,20 @@ function handleTableClick(ev){
 }
 function exportOpenCsv(){
   const open = state.jobs.filter(j => j.status !== 'paid').sort((a,b) => safeNumber(a.rank,9999) - safeNumber(b.rank,9999));
-  const header = ['rank','title','description','asset_folder','company_name','request_amount_eur','production_effect_pct','business_critical','tech_approved','econ_approved','director_approved','lost_kwh_day','lost_revenue_day','total_exposure_day','security_risk','hse_risk','payback_days','efficiency_ratio_30d','priority_score','priority_class','priority_reason','created_at','updated_at'];
+  const paid = state.jobs.filter(j => j.status === 'paid').sort((a,b) => String(b.paid_at || '').localeCompare(String(a.paid_at || '')));
+  const header = ['section','status','rank','title','description','asset_folder','company_name','request_amount_eur','production_effect_pct','business_critical','tech_approved','econ_approved','director_approved','lost_kwh_day','lost_revenue_day','total_exposure_day','security_risk','hse_risk','payback_days','efficiency_ratio_30d','priority_score','priority_class','priority_reason','created_at','updated_at','paid_at'];
   const lines = [header.join(',')];
   open.forEach(j => {
-    const row = [j.rank, j.title, j.description, j.asset_folder, j.company_name, j.request_amount, j.production_effect_pct, j.business_critical ? 'yes' : 'no', j.approvals?.tech?.approved ? 'yes' : 'no', j.approvals?.econ?.approved ? 'yes' : 'no', j.approvals?.director?.approved ? 'yes' : 'no', j.lost_kwh_day, j.lost_revenue_day, j.total_exposure_day, j.security_risk, j.hse_risk, j.payback_days, j.efficiency_ratio_30d, j.priority_score, j.priority_class, j.priority_reason, j.created_at, j.updated_at]
+    const row = ['open_ranking','open', j.rank, j.title, j.description, j.asset_folder, j.company_name, j.request_amount, j.production_effect_pct, j.business_critical ? 'yes' : 'no', j.approvals?.tech?.approved ? 'yes' : 'no', j.approvals?.econ?.approved ? 'yes' : 'no', j.approvals?.director?.approved ? 'yes' : 'no', j.lost_kwh_day, j.lost_revenue_day, j.total_exposure_day, j.security_risk, j.hse_risk, j.payback_days, j.efficiency_ratio_30d, j.priority_score, j.priority_class, j.priority_reason, j.created_at, j.updated_at, j.paid_at]
       .map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"');
     lines.push(row.join(','));
   });
-  downloadText('payment_priority_open_ranking.csv', lines.join('\n'), 'text/csv');
+  paid.forEach(j => {
+    const row = ['paid_archive','paid', '', j.title, j.description, j.asset_folder, j.company_name, j.request_amount, j.production_effect_pct, j.business_critical ? 'yes' : 'no', j.approvals?.tech?.approved ? 'yes' : 'no', j.approvals?.econ?.approved ? 'yes' : 'no', j.approvals?.director?.approved ? 'yes' : 'no', j.lost_kwh_day, j.lost_revenue_day, j.total_exposure_day, j.security_risk, j.hse_risk, j.payback_days, j.efficiency_ratio_30d, j.priority_score, j.priority_class, j.priority_reason, j.created_at, j.updated_at, j.paid_at]
+      .map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"');
+    lines.push(row.join(','));
+  });
+  downloadText('payment_priority_open_and_paid.csv', lines.join('\n'), 'text/csv');
 }
 function createNewJobsFile(){
   state.jobs = [];
