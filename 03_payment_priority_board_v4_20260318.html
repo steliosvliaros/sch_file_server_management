@@ -87,11 +87,12 @@
 }
 * { box-sizing:border-box; }
 body { margin:0; font-family:Inter, Arial, sans-serif; color:var(--text); background:var(--bg); }
-.wrap { max-width:1700px; margin:0 auto; padding:18px; }
+.wrap { width:100%; max-width:none; margin:0; padding:18px; }
 .grid { display:grid; gap:16px; }
-.hero { display:grid; gap:16px; grid-template-columns:1.35fr 1fr; }
+.hero { display:grid; gap:16px; grid-template-columns:1fr; }
 .two-col { display:grid; gap:16px; grid-template-columns:430px 1fr; }
 .three-col { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); }
+.charts-row { display:grid; gap:16px; grid-template-columns:repeat(3,minmax(0,1fr)); }
 .cards { display:grid; gap:12px; grid-template-columns:repeat(6,minmax(0,1fr)); }
 .panel { background:var(--panel-bg); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:var(--panel-shadow); }
 h1,h2,h3 { margin:0 0 10px; }
@@ -107,6 +108,7 @@ button.secondary { background:var(--btn-secondary-bg); color:var(--text); border
 button.ghost { background:var(--btn-secondary-bg); color:var(--text); border:1px solid var(--border); }
 button.warn { background:var(--warn); color:#ffffff; }
 button.danger { background:var(--bad); color:#ffffff; }
+button:disabled { opacity:.55; cursor:not-allowed; }
 button.slim { padding:7px 10px; font-size:12px; }
 input,select,textarea { padding:10px 12px; }
 textarea { min-height:96px; resize:vertical; }
@@ -116,6 +118,13 @@ textarea { min-height:96px; resize:vertical; }
 .full { grid-column:1 / -1; }
 .asset-meta,.metrics-grid { display:grid; gap:10px; grid-template-columns:repeat(2,minmax(0,1fr)); }
 .metrics-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.compact-metrics { display:grid; gap:8px; grid-template-columns:repeat(9,minmax(0,1fr)); }
+.compact-metrics .card { padding:8px 10px; }
+.compact-metrics .card .small { font-size:11px; }
+.compact-metrics .card .metric { font-size:16px; margin-top:4px; }
+.compact-kpi .card { padding:8px 10px; }
+.compact-kpi .card .small { font-size:11px; }
+.compact-kpi .card .metric { font-size:16px; margin-top:4px; }
 .asset-box,.card,.status-chip { background:var(--asset-card-bg); border:1px solid var(--border); border-radius:18px; padding:14px; }
 .asset-box { border-radius:14px; padding:10px 12px; }
 .asset-box .k { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
@@ -143,7 +152,10 @@ tbody tr[data-row-id] { cursor:pointer; transition:background .15s ease, box-sha
 tbody tr[data-row-id]:hover { background:var(--row-hover); }
 tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px var(--row-selected-outline); }
 .chart-box { border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--chart-bg); }
-.chart-wrap { position:relative; height:300px; }
+.approval-grid { display:grid; grid-template-columns:repeat(3,minmax(68px,1fr)); gap:6px; margin-bottom:8px; }
+.action-grid { display:flex; flex-wrap:wrap; gap:8px; }
+.chart-shell { position:relative; width:100%; height:280px; }
+.chart { width:100% !important; height:100% !important; display:block; }
 .legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted); }
 .legend span::before { content:''; display:inline-block; width:10px; height:10px; border-radius:999px; margin-right:6px; vertical-align:middle; }
 .legend .l1::before { background:var(--accent); }
@@ -151,10 +163,9 @@ tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px v
 .legend .l3::before { background:var(--warn); }
 .legend .l4::before { background:var(--bad); }
 .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
-@media (max-width:1320px) { .hero,.two-col,.three-col,.cards,.status-row,.metrics-grid { grid-template-columns:1fr; } }
+@media (max-width:1320px) { .hero,.two-col,.three-col,.charts-row,.cards,.status-row,.metrics-grid,.compact-metrics { grid-template-columns:1fr; } }
 </style>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <body>
 <div class="wrap">
   <section class="hero">
@@ -193,24 +204,17 @@ tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px v
       </div>
       <div class="small" style="margin-top:10px;">Recommended folder contents: <span class="mono">assets_master.json</span>, <span class="mono">company_master.json</span>, <span class="mono">asset_types.json</span>, <span class="mono">payment_priority_config.json</span>, and optionally <span class="mono">payment_priority_jobs.json</span>.</div>
     </div>
-    <div class="panel">
-      <h2>Calculation logic</h2>
-      <div class="tag danger">Business critical / high risk first</div>
-      <div class="tag warn">Then stable absolute score</div>
-      <div class="tag info">Then exposure/day and age</div>
-      <p style="margin-top:12px;">The technical team fills only the request and risk details. The app resolves company and asset metadata from the masters, calculates production/revenue loss from the selected asset plus economics config, and then keeps a stable ranked queue for the economic team.</p>
-      <div class="note" style="margin-top:12px;">
-        <div class="mono">Lost kWh/day = Capacity(MW) × 1000 × 24 × TypicalCF × ProductionEffect%</div>
-        <div class="mono">Lost revenue/day = Lost kWh/day × Value_per_kWh</div>
-        <div class="mono">Priority class = Critical business obligation override, else Security/HSE risk thresholds</div>
-        <div class="mono">Stable score = exposure/day + Security risk + HSE risk + 30-day avoided-loss efficiency - mild size penalty</div>
-        <div class="mono">30-day efficiency = (Exposure/day × 30) / Request amount</div>
-        <div class="mono">Simple payback (days) = Request amount / Lost revenue/day</div>
-      </div>
-    </div>
   </section>
 
-  <section class="cards" id="kpiCards" style="margin-top:16px;"></section>
+  <section class="panel" style="margin-top:16px;">
+    <h2>Portfolio overview</h2>
+    <div class="cards compact-kpi" id="kpiCards" style="margin-top:12px;"></div>
+  </section>
+
+  <section class="panel" style="margin-top:16px;">
+    <h2>Calculated request impact</h2>
+    <div class="compact-metrics" id="liveMetrics" style="margin-top:10px;"></div>
+  </section>
 
   <section class="panel" style="margin-top:16px;">
     <div class="row" style="justify-content:space-between; gap:12px;">
@@ -268,36 +272,7 @@ tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px v
     </div>
   </section>
 
-  <section class="grid" style="margin-top:16px;">
-    <div class="grid">
-      <div class="panel">
-        <h2>Calculated request impact</h2>
-        <div class="metrics-grid" id="liveMetrics"></div>
-        <div class="legend">
-          <span class="l1">Economics</span>
-          <span class="l2">Risk</span>
-          <span class="l3">Payback</span>
-          <span class="l4">Priority</span>
-        </div>
-      </div>
-
-      <div class="grid three-col">
-        <div class="panel chart-box">
-          <h2>Top open requests by priority</h2>
-           <div class="chart-wrap"><canvas id="chartPriority"></canvas></div>
-        </div>
-        <div class="panel chart-box">
-          <h2>Open exposure by asset</h2>
-           <div class="chart-wrap"><canvas id="chartAmountByAsset"></canvas></div>
-        </div>
-        <div class="panel chart-box">
-          <h2>Open request buckets</h2>
-           <div class="chart-wrap"><canvas id="chartBuckets"></canvas></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
+  <section class="panel" style="margin-top:16px;">
       <h2>Technical request form</h2>
       <div class="field" style="margin-top:12px;">
         <label for="assetSearch">Search asset</label>
@@ -365,22 +340,49 @@ tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px v
         <button id="updateRequestBtn" class="secondary">Update selected</button>
         <button id="clearFormBtn" class="ghost">Clear form</button>
       </div>
+  </section>
+
+  <section class="panel" style="margin-top:16px;">
+    <h2>Calculation logic</h2>
+    <div class="tag danger">Business critical / high risk first</div>
+    <div class="tag warn">Then stable absolute score</div>
+    <div class="tag info">Then exposure/day and age</div>
+    <p style="margin-top:12px;">The technical team fills only the request and risk details. The app resolves company and asset metadata from the masters, calculates production/revenue loss from the selected asset plus economics config, and then keeps a stable ranked queue for the economic team.</p>
+    <div class="note" style="margin-top:12px;">
+      <div class="mono">Lost kWh/day = Capacity(MW) × 1000 × 24 × TypicalCF × ProductionEffect%</div>
+      <div class="mono">Lost revenue/day = Lost kWh/day × Value_per_kWh</div>
+      <div class="mono">Priority class = Critical business obligation override, else Security/HSE risk thresholds</div>
+      <div class="mono">Stable score = exposure/day + Security risk + HSE risk + 30-day avoided-loss efficiency - mild size penalty</div>
+      <div class="mono">30-day efficiency = (Exposure/day × 30) / Request amount</div>
+      <div class="mono">Simple payback (days) = Request amount / Lost revenue/day</div>
+    </div>
+  </section>
+
+  <section class="charts-row" style="margin-top:16px;">
+    <div class="panel chart-box">
+      <h2>Top open requests by priority</h2>
+      <div class="chart-shell"><canvas id="chartPriority" class="chart" width="560" height="280"></canvas></div>
+    </div>
+    <div class="panel chart-box">
+      <h2>Exposure/day vs request amount by asset</h2>
+      <div class="chart-shell"><canvas id="chartAmountByAsset" class="chart" width="560" height="280"></canvas></div>
+    </div>
+    <div class="panel chart-box">
+      <h2>Payback vs exposure bubble map</h2>
+      <div class="chart-shell"><canvas id="chartBuckets" class="chart" width="560" height="280"></canvas></div>
     </div>
   </section>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
 
 const REQUIRED_MASTER_FILES = ['assets_master.json', 'company_master.json', 'asset_types.json', 'payment_priority_config.json'];
 const JOBS_FILENAME = 'payment_priority_jobs.json';
 const JOBS_SCHEMA_ID = 'sch.payment-priority.jobs';
 const JOBS_SCHEMA_VERSION = '2.0.0';
-const HANDLE_DB_NAME = 'sch-payment-priority-board';
-const HANDLE_STORE_NAME = 'settings';
-const HANDLE_KEY = 'working-folder-handle';
 const dom = {};
-const _charts = {};
 const DEFAULT_CONFIG = {
   schema: { id: 'sch.payment-priority.config', version: '2.0.0' },
   parameters: {
@@ -419,6 +421,11 @@ const DEFAULT_CONFIG = {
       { value: 5, label: '5 - Critical', description: 'Severe / unacceptable impact' },
     ],
   },
+  approvals: {
+    tech: { label: 'Tech approval', keyword: 'change-me-tech' },
+    econ: { label: 'Econ approval', keyword: 'change-me-econ' },
+    director: { label: 'Director approval', keyword: 'change-me-director' },
+  },
   type_economics: {},
 };
 const state = {
@@ -442,6 +449,11 @@ const state = {
     jobs: false,
   },
 };
+const charts = {
+  priority: null,
+  amountByAsset: null,
+  buckets: null,
+};
 
 function q(id){ return document.getElementById(id); }
 function nowIso(){ return new Date().toISOString(); }
@@ -455,6 +467,36 @@ function formatDays(v){ if (!Number.isFinite(v) || v <= 0) return '-'; return fo
 function formatRatioX(v){ if (!Number.isFinite(v) || v <= 0) return '-'; return formatNum(v,2) + 'x'; }
 function uid(){ return 'REQ-' + Date.now() + '-' + Math.random().toString(36).slice(2,8).toUpperCase(); }
 function structuredCloneSafe(obj){ return obj == null ? obj : JSON.parse(JSON.stringify(obj)); }
+function approvalDefaults(){
+  return {
+    tech: { approved:false, approved_at:null },
+    econ: { approved:false, approved_at:null },
+    director: { approved:false, approved_at:null },
+  };
+}
+function normalizeApprovals(value){
+  const base = approvalDefaults();
+  ['tech','econ','director'].forEach(role => {
+    const src = value?.[role] || {};
+    base[role] = { approved: !!src.approved, approved_at: src.approved_at || null };
+  });
+  return base;
+}
+function approvalsComplete(job){
+  return ['tech','econ','director'].every(role => !!job?.approvals?.[role]?.approved);
+}
+function approvalStatusLine(job){
+  const labels = { tech:'Tech', econ:'Econ', director:'Director' };
+  const approved = ['tech','econ','director'].filter(role => !!job?.approvals?.[role]?.approved).map(role => labels[role]);
+  const pending = ['tech','econ','director'].filter(role => !job?.approvals?.[role]?.approved).map(role => labels[role]);
+  if (!pending.length) return 'All approvals complete';
+  if (!approved.length) return `Pending: ${pending.join(', ')}`;
+  return `Approved: ${approved.join(', ')} | Pending: ${pending.join(', ')}`;
+}
+function approvalChanged(existing, nextData){
+  const keys = ['asset_id','title','description','request_amount','production_effect_pct','security_likelihood','security_impact','hse_likelihood','hse_impact','business_critical'];
+  return keys.some(key => JSON.stringify(existing?.[key] ?? null) !== JSON.stringify(nextData?.[key] ?? null));
+}
 function downloadText(filename, text, mime='application/json'){
   const blob = new Blob([text], {type:mime + ';charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -467,54 +509,6 @@ function downloadText(filename, text, mime='application/json'){
   URL.revokeObjectURL(url);
 }
 function readJsonFile(file){ return file.text().then(txt => JSON.parse(txt)); }
-function openHandleDb(){
-  if (!window.indexedDB) return Promise.resolve(null);
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(HANDLE_DB_NAME, 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(HANDLE_STORE_NAME)) db.createObjectStore(HANDLE_STORE_NAME);
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error('Could not open IndexedDB.'));
-  });
-}
-async function readStoredHandle(){
-  const db = await openHandleDb();
-  if (!db) return null;
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(HANDLE_STORE_NAME, 'readonly');
-    const store = tx.objectStore(HANDLE_STORE_NAME);
-    const request = store.get(HANDLE_KEY);
-    request.onsuccess = () => resolve(request.result || null);
-    request.onerror = () => reject(request.error || new Error('Could not read stored folder handle.'));
-  }).finally(() => db.close());
-}
-async function writeStoredHandle(handle){
-  const db = await openHandleDb();
-  if (!db) return;
-  await new Promise((resolve, reject) => {
-    const tx = db.transaction(HANDLE_STORE_NAME, 'readwrite');
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error || new Error('Could not store folder handle.'));
-    tx.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
-  }).finally(() => db.close());
-}
-async function clearStoredHandle(){
-  const db = await openHandleDb();
-  if (!db) return;
-  await new Promise((resolve, reject) => {
-    const tx = db.transaction(HANDLE_STORE_NAME, 'readwrite');
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error || new Error('Could not clear stored folder handle.'));
-    tx.objectStore(HANDLE_STORE_NAME).delete(HANDLE_KEY);
-  }).finally(() => db.close());
-}
-async function hasFolderPermission(handle, mode='read'){
-  if (!handle || !handle.queryPermission) return false;
-  const permission = await handle.queryPermission({ mode });
-  return permission === 'granted';
-}
 function companyMap(){ return new Map((state.companies || []).map(x => [x.company_id, x])); }
 function assetTypeMap(){ return new Map((state.assetTypes || []).map(x => [x.type_code, x])); }
 function mergedAssets(){ return [...(state.assets || []), ...(state.virtualAssets || [])]; }
@@ -610,6 +604,7 @@ function normalizeJobs(data){
     rank: Number.isFinite(Number(j.rank)) ? Number(j.rank) : null,
     calc_note: j.calc_note || '',
     score_components: j.score_components || null,
+    approvals: normalizeApprovals(j.approvals),
     imported_from_workbook: !!j.imported_from_workbook,
     imported_asset: !!j.imported_asset,
     legacy_priority_rank: j.legacy_priority_rank ?? null,
@@ -929,18 +924,18 @@ function validateForm(data){
 function renderLivePreview(){
   const data = getFormData();
   const metrics = computeRequestMetrics(data);
-  const priorityBlock = `<div class="card"><div class="small">Priority decision</div><div class="metric" style="font-size:24px;">${escapeHtml(metrics.priority_class || '-')}</div><div class="small">${escapeHtml(metrics.priority_reason || '-')}</div></div>`;
+  const priorityBlock = `<div class="card"><div class="small">Priority decision</div><div class="metric" style="font-size:16px;margin-top:4px;">${escapeHtml(metrics.priority_class || '-')}</div><div class="small" style="margin-top:2px;">${escapeHtml(metrics.priority_reason || '-')}</div></div>`;
   const cards = [
     ['Lost kWh/day', formatNum(metrics.lost_kwh_day,2)],
     ['Lost revenue/day', formatCurrency(metrics.lost_revenue_day)],
     ['Total exposure/day', formatCurrency(metrics.total_exposure_day)],
     ['Security risk', formatNum(metrics.security_risk,0)],
     ['HSE risk', formatNum(metrics.hse_risk,0)],
-    ['30-day avoided-loss ratio', formatRatioX(metrics.efficiency_ratio_30d)],
+    ['30d ratio', formatRatioX(metrics.efficiency_ratio_30d)],
     ['Payback', formatDays(metrics.payback_days)],
     ['Score (0-100)', formatNum(metrics.priority_score,2)],
   ];
-  dom.liveMetrics.innerHTML = cards.map(([label, value]) => `<div class="card"><div class="small">${escapeHtml(label)}</div><div class="metric" style="font-size:24px;">${escapeHtml(String(value))}</div></div>`).join('') + priorityBlock;
+  dom.liveMetrics.innerHTML = cards.map(([label, value]) => `<div class="card"><div class="small">${escapeHtml(label)}</div><div class="metric">${escapeHtml(String(value))}</div></div>`).join('') + priorityBlock;
 }
 function renderKpis(){
   const open = state.jobs.filter(j => j.status !== 'paid');
@@ -967,7 +962,6 @@ function rowTags(job){
   const classes = { 'Mandatory':'danger', 'Pay soon':'warn', 'Normal':'ok' };
   let html = `<span class="tag ${classes[job.priority_class] || 'info'}">${escapeHtml(job.priority_class || 'Normal')}</span>`;
   if (job.business_critical) html += ` <span class="tag info">Critical obligation</span>`;
-  if (job.imported_asset) html += ` <span class="tag">Imported asset</span>`;
   return html;
 }
 function renderTables(){
@@ -990,9 +984,14 @@ function renderTables(){
       <td>${formatNum(job.priority_score,2)}</td>
       <td>${rowTags(job)}</td>
       <td>
-        <div class="controls">
-          <button class="secondary slim" data-action="select" data-id="${job.id}">Select</button>
-          <button class="warn slim" data-action="pay" data-id="${job.id}">Mark paid</button>
+        <div class="small" style="margin-bottom:8px;">${escapeHtml(approvalStatusLine(job))}</div>
+        <div class="approval-grid">
+          <button class="secondary slim" data-action="approve-tech" data-id="${job.id}" ${job.approvals?.tech?.approved ? 'disabled' : ''}>Tech ${job.approvals?.tech?.approved ? '✓' : ''}</button>
+          <button class="secondary slim" data-action="approve-econ" data-id="${job.id}" ${job.approvals?.econ?.approved ? 'disabled' : ''}>Econ ${job.approvals?.econ?.approved ? '✓' : ''}</button>
+          <button class="secondary slim" data-action="approve-director" data-id="${job.id}" ${job.approvals?.director?.approved ? 'disabled' : ''}>Director ${job.approvals?.director?.approved ? '✓' : ''}</button>
+        </div>
+        <div class="action-grid">
+          <button class="warn slim" data-action="pay" data-id="${job.id}" ${approvalsComplete(job) ? '' : 'disabled'}>Mark paid</button>
           <button class="danger slim" data-action="delete" data-id="${job.id}">Delete</button>
         </div>
       </td>
@@ -1016,123 +1015,190 @@ function renderTables(){
     </tr>`).join('') : '<tr><td colspan="9" class="small">No paid requests yet.</td></tr>';
   dom.selectedRequestLabel.textContent = state.selectedJobId ? (state.jobs.find(j => j.id === state.selectedJobId)?.title || 'selected') : 'none';
 }
-function shortenChartLabel(value, maxLen = 26){
-  const text = String(value || '').trim();
-  return text.length > maxLen ? `${text.slice(0, maxLen - 1)}...` : text;
+function chartColorMap(){
+  const css = getComputedStyle(document.documentElement);
+  return {
+    text: (css.getPropertyValue('--text') || '').trim() || '#1f2937',
+    muted: (css.getPropertyValue('--muted') || '').trim() || '#6b7280',
+    border: (css.getPropertyValue('--line') || '').trim() || '#e5e7eb',
+    mandatory: (css.getPropertyValue('--bad') || '').trim() || '#991b1b',
+    paySoon: (css.getPropertyValue('--warn') || '').trim() || '#92400e',
+    normal: (css.getPropertyValue('--ok') || '').trim() || '#065f46',
+    info: (css.getPropertyValue('--info') || '').trim() || '#1d4ed8',
+    accent: (css.getPropertyValue('--accent') || '').trim() || '#111827',
+  };
 }
-function _getCssVar(name, fallback) {
-  return (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim() || fallback;
+function priorityColor(priority, colors){
+  if (priority === 'Mandatory') return colors.mandatory;
+  if (priority === 'Pay soon') return colors.paySoon;
+  return colors.normal;
 }
-function drawBarChart(canvasEl, items, valueKey, labelKey, formatter='number'){
-  if (_charts[canvasEl.id]) { _charts[canvasEl.id].destroy(); delete _charts[canvasEl.id]; }
-  if (!items.length) return;
-  const accent = _getCssVar('--accent', '#111827');
-  const textColor= _getCssVar('--text',   '#1f2937');
-  const mutedColor= _getCssVar('--muted', '#6b7280');
-  const gridColor = _getCssVar('--line',  '#e5e7eb');
-  const labels = items.map(x => shortenChartLabel(x[labelKey], 30));
-  const values = items.map(x => safeNumber(x[valueKey]));
-  const bgColors = items.map(x => x.color || accent);
-  _charts[canvasEl.id] = new Chart(canvasEl, {
-    type: 'bar',
-    data: { labels, datasets: [{ data: values, backgroundColor: bgColors, borderRadius: 6, borderSkipped: false, barPercentage: 0.7 }] },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 400, easing: 'easeOutQuart' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1f2937',
-          titleColor: '#f9fafb',
-          bodyColor: '#d1d5db',
-          padding: 10,
-          cornerRadius: 8,
-          callbacks: { label: ctx => '  ' + (formatter === 'currency' ? formatCurrency(ctx.parsed.x) : formatNum(ctx.parsed.x, 2)) }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: gridColor, drawBorder: false },
-          border: { dash: [4, 4], display: false },
-          ticks: { color: mutedColor, font: { size: 11 }, callback: v => formatter === 'currency' ? formatCurrency(v) : formatNum(v, 0) }
-        },
-        y: {
-          grid: { display: false },
-          ticks: { color: textColor, font: { size: 12 } }
-        }
-      }
+function destroyCharts(){
+  Object.keys(charts).forEach(key => {
+    if (charts[key]) {
+      charts[key].destroy();
+      charts[key] = null;
     }
   });
 }
-function drawBucketChart(canvasEl, items){
-  if (_charts[canvasEl.id]) { _charts[canvasEl.id].destroy(); delete _charts[canvasEl.id]; }
-  if (!items.length) return;
-  const textColor  = _getCssVar('--text',  '#1f2937');
-  const mutedColor = _getCssVar('--muted', '#6b7280');
-  const gridColor  = _getCssVar('--line',  '#e5e7eb');
-  const colors = [
-    _getCssVar('--bad',  '#dc2626'),
-    _getCssVar('--warn', '#d97706'),
-    _getCssVar('--ok',   '#059669'),
-    _getCssVar('--info', '#3b82f6'),
-  ];
-  _charts[canvasEl.id] = new Chart(canvasEl, {
-    type: 'bar',
-    data: {
-      labels: items.map(x => x.label),
-      datasets: [{ data: items.map(x => x.value), backgroundColor: items.map((_, i) => colors[i % colors.length]), borderRadius: 8, borderSkipped: false, barPercentage: 0.6 }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 400, easing: 'easeOutQuart' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1f2937',
-          titleColor: '#f9fafb',
-          bodyColor: '#d1d5db',
-          padding: 10,
-          cornerRadius: 8,
-          callbacks: { label: ctx => '  ' + ctx.parsed.y + ' requests' }
-        }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: textColor, font: { size: 13, weight: '600' } }
-        },
-        y: {
-          grid: { color: gridColor, drawBorder: false },
-          border: { dash: [4, 4], display: false },
-          ticks: { color: mutedColor, font: { size: 11 }, stepSize: 1, precision: 0 }
-        }
-      }
-    }
-  });
+function drawCanvasFallback(canvas, message){
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const colors = chartColorMap();
+  const w = canvas.width || 560;
+  const h = canvas.height || 280;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = colors.muted;
+  ctx.font = '14px Inter, Arial, sans-serif';
+  ctx.fillText(message, 16, 30);
 }
 function renderCharts(){
   const open = state.jobs.filter(j => j.status !== 'paid').sort((a,b) => safeNumber(b.priority_score) - safeNumber(a.priority_score));
-  const css = getComputedStyle(document.documentElement);
-  const accent = (css.getPropertyValue('--accent') || '').trim() || '#111827';
-  const info = (css.getPropertyValue('--info') || '').trim() || '#1d4ed8';
-  drawBarChart(dom.chartPriority, open.slice(0,8).map(x => ({...x, color:accent})), 'priority_score', 'title', 'number');
+  const colors = chartColorMap();
+  destroyCharts();
+
+  if (typeof window.Chart === 'undefined') {
+    drawCanvasFallback(dom.chartPriority, 'Chart.js unavailable. Check internet/CDN access.');
+    drawCanvasFallback(dom.chartAmountByAsset, 'Chart.js unavailable. Check internet/CDN access.');
+    drawCanvasFallback(dom.chartBuckets, 'Chart.js unavailable. Check internet/CDN access.');
+    return;
+  }
+
+  Chart.defaults.color = colors.muted;
+  Chart.defaults.borderColor = colors.border;
+
+  const topExposure = [...open].sort((a,b) => safeNumber(b.total_exposure_day) - safeNumber(a.total_exposure_day)).slice(0, 10);
+  charts.priority = new Chart(dom.chartPriority.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: topExposure.map(j => (j.title || 'Untitled').slice(0, 28)),
+      datasets: [{
+        label: 'Exposure/day (EUR)',
+        data: topExposure.map(j => safeNumber(j.total_exposure_day)),
+        backgroundColor: topExposure.map(j => priorityColor(j.priority_class, colors)),
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const j = topExposure[ctx.dataIndex] || {};
+              return `${formatCurrency(j.total_exposure_day)} | Score ${formatNum(j.priority_score,2)} | ${j.priority_class || 'Normal'}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Daily exposure (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } },
+        y: { ticks: { color: colors.text } }
+      }
+    }
+  });
+
   const byAsset = Object.values(open.reduce((acc, job) => {
     const key = job.asset_folder || 'Unknown';
-    acc[key] = acc[key] || {label:key, exposure:0, color:info};
+    acc[key] = acc[key] || {label:key, exposure:0, amount:0};
     acc[key].exposure += safeNumber(job.total_exposure_day);
+    acc[key].amount += safeNumber(job.request_amount);
     return acc;
   }, {})).sort((a,b) => b.exposure - a.exposure).slice(0,8);
-  drawBarChart(dom.chartAmountByAsset, byAsset, 'exposure', 'label', 'currency');
-  const buckets = [
-    {label:'Mandatory', value:open.filter(j => j.priority_class === 'Mandatory').length},
-    {label:'Pay soon', value:open.filter(j => j.priority_class === 'Pay soon').length},
-    {label:'Normal', value:open.filter(j => j.priority_class === 'Normal').length},
-    {label:'Paid', value:state.jobs.filter(j => j.status === 'paid').length},
-  ];
-  drawBucketChart(dom.chartBuckets, buckets);
+  charts.amountByAsset = new Chart(dom.chartAmountByAsset.getContext('2d'), {
+    data: {
+      labels: byAsset.map(x => x.label.slice(0, 24)),
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Exposure/day',
+          data: byAsset.map(x => x.exposure),
+          yAxisID: 'yExposure',
+          backgroundColor: colors.info,
+          borderRadius: 8,
+        },
+        {
+          type: 'line',
+          label: 'Request amount',
+          data: byAsset.map(x => x.amount),
+          yAxisID: 'yAmount',
+          borderColor: colors.accent,
+          backgroundColor: colors.accent,
+          pointRadius: 3,
+          tension: 0.25,
+        }
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: {
+        yExposure: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: 'Exposure/day (EUR)' },
+          ticks: { callback: (v) => formatCurrency(v) }
+        },
+        yAmount: {
+          type: 'linear',
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: 'Request amount (EUR)' },
+          ticks: { callback: (v) => formatCurrency(v) }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}`
+          }
+        }
+      }
+    }
+  });
+
+  const bubble = open.filter(j => Number.isFinite(j.payback_days) && safeNumber(j.payback_days) > 0).map(j => ({
+    x: safeNumber(j.payback_days),
+    y: safeNumber(j.total_exposure_day),
+    r: Math.max(4, Math.min(16, Math.sqrt(Math.max(0, safeNumber(j.request_amount))) / 18)),
+    _job: j,
+  }));
+  charts.buckets = new Chart(dom.chartBuckets.getContext('2d'), {
+    type: 'bubble',
+    data: {
+      datasets: [{
+        label: 'Requests',
+        data: bubble,
+        backgroundColor: bubble.map(p => priorityColor(p._job.priority_class, colors) + 'AA'),
+        borderColor: bubble.map(p => priorityColor(p._job.priority_class, colors)),
+        borderWidth: 1.5,
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => items?.length ? (items[0].raw?._job?.title || 'Request') : 'Request',
+            label: (ctx) => {
+              const j = ctx.raw?._job || {};
+              return `Payback ${formatDays(j.payback_days)} | Exposure/day ${formatCurrency(j.total_exposure_day)} | Amount ${formatCurrency(j.request_amount)}`;
+            },
+            afterLabel: (ctx) => {
+              const j = ctx.raw?._job || {};
+              return `${j.priority_class || 'Normal'} | Score ${formatNum(j.priority_score,2)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Simple payback (days)' } },
+        y: { title: { display: true, text: 'Daily exposure (EUR)' }, ticks: { callback: (v) => formatCurrency(v) } }
+      }
+    }
+  });
 }
 function renderAll(){
   refreshVirtualAssetsFromJobs();
@@ -1222,8 +1288,64 @@ async function readFolderJson(name, optional=false){
     throw err;
   }
 }
-async function loadWorkingFolderFromHandle(handle, source='manual'){
-  state.folderHandle = handle;
+function getApprovalConfig(role){
+  return state.config?.approvals?.[role] || DEFAULT_CONFIG.approvals[role] || { label: role, keyword: '' };
+}
+function requestApproval(job, role){
+  const prereq = { tech: [], econ: ['tech'], director: ['tech','econ'] };
+  const missing = (prereq[role] || []).filter(name => !job?.approvals?.[name]?.approved);
+  if (missing.length) {
+    setStatus(`Complete ${missing.join(' and ')} approval first.`, 'alert');
+    return false;
+  }
+  if (job?.approvals?.[role]?.approved) {
+    setStatus(`${getApprovalConfig(role).label} already recorded.`, 'note');
+    return false;
+  }
+  const cfg = getApprovalConfig(role);
+  const entered = window.prompt(`Enter ${cfg.label} keyword`);
+  if (entered == null) return false;
+  if (String(entered) !== String(cfg.keyword || '')) {
+    setStatus(`Wrong keyword for ${cfg.label}.`, 'alert');
+    return false;
+  }
+  job.approvals = normalizeApprovals(job.approvals);
+  job.approvals[role].approved = true;
+  job.approvals[role].approved_at = nowIso();
+  job.updated_at = nowIso();
+  setStatus(`${cfg.label} recorded for ${job.title}.`, 'good');
+  renderAll();
+  autosaveJobs();
+  return true;
+}
+
+async function idbSet(key, value){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('sch_ppb', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('kv');
+    req.onsuccess = () => {
+      const tx = req.result.transaction('kv', 'readwrite');
+      tx.objectStore('kv').put(value, key);
+      tx.oncomplete = () => { req.result.close(); resolve(); };
+      tx.onerror = () => { req.result.close(); reject(tx.error); };
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbGet(key){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('sch_ppb', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('kv');
+    req.onsuccess = () => {
+      const tx = req.result.transaction('kv', 'readonly');
+      const r = tx.objectStore('kv').get(key);
+      r.onsuccess = () => { req.result.close(); resolve(r.result); };
+      r.onerror = () => { req.result.close(); reject(r.error); };
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+async function loadFromFolderHandle(){
   const assets = await readFolderJson('assets_master.json');
   const companies = await readFolderJson('company_master.json');
   const assetTypes = await readFolderJson('asset_types.json');
@@ -1242,8 +1364,8 @@ async function loadWorkingFolderFromHandle(handle, source='manual'){
   state.loaded.jobs = !!jobs;
   state.loaded.contractors = !!contractors;
   state.loaded.legalTypes = !!legal;
-  const prefix = source === 'restored' ? 'Restored working folder' : 'Loaded working folder';
-  setStatus(jobs ? `${prefix} ${state.folderHandle.name} and existing ${JOBS_FILENAME}.` : `${prefix} ${state.folderHandle.name}. No jobs file existed yet. It will be created on first save.`, 'good');
+  setStatus(jobs ? `Loaded working folder ${state.folderHandle.name} and existing ${JOBS_FILENAME}.` : `Loaded working folder ${state.folderHandle.name}. No jobs file existed yet. It will be created on first save.`, 'good');
+  await idbSet('folderHandle', state.folderHandle).catch(() => {});
   clearForm();
   renderAll();
 }
@@ -1253,26 +1375,26 @@ async function openWorkingFolder(){
     return;
   }
   try {
-    const handle = await window.showDirectoryPicker();
-    await writeStoredHandle(handle).catch(() => null);
-    await loadWorkingFolderFromHandle(handle, 'manual');
+    state.folderHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    await loadFromFolderHandle();
   } catch (err) {
-    setStatus('Could not open working folder: ' + err.message, 'alert');
+    if (err.name !== 'AbortError') setStatus('Could not open working folder: ' + err.message, 'alert');
   }
 }
-async function restoreWorkingFolder(){
-  if (!window.showDirectoryPicker) return false;
+async function tryAutoLoadFolder(){
   try {
-    const handle = await readStoredHandle();
-    if (!handle) return false;
-    const allowed = await hasFolderPermission(handle, 'read');
-    if (!allowed) return false;
-    await loadWorkingFolderFromHandle(handle, 'restored');
-    return true;
-  } catch (err) {
-    await clearStoredHandle().catch(() => null);
-    return false;
-  }
+    const handle = await idbGet('folderHandle');
+    if (!handle) return;
+    setStatus('Reconnecting to last working folder…', 'note');
+    updateStatusChips();
+    const perm = await handle.requestPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      setStatus('Permission denied for saved folder. Click “Open working folder” to reconnect.', 'alert');
+      return;
+    }
+    state.folderHandle = handle;
+    await loadFromFolderHandle();
+  } catch(e) { /* silent — manual load still available */ }
 }
 function addOrUpdateRequest(mode){
   const data = getFormData();
@@ -1291,10 +1413,11 @@ function addOrUpdateRequest(mode){
     const idx = state.jobs.findIndex(j => j.id === state.selectedJobId);
     if (idx < 0) { setStatus('Select a request from the table first.', 'alert'); return; }
     const existing = state.jobs[idx];
-    state.jobs[idx] = {...existing, ...base, paid_at: null};
-    setStatus(`Updated request ${existing.title}.`, 'good');
+    const approvals = approvalChanged(existing, data) ? approvalDefaults() : normalizeApprovals(existing.approvals);
+    state.jobs[idx] = {...existing, ...base, approvals, paid_at: null};
+    setStatus(approvalChanged(existing, data) ? `Updated request ${existing.title}. Approvals were reset because key fields changed.` : `Updated request ${existing.title}.`, 'good');
   } else {
-    state.jobs.push({ id: uid(), created_at: nowIso(), paid_at: null, ...base });
+    state.jobs.push({ id: uid(), created_at: nowIso(), paid_at: null, approvals: approvalDefaults(), ...base });
     setStatus(`Added request ${data.title} to ranking.`, 'good');
   }
   state.selectedJobId = null;
@@ -1309,10 +1432,14 @@ function handleTableClick(ev){
     const action = btn.dataset.action;
     const job = state.jobs.find(j => j.id === id);
     if (!job) return;
-    if (action === 'select') {
-      fillFormFromJob(job);
-      setStatus(`Loaded ${job.title} into the form.`, 'note');
+    if (action === 'approve-tech') {
+      requestApproval(job, 'tech');
+    } else if (action === 'approve-econ') {
+      requestApproval(job, 'econ');
+    } else if (action === 'approve-director') {
+      requestApproval(job, 'director');
     } else if (action === 'pay') {
+      if (!approvalsComplete(job)) { setStatus('All three approvals are required before marking a request as paid.', 'alert'); return; }
       job.status = 'paid';
       job.paid_at = nowIso();
       state.selectedJobId = null;
@@ -1344,10 +1471,10 @@ function handleTableClick(ev){
 }
 function exportOpenCsv(){
   const open = state.jobs.filter(j => j.status !== 'paid').sort((a,b) => safeNumber(a.rank,9999) - safeNumber(b.rank,9999));
-  const header = ['rank','title','description','asset_folder','company_name','request_amount_eur','production_effect_pct','business_critical','lost_kwh_day','lost_revenue_day','total_exposure_day','security_risk','hse_risk','payback_days','efficiency_ratio_30d','priority_score','priority_class','priority_reason','created_at','updated_at'];
+  const header = ['rank','title','description','asset_folder','company_name','request_amount_eur','production_effect_pct','business_critical','tech_approved','econ_approved','director_approved','lost_kwh_day','lost_revenue_day','total_exposure_day','security_risk','hse_risk','payback_days','efficiency_ratio_30d','priority_score','priority_class','priority_reason','created_at','updated_at'];
   const lines = [header.join(',')];
   open.forEach(j => {
-    const row = [j.rank, j.title, j.description, j.asset_folder, j.company_name, j.request_amount, j.production_effect_pct, j.business_critical ? 'yes' : 'no', j.lost_kwh_day, j.lost_revenue_day, j.total_exposure_day, j.security_risk, j.hse_risk, j.payback_days, j.efficiency_ratio_30d, j.priority_score, j.priority_class, j.priority_reason, j.created_at, j.updated_at]
+    const row = [j.rank, j.title, j.description, j.asset_folder, j.company_name, j.request_amount, j.production_effect_pct, j.business_critical ? 'yes' : 'no', j.approvals?.tech?.approved ? 'yes' : 'no', j.approvals?.econ?.approved ? 'yes' : 'no', j.approvals?.director?.approved ? 'yes' : 'no', j.lost_kwh_day, j.lost_revenue_day, j.total_exposure_day, j.security_risk, j.hse_risk, j.payback_days, j.efficiency_ratio_30d, j.priority_score, j.priority_class, j.priority_reason, j.created_at, j.updated_at]
       .map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"');
     lines.push(row.join(','));
   });
@@ -1398,7 +1525,7 @@ function initDefaults(){
   dom.liveMetrics.innerHTML = '<div class="card"><div class="small">Waiting for data</div><div class="metric">-</div></div>';
   ['secLikelihood','secImpact','hseLikelihood','hseImpact'].forEach(id => dom[id].innerHTML = '<option value="">Load config first</option>');
 }
-async function init(){
+function init(){
   setDomRefs();
   bindEvents();
   initDefaults();
@@ -1406,9 +1533,9 @@ async function init(){
   renderTables();
   renderCharts();
   updateStatusChips();
-  await restoreWorkingFolder();
+  tryAutoLoadFolder();
 }
-init().catch(err => setStatus('Initialization failed: ' + err.message, 'alert'));
+init();
 
 </script>
 </body>
