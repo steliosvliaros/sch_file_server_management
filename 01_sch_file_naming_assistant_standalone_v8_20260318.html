@@ -208,11 +208,13 @@
 
           <div>
             <label for="date">Date</label>
-            <input id="date" value="20260315" />
+            <input id="date" type="date" value="2026-03-15" />
+            <div class="hint">Select from calendar. Output token in filename is YYYYMMDD.</div>
           </div>
           <div>
             <label for="version">Version</label>
-            <input id="version" value="v01" />
+            <input id="version" type="number" min="0" step="1" value="1" inputmode="numeric" />
+            <div class="hint">Numbers only. Filename format is v00 (for example 1 -> v01).</div>
           </div>
           <div>
             <label for="status">Status</label>
@@ -330,6 +332,7 @@
     const HANDLE_DB_NAME = 'sch-folder-handles';
     const HANDLE_STORE_NAME = 'settings';
     const HANDLE_KEY = 'file-naming-assistant-working-folder';
+    let handleDbPromise = null;
 
     const finStemCatalog = [
       { greek: 'ΤΠΥ', stem: 'service-invoice' },
@@ -361,6 +364,14 @@
       els.statusBadge.textContent = message;
     }
 
+    function debounce(fn, wait = 140) {
+      let timer = null;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), wait);
+      };
+    }
+
     function fillSelect(select, entries, labelFn, valueFn) {
       select.innerHTML = entries.map((entry, idx) => {
         const value = valueFn ? valueFn(entry, idx) : (typeof entry === 'string' ? entry : entry.value ?? idx);
@@ -370,7 +381,24 @@
     }
 
     function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+      return String(str ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+    }
+
+    function isObject(value) {
+      return !!value && typeof value === 'object' && !Array.isArray(value);
+    }
+
+    function assertPolicyShape(obj) {
+      if (!isObject(obj)) throw new Error('policy.json must be a JSON object.');
+      if (!isObject(obj.core)) throw new Error('policy.json missing core section.');
+      if (!isObject(obj.core.enums)) throw new Error('policy.json missing core.enums section.');
+      if (!isObject(obj.core.workstreams)) throw new Error('policy.json missing core.workstreams section.');
+      if (!isObject(obj.core.doc_type_catalog)) throw new Error('policy.json missing core.doc_type_catalog section.');
+      if (!Array.isArray(obj.core.enums.statuses)) throw new Error('policy.json core.enums.statuses must be an array.');
+      if (!Array.isArray(obj.core.enums.deliverable_stages)) throw new Error('policy.json core.enums.deliverable_stages must be an array.');
+      if (!isObject(obj.routing) || !isObject(obj.routing.route_registry)) throw new Error('policy.json missing routing.route_registry section.');
+      if (!isObject(obj.core.folder_index)) throw new Error('policy.json missing core.folder_index section.');
+      if (!isObject(obj.core.constraints)) throw new Error('policy.json missing core.constraints section.');
     }
 
     function normalizeText(value) {
@@ -706,8 +734,11 @@
       els.finSpecific.value = finSpecificRaw;
       const finSpecific = normalizeFinSpecific(finSpecificRaw);
       const description = buildDescription(docType, els.description.value, els.counterparty.value, els.otherCounterparty.value, finStem, finSpecificRaw);
-      const date = (els.date.value || '').replace(/[^0-9]/g, '');
-      const version = els.version.value.trim();
+      const dateRaw = (els.date.value || '').trim();
+      const date = dateRaw.replace(/-/g, '');
+      const versionRaw = String(els.version.value || '').trim();
+      const versionNum = /^\d+$/.test(versionRaw) ? Number(versionRaw) : NaN;
+      const version = Number.isFinite(versionNum) && versionNum >= 0 ? `v${String(versionNum).padStart(2, '0')}` : '';
       const status = els.status.value;
 
       const issues = [];
@@ -719,8 +750,10 @@
       if (!phase) issues.push('Missing phase');
       if (!docType) issues.push('Missing doc type');
       if (!description) issues.push('Missing description');
-      if (!date || date.length !== 8) issues.push('Date should be YYYYMMDD');
-      if (!version || !/^v\d\d$/i.test(version)) issues.push('Version should look like v01');
+      if (!dateRaw) issues.push('Date is required (choose from calendar)');
+      else if (!/^\d{8}$/.test(date)) issues.push('Date should resolve to YYYYMMDD');
+      if (!/^\d+$/.test(versionRaw)) issues.push('Version must be numeric only');
+      if (!version) issues.push('Version could not be formatted as v00');
       if (!status) issues.push('Missing status');
       if ((docType === 'DRWTEC' || docType === 'SDYTEC') && !stage) issues.push('Missing deliverable stage');
       if ((docType === 'FIN' || docType === 'CNT') && !normalizeCounterparty(els.counterparty.value)) issues.push('Missing counterparty');
@@ -757,10 +790,12 @@
       } else {
         const limits = state.policy.core.constraints;
         const depth = fullPath.split('/').filter(Boolean).length;
-        els.validation.innerHTML = `
-          <div>• Filename length: ${filename.length}/${limits.max_filename_chars}</div>
-          <div>• Full path length: ${fullPath.length}/${limits.max_full_path_chars}</div>
-          <div>• Path depth: ${depth}/${limits.max_depth_segments}</div>`;
+        const validationLines = [
+          `Filename length: ${filename.length}/${limits.max_filename_chars}`,
+          `Full path length: ${fullPath.length}/${limits.max_full_path_chars}`,
+          `Path depth: ${depth}/${limits.max_depth_segments}`
+        ];
+        els.validation.innerHTML = validationLines.map(line => `<div>• ${escapeHtml(line)}</div>`).join('');
       }
     }
 
@@ -777,8 +812,8 @@
       els.finStem.value = 'service-invoice';
       els.finSpecific.value = '123';
       els.description.value = 'design-invoice';
-      els.date.value = '20260315';
-      els.version.value = 'v01';
+      els.date.value = '2026-03-15';
+      els.version.value = '1';
       els.forceReview.value = 'no';
       updateConditionalFields();
       if (els.status.options.length) els.status.value = 'FINAL';
@@ -816,20 +851,30 @@
 
     async function readJsonFile(file) {
       const text = await file.text();
-      return JSON.parse(text);
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error(`Invalid JSON in ${file?.name || 'file'}: ${err.message}`);
+      }
     }
 
     function openHandleDb() {
       if (!window.indexedDB) return Promise.resolve(null);
-      return new Promise((resolve, reject) => {
+      if (handleDbPromise) return handleDbPromise;
+      handleDbPromise = new Promise((resolve, reject) => {
         const request = indexedDB.open(HANDLE_DB_NAME, 1);
         request.onupgradeneeded = () => {
           const db = request.result;
           if (!db.objectStoreNames.contains(HANDLE_STORE_NAME)) db.createObjectStore(HANDLE_STORE_NAME);
         };
-        request.onsuccess = () => resolve(request.result);
+        request.onsuccess = () => {
+          const db = request.result;
+          db.onversionchange = () => { db.close(); handleDbPromise = null; };
+          resolve(db);
+        };
         request.onerror = () => reject(request.error || new Error('Could not open IndexedDB.'));
       });
+      return handleDbPromise;
     }
 
     async function readStoredHandle() {
@@ -840,7 +885,7 @@
         const request = tx.objectStore(HANDLE_STORE_NAME).get(HANDLE_KEY);
         request.onsuccess = () => resolve(request.result || null);
         request.onerror = () => reject(request.error || new Error('Could not read stored folder handle.'));
-      }).finally(() => db.close());
+      });
     }
 
     async function writeStoredHandle(handle) {
@@ -851,7 +896,7 @@
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error || new Error('Could not store folder handle.'));
         tx.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
-      }).finally(() => db.close());
+      });
     }
 
     async function clearStoredHandle() {
@@ -862,7 +907,7 @@
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error || new Error('Could not clear stored folder handle.'));
         tx.objectStore(HANDLE_STORE_NAME).delete(HANDLE_KEY);
-      }).finally(() => db.close());
+      });
     }
 
     async function hasDirectoryPermission(handle, mode='read') {
@@ -877,6 +922,7 @@
     }
 
     function loadPolicyObject(obj) {
+      assertPolicyShape(obj);
       state.policy = obj;
       fillSelect(els.workstream, Object.entries(obj.core.workstreams), ([code, ws]) => `${code} — ${ws.root_folder.name}`, ([code]) => code);
       fillSelect(els.phase, Object.entries(obj.core.enums.phases), ([code, label]) => `${code} — ${label}`, ([code]) => code);
@@ -890,28 +936,36 @@
     }
 
     function loadCompaniesObject(obj) {
+      if (!isObject(obj) || (!Array.isArray(obj?.companies) && !Array.isArray(obj))) throw new Error('company_master.json must contain a companies array.');
       state.companies = Array.isArray(obj?.companies) ? obj.companies : [];
       refreshCompanySelect();
     }
 
     function loadAssetsObject(obj) {
+      if (!isObject(obj) || (!Array.isArray(obj?.assets) && !Array.isArray(obj))) throw new Error('assets_master.json must contain an assets array.');
       state.assets = Array.isArray(obj?.assets) ? obj.assets : [];
       refreshAssetSelect();
     }
 
     function loadContractorsObject(obj) {
+      if (!isObject(obj) && !Array.isArray(obj)) throw new Error('contractors_master.json must contain a contractors array.');
       state.contractors = Array.isArray(obj?.contractors) ? obj.contractors : [];
       populateCounterpartySelects();
     }
 
     async function loadWorkingFolderFromHandle(dirHandle, source='manual') {
       state.directoryHandle = dirHandle;
-      const [policyObj, companyObj, assetsObj, contractorsObj] = await Promise.all([
+      const [policyObj, companyObj, assetsObj] = await Promise.all([
         readJsonFromHandle(dirHandle, 'policy.json'),
         readJsonFromHandle(dirHandle, 'company_master.json'),
-        readJsonFromHandle(dirHandle, 'assets_master.json'),
-        readJsonFromHandle(dirHandle, 'contractors_master.json')
+        readJsonFromHandle(dirHandle, 'assets_master.json')
       ]);
+      let contractorsObj = { contractors: [] };
+      try {
+        contractorsObj = await readJsonFromHandle(dirHandle, 'contractors_master.json');
+      } catch (_) {
+        contractorsObj = { contractors: [] };
+      }
       loadPolicyObject(policyObj);
       loadCompaniesObject(companyObj);
       loadAssetsObject(assetsObj);
@@ -919,7 +973,8 @@
       if (state.companies.length) els.companySelect.value = state.companies[0].company_id || '';
       refreshAssetSelect();
       resetDefaults();
-      setStatus(source === 'restored' ? 'Restored last working folder automatically.' : 'Loaded policy.json, company_master.json, and assets_master.json from the selected folder.', 'ok');
+      const contractorNotice = state.contractors.length ? '' : ' contractors_master.json not found; counterparty lists are empty.';
+      setStatus((source === 'restored' ? 'Restored last working folder automatically.' : 'Loaded policy.json, company_master.json, and assets_master.json from the selected folder.') + contractorNotice, 'ok');
     }
 
     async function openWorkingFolder() {
@@ -957,16 +1012,22 @@
         return;
       }
       try {
-        const [policyResp, companyResp, assetsResp, contractorsResp] = await Promise.all([
+        const [policyResp, companyResp, assetsResp] = await Promise.all([
           fetch('./policy.json', { cache: 'no-store' }),
           fetch('./company_master.json', { cache: 'no-store' }),
-          fetch('./assets_master.json', { cache: 'no-store' }),
-          fetch('./contractors_master.json', { cache: 'no-store' })
+          fetch('./assets_master.json', { cache: 'no-store' })
         ]);
-        if (!policyResp.ok || !companyResp.ok || !assetsResp.ok || !contractorsResp.ok) {
-          throw new Error('One or more JSON files were not found next to the HTML file.');
+        if (!policyResp.ok || !companyResp.ok || !assetsResp.ok) {
+          throw new Error('policy.json, company_master.json, or assets_master.json was not found next to the HTML file.');
         }
-        const [policyObj, companyObj, assetsObj, contractorsObj] = await Promise.all([policyResp.json(), companyResp.json(), assetsResp.json(), contractorsResp.json()]);
+        let contractorsObj = { contractors: [] };
+        try {
+          const contractorsResp = await fetch('./contractors_master.json', { cache: 'no-store' });
+          if (contractorsResp.ok) contractorsObj = await contractorsResp.json();
+        } catch (_) {
+          contractorsObj = { contractors: [] };
+        }
+        const [policyObj, companyObj, assetsObj] = await Promise.all([policyResp.json(), companyResp.json(), assetsResp.json()]);
         loadPolicyObject(policyObj);
         loadCompaniesObject(companyObj);
         loadAssetsObject(assetsObj);
@@ -974,7 +1035,8 @@
         if (state.companies.length) els.companySelect.value = state.companies[0].company_id || '';
         refreshAssetSelect();
         resetDefaults();
-        setStatus('Auto-loaded JSON files from the same folder.', 'ok');
+        const contractorNotice = state.contractors.length ? '' : ' contractors_master.json not found; counterparty lists are empty.';
+        setStatus('Auto-loaded JSON files from the same folder.' + contractorNotice, 'ok');
       } catch (err) {
         setStatus(`Auto-load failed: ${err.message}`, 'bad');
       }
@@ -1009,12 +1071,13 @@
     els.counterparty.addEventListener('change', generate);
     els.otherCounterparty.addEventListener('change', generate);
     els.finStem.addEventListener('change', generate);
-    els.finSpecific.addEventListener('input', generate);
-    els.description.addEventListener('input', generate);
-    els.date.addEventListener('input', generate);
-    els.version.addEventListener('input', generate);
+    const debouncedGenerate = debounce(generate, 140);
+    els.finSpecific.addEventListener('input', debouncedGenerate);
+    els.description.addEventListener('input', debouncedGenerate);
+    els.date.addEventListener('input', debouncedGenerate);
+    els.version.addEventListener('input', debouncedGenerate);
     els.status.addEventListener('change', generate);
-    els.ext.addEventListener('input', generate);
+    els.ext.addEventListener('input', debouncedGenerate);
     els.forceReview.addEventListener('change', generate);
 
     els.openFolderBtn.addEventListener('click', openWorkingFolder);

@@ -307,6 +307,10 @@
       currentAssetIndex: -1,
       currentContractorIndex: -1,
     };
+    const lookupCache = {
+      assetTypeMap: null,
+      companyMap: null,
+    };
 
     const $ = id => document.getElementById(id);
     const companyEls = {
@@ -320,6 +324,13 @@
     };
 
     function setStatus(text, cls='warnb') { const el=$('statusBadge'); el.textContent=text; el.className=`badge ${cls}`; }
+    function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function debounce(fn, wait=150) { let t=null; return (...args) => { clearTimeout(t); t=setTimeout(() => fn(...args), wait); }; }
+    function invalidateLookupCaches(options={}) {
+      const { assetTypes=true, companies=true } = options;
+      if (assetTypes) lookupCache.assetTypeMap = null;
+      if (companies) lookupCache.companyMap = null;
+    }
     function slug(value) { return String(value||'').normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9\s\-_]/g,'').trim().replace(/[_\s]+/g,'-').replace(/-+/g,'-').replace(/^[-_]+|[-_]+$/g,''); }
     function normalizeNamecode(value,fallback='') { return String(value||fallback||'').replace(/[^A-Za-z]/g,'').toUpperCase().slice(0,6); }
     function normalizeProjectName(value) { return slug(value).toLowerCase().replace(/-+/g,'-').replace(/^-+|-+$/g,''); }
@@ -340,11 +351,18 @@
     function buildCompanyFolder(namecode,typ3,vat9) { return `${normalizeNamecode(namecode)}-${String(typ3||'').toUpperCase()}-${padVat(vat9)}`; }
     function buildAssetFolder(typeid,projectName,location) { return `${typeid}_${normalizeProjectName(projectName)}_${normalizeLocation(location)}`; }
     function nextRecordId(items,prefix,key) { let max=0; (items||[]).forEach(item=>{ const m=String(item?.[key]||'').toUpperCase().match(new RegExp(`^${prefix}-(\\d+)$`)); if(m) max=Math.max(max,Number(m[1])); }); return `${prefix}-${String(max+1).padStart(4,'0')}`; }
-    function assetTypeMap() { return Object.fromEntries((state.assetTypes.asset_types||[]).map(x=>[x.type_code,x])); }
-    function companyById(id) { return (state.companies.companies||[]).find(c=>c.company_id===id) || null; }
+    function assetTypeMap() {
+      if (!lookupCache.assetTypeMap) lookupCache.assetTypeMap = Object.fromEntries((state.assetTypes.asset_types||[]).map(x=>[x.type_code,x]));
+      return lookupCache.assetTypeMap;
+    }
+    function companyMap() {
+      if (!lookupCache.companyMap) lookupCache.companyMap = new Map((state.companies.companies||[]).map(c => [c.company_id, c]));
+      return lookupCache.companyMap;
+    }
+    function companyById(id) { return companyMap().get(id) || null; }
     function computeMetric(typeCode,inputValue,inputUnit) { const rule=assetTypeMap()[typeCode]; const n=Number(inputValue); if(!rule||!Number.isFinite(n)) return ''; const mult=Number((rule.input_to_base_multiplier||{})[inputUnit]); if(!Number.isFinite(mult)) return ''; const total=Math.round(n*mult); const left=Math.floor(total/1000); const right=total%1000; return `${String(left).padStart(2,'0')}p${String(right).padStart(3,'0')}`; }
     function buildTypeId(typeCode,metric,ss) { return `${String(typeCode||'').toUpperCase()}${metric}-${padSs(ss)}`; }
-    function fillSelect(selectEl, options, formatter) { selectEl.innerHTML = options.map(opt => { const value = typeof opt==='string' ? opt : opt.value; const label = formatter ? formatter(opt) : (typeof opt==='string' ? opt : opt.label); return `<option value="${value}">${label}</option>`; }).join(''); }
+    function fillSelect(selectEl, options, formatter) { selectEl.innerHTML = options.map(opt => { const value = typeof opt==='string' ? opt : opt.value; const label = formatter ? formatter(opt) : (typeof opt==='string' ? opt : opt.label); return `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`; }).join(''); }
 
     function refreshReferenceDropdowns() {
       fillSelect(companyEls.typ3, (state.legalTypes.legal_types||[]).map(row=>({ value:row.typ3, label:`${row.typ3} — ${row.label}` })));
@@ -366,7 +384,7 @@
     }
     function refreshCompanySelect(preferredIndex = state.currentCompanyIndex) {
       const rows = (state.companies.companies||[]).map((row,index)=>({ row, index }));
-      companyEls.select.innerHTML = rows.length ? rows.map(({row,index})=>`<option value="${index}">${row.company_id} — ${row.display_name}</option>`).join('') : '<option value="">No companies</option>';
+      companyEls.select.innerHTML = rows.length ? rows.map(({row,index})=>`<option value="${index}">${escapeHtml(row.company_id)} — ${escapeHtml(row.display_name)}</option>`).join('') : '<option value="">No companies</option>';
       if (!rows.length) return null;
       const selected = rows.some(x => x.index === preferredIndex) ? preferredIndex : rows[0].index;
       companyEls.select.value = String(selected);
@@ -374,7 +392,7 @@
     }
     function refreshAssetSelect(preferredIndex = state.currentAssetIndex) {
       const rows = (state.assets.assets||[]).map((row,index)=>({ row, index }));
-      assetEls.select.innerHTML = rows.length ? rows.map(({row,index})=>`<option value="${index}">${row.asset_id} — ${row.typeid || '(no TYPEID yet)'}</option>`).join('') : '<option value="">No assets</option>';
+      assetEls.select.innerHTML = rows.length ? rows.map(({row,index})=>`<option value="${index}">${escapeHtml(row.asset_id)} — ${escapeHtml(row.typeid || '(no TYPEID yet)')}</option>`).join('') : '<option value="">No assets</option>';
       if (!rows.length) return null;
       const selected = rows.some(x => x.index === preferredIndex) ? preferredIndex : rows[0].index;
       assetEls.select.value = String(selected);
@@ -382,16 +400,44 @@
     }
     function refreshContractorSelect(preferredIndex = state.currentContractorIndex) {
       const rows = (state.contractors.contractors||[]).map((row,index)=>({ row, index }));
-      contractorEls.select.innerHTML = rows.length ? rows.map(({row,index})=>`<option value="${index}">${row.contractor_id || ''} — ${row.display_name || row.canonical_name || ''}</option>`).join('') : '<option value="">No contractors</option>';
+      contractorEls.select.innerHTML = rows.length ? rows.map(({row,index})=>`<option value="${index}">${escapeHtml(row.contractor_id || '')} — ${escapeHtml(row.display_name || row.canonical_name || '')}</option>`).join('') : '<option value="">No contractors</option>';
       if (!rows.length) return null;
       const selected = rows.some(x => x.index === preferredIndex) ? preferredIndex : rows[0].index;
       contractorEls.select.value = String(selected);
       return selected;
     }
-    function renderTables() {
-      $('companiesTable').innerHTML = getFilteredCompanies().map(({row})=>`<tr><td>${row.company_id}</td><td>${row.display_name}</td><td class="mono">${normalizeAbsoluteRootPath(row.absolute_company_root_path||row.company_root_path||'')}</td><td class="mono">${row.company_folder||''}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
-      $('assetsTable').innerHTML = getFilteredAssets().map(({row})=>`<tr><td>${row.asset_id}</td><td class="mono">${row.typeid||''}</td><td>${row.company_id||''}</td><td class="mono">${row.asset_folder||''}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
-      $('contractorsTable').innerHTML = getFilteredContractors().map(({row})=>`<tr><td>${row.contractor_id}</td><td>${row.display_name||''}</td><td class="mono">${row.canonical_name||''}</td><td>${(row.aliases||[]).join('; ')}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+    function renderCompaniesTable() {
+      $('companiesTable').innerHTML = getFilteredCompanies().map(({row})=>`<tr><td>${escapeHtml(row.company_id)}</td><td>${escapeHtml(row.display_name)}</td><td class="mono">${escapeHtml(normalizeAbsoluteRootPath(row.absolute_company_root_path||row.company_root_path||''))}</td><td class="mono">${escapeHtml(row.company_folder||'')}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+    }
+    function renderAssetsTable() {
+      $('assetsTable').innerHTML = getFilteredAssets().map(({row})=>`<tr><td>${escapeHtml(row.asset_id)}</td><td class="mono">${escapeHtml(row.typeid||'')}</td><td>${escapeHtml(row.company_id||'')}</td><td class="mono">${escapeHtml(row.asset_folder||'')}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+    }
+    function renderContractorsTable() {
+      $('contractorsTable').innerHTML = getFilteredContractors().map(({row})=>`<tr><td>${escapeHtml(row.contractor_id)}</td><td>${escapeHtml(row.display_name||'')}</td><td class="mono">${escapeHtml(row.canonical_name||'')}</td><td>${escapeHtml((row.aliases||[]).join('; '))}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+    }
+    function renderTables(scope='all') {
+      if (scope === 'all' || scope === 'companies') renderCompaniesTable();
+      if (scope === 'all' || scope === 'assets') renderAssetsTable();
+      if (scope === 'all' || scope === 'contractors') renderContractorsTable();
+    }
+    function syncUi(options={}) {
+      if (options.refs) refreshReferenceDropdowns();
+      if (options.companySelectIndex !== undefined) refreshCompanySelect(options.companySelectIndex);
+      if (options.assetSelectIndex !== undefined) refreshAssetSelect(options.assetSelectIndex);
+      if (options.contractorSelectIndex !== undefined) refreshContractorSelect(options.contractorSelectIndex);
+      renderTables(options.tableScope || 'all');
+      if (options.companyFormIndex !== undefined) {
+        if (state.companies.companies.length) loadCompanyForm(options.companyFormIndex);
+        else newCompany();
+      }
+      if (options.assetFormIndex !== undefined) {
+        if (state.assets.assets.length) loadAssetForm(options.assetFormIndex);
+        else newAsset();
+      }
+      if (options.contractorFormIndex !== undefined) {
+        if (state.contractors.contractors.length) loadContractorForm(options.contractorFormIndex);
+        else newContractor();
+      }
     }
 
     function computeCompanyDerivedFields() {
@@ -419,7 +465,7 @@
       const units=rule ? rule.allowed_input_units : [];
       fillSelect(assetEls.inputUnit, units);
       if (units.length && !units.includes(assetEls.inputUnit.value)) assetEls.inputUnit.value = units[0];
-      $('assetRuleSummary').innerHTML = rule ? `<div><strong>${rule.label}</strong> — characteristic: ${rule.characteristic}</div><div>Allowed units: ${rule.allowed_input_units.join(', ')}</div><div>Metric rule: ${rule.metric_rule}</div><div>Example: <span class="mono">${rule.example}</span></div>` : 'No asset type selected.';
+      $('assetRuleSummary').innerHTML = rule ? `<div><strong>${escapeHtml(rule.label)}</strong> — characteristic: ${escapeHtml(rule.characteristic)}</div><div>Allowed units: ${escapeHtml(rule.allowed_input_units.join(', '))}</div><div>Metric rule: ${escapeHtml(rule.metric_rule)}</div><div>Example: <span class="mono">${escapeHtml(rule.example)}</span></div>` : 'No asset type selected.';
       computeAssetDerivedFields();
     }
 
@@ -520,81 +566,126 @@
         setStatus('absolute_company_root_path is required', 'bad');
         return false;
       }
+      if (!companyEls.displayName.value.trim()) {
+        setStatus('display_name is required', 'bad');
+        return false;
+      }
+      const duplicateCompany = (state.companies.companies || []).some((row, idx) => idx !== state.currentCompanyIndex && String(row.company_id) === String(companyEls.id.value));
+      if (duplicateCompany) {
+        setStatus('company_id must be unique', 'bad');
+        return false;
+      }
       const row = { company_id:companyEls.id.value, display_name:companyEls.displayName.value.trim() || companyEls.namecode.value, absolute_company_root_path:companyEls.absoluteRootPath.value, namecode:companyEls.namecode.value, typ3:companyEls.typ3.value, vat9:companyEls.vat9.value, company_folder:companyEls.folder.value, is_active:companyEls.active.value==='true', notes:companyEls.notes.value.trim() };
       if (state.currentCompanyIndex >= 0) state.companies.companies[state.currentCompanyIndex] = row; else { state.companies.companies.push(row); state.currentCompanyIndex = state.companies.companies.length - 1; }
+      invalidateLookupCaches({ companies:true, assetTypes:false });
       state.companies.schema.generated_at = new Date().toISOString();
-      refreshCompanySelect(); refreshReferenceDropdowns(); renderTables(); loadCompanyForm(state.currentCompanyIndex); setStatus('Company saved', 'ok');
+      syncUi({ refs:true, companySelectIndex:state.currentCompanyIndex, tableScope:'companies', companyFormIndex:state.currentCompanyIndex });
+      renderTables('assets');
       return true;
     }
     function saveAssetRecord() {
       computeAssetDerivedFields({ applyProjectName:true });
+      if (!assetEls.company.value) {
+        setStatus('company_id is required for assets', 'bad');
+        return false;
+      }
+      if (!assetEls.type.value) {
+        setStatus('type is required for assets', 'bad');
+        return false;
+      }
+      if (!assetEls.typeid.value || !assetEls.folder.value) {
+        setStatus('asset TYPEID and folder must be generated before save', 'bad');
+        return false;
+      }
+      const duplicateAsset = (state.assets.assets || []).some((row, idx) => idx !== state.currentAssetIndex && String(row.asset_id) === String(assetEls.id.value));
+      if (duplicateAsset) {
+        setStatus('asset_id must be unique', 'bad');
+        return false;
+      }
       const company = companyById(assetEls.company.value);
       const row = { asset_id:assetEls.id.value, company_id:assetEls.company.value, company_folder:company ? company.company_folder : '', absolute_company_root_path:company ? (company.absolute_company_root_path || '') : '', type:assetEls.type.value, input_value:assetEls.inputValue.value === '' ? '' : Number(assetEls.inputValue.value), input_unit:assetEls.inputUnit.value, metric:assetEls.metric.value, ss:assetEls.ss.value, typeid:assetEls.typeid.value, project_name:assetEls.projectName.value, location:assetEls.location.value, asset_folder:assetEls.folder.value, lifecycle_status:assetEls.lifecycleStatus.value, is_active:assetEls.active.value==='true', notes:assetEls.notes.value.trim() };
       if (state.currentAssetIndex >= 0) state.assets.assets[state.currentAssetIndex] = row; else { state.assets.assets.push(row); state.currentAssetIndex = state.assets.assets.length - 1; }
       state.assets.schema.generated_at = new Date().toISOString();
-      refreshAssetSelect(); renderTables(); loadAssetForm(state.currentAssetIndex); setStatus('Asset saved', 'ok');
+      syncUi({ assetSelectIndex:state.currentAssetIndex, tableScope:'assets', assetFormIndex:state.currentAssetIndex });
+      setStatus('Asset saved', 'ok');
+      return true;
     }
     function saveContractorRecord() {
       computeContractorDerivedFields();
       const row = { contractor_id:contractorEls.id.value, display_name:contractorEls.displayName.value.trim() || contractorEls.canonicalName.value, canonical_name:contractorEls.canonicalName.value, aliases:splitAliases(contractorEls.aliases.value).map(x=>normalizeContractorName(x)).filter(Boolean), is_active:contractorEls.active.value==='true', notes:contractorEls.notes.value.trim() };
       if (!row.canonical_name) { setStatus('canonical_name is required', 'bad'); return false; }
+      const duplicateContractor = (state.contractors.contractors || []).some((item, idx) => idx !== state.currentContractorIndex && String(item.contractor_id) === String(row.contractor_id));
+      if (duplicateContractor) { setStatus('contractor_id must be unique', 'bad'); return false; }
       if (state.currentContractorIndex >= 0) state.contractors.contractors[state.currentContractorIndex] = row; else { state.contractors.contractors.push(row); state.currentContractorIndex = state.contractors.contractors.length - 1; }
       state.contractors.schema.generated_at = new Date().toISOString();
-      refreshContractorSelect(); renderTables(); loadContractorForm(state.currentContractorIndex); setStatus('Contractor saved', 'ok');
+      syncUi({ contractorSelectIndex:state.currentContractorIndex, tableScope:'contractors', contractorFormIndex:state.currentContractorIndex });
+      setStatus('Contractor saved', 'ok');
       return true;
     }
     function deleteCurrentCompany() {
       if (state.currentCompanyIndex < 0) return;
       const companyId = state.companies.companies[state.currentCompanyIndex]?.company_id;
+      const affectedAssets = (state.assets.assets || []).filter(a => a.company_id === companyId).length;
+      if (!window.confirm(`Delete company ${companyId || ''}? This will also delete ${affectedAssets} linked assets.`)) return;
       state.companies.companies.splice(state.currentCompanyIndex,1);
       state.assets.assets = (state.assets.assets||[]).filter(a => a.company_id !== companyId);
-      refreshCompanySelect(); refreshAssetSelect(); refreshReferenceDropdowns(); renderTables();
-      if (state.companies.companies.length) loadCompanyForm(0); else newCompany();
-      if (state.assets.assets.length) loadAssetForm(0); else newAsset();
+      invalidateLookupCaches({ companies:true, assetTypes:false });
+      syncUi({ refs:true, companySelectIndex:0, assetSelectIndex:0, tableScope:'all', companyFormIndex:0, assetFormIndex:0 });
       setStatus('Company deleted', 'ok');
     }
     function deleteCurrentAsset() {
       if (state.currentAssetIndex < 0) return;
       state.assets.assets.splice(state.currentAssetIndex,1);
-      refreshAssetSelect(); renderTables();
-      if (state.assets.assets.length) loadAssetForm(0); else newAsset();
+      syncUi({ assetSelectIndex:0, tableScope:'assets', assetFormIndex:0 });
       setStatus('Asset deleted', 'ok');
     }
     function deleteCurrentContractor() {
       if (state.currentContractorIndex < 0) return;
       state.contractors.contractors.splice(state.currentContractorIndex,1);
-      refreshContractorSelect(); renderTables();
-      if (state.contractors.contractors.length) loadContractorForm(0); else newContractor();
+      syncUi({ contractorSelectIndex:0, tableScope:'contractors', contractorFormIndex:0 });
       setStatus('Contractor deleted', 'ok');
     }
 
-    function applyCompanySearch() {
-      renderTables();
-    }
-    function applyAssetSearch() {
-      renderTables();
-    }
-    function applyContractorSearch() {
-      renderTables();
-    }
+    const debouncedCompanySearch = debounce(() => renderTables('companies'));
+    const debouncedAssetSearch = debounce(() => renderTables('assets'));
+    const debouncedContractorSearch = debounce(() => renderTables('contractors'));
+    function applyCompanySearch() { debouncedCompanySearch(); }
+    function applyAssetSearch() { debouncedAssetSearch(); }
+    function applyContractorSearch() { debouncedContractorSearch(); }
 
     const HANDLE_DB_NAME = 'sch-folder-handles';
     const HANDLE_STORE_NAME = 'settings';
     const HANDLE_KEY = 'company-assets-admin-working-folder';
+    let handleDbPromise = null;
 
-    async function readJsonFileFromDirectory(dirHandle, filename) { const handle = await dirHandle.getFileHandle(filename); const file = await handle.getFile(); return JSON.parse(await file.text()); }
+    async function readJsonFileFromDirectory(dirHandle, filename) {
+      const handle = await dirHandle.getFileHandle(filename);
+      const file = await handle.getFile();
+      const text = await file.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error(`Invalid JSON in ${filename}: ${err.message}`);
+      }
+    }
     async function writeJsonFileToDirectory(dirHandle, filename, data) { const handle = await dirHandle.getFileHandle(filename, { create:true }); const writable = await handle.createWritable(); await writable.write(JSON.stringify(data, null, 2) + "\n"); await writable.close(); }
     function openHandleDb() {
       if (!window.indexedDB) return Promise.resolve(null);
-      return new Promise((resolve, reject) => {
+      if (handleDbPromise) return handleDbPromise;
+      handleDbPromise = new Promise((resolve, reject) => {
         const request = indexedDB.open(HANDLE_DB_NAME, 1);
         request.onupgradeneeded = () => {
           const db = request.result;
           if (!db.objectStoreNames.contains(HANDLE_STORE_NAME)) db.createObjectStore(HANDLE_STORE_NAME);
         };
-        request.onsuccess = () => resolve(request.result);
+        request.onsuccess = () => {
+          const db = request.result;
+          db.onversionchange = () => { db.close(); handleDbPromise = null; };
+          resolve(db);
+        };
         request.onerror = () => reject(request.error || new Error('Could not open IndexedDB.'));
       });
+      return handleDbPromise;
     }
     async function readStoredHandle() {
       const db = await openHandleDb();
@@ -604,7 +695,7 @@
         const request = tx.objectStore(HANDLE_STORE_NAME).get(HANDLE_KEY);
         request.onsuccess = () => resolve(request.result || null);
         request.onerror = () => reject(request.error || new Error('Could not read stored folder handle.'));
-      }).finally(() => db.close());
+      });
     }
     async function writeStoredHandle(handle) {
       const db = await openHandleDb();
@@ -614,7 +705,7 @@
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error || new Error('Could not store folder handle.'));
         tx.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
-      }).finally(() => db.close());
+      });
     }
     async function clearStoredHandle() {
       const db = await openHandleDb();
@@ -624,7 +715,7 @@
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error || new Error('Could not clear stored folder handle.'));
         tx.objectStore(HANDLE_STORE_NAME).delete(HANDLE_KEY);
-      }).finally(() => db.close());
+      });
     }
     async function hasDirectoryPermission(handle, mode='read') {
       if (!handle || !handle.queryPermission) return false;
@@ -643,27 +734,45 @@
     async function loadAllFromCurrentFolder() {
       if (!state.directoryHandle) return;
       try {
-        state.legalTypes = await readJsonFileFromDirectory(state.directoryHandle, 'legal_types.json');
-        state.assetTypes = await readJsonFileFromDirectory(state.directoryHandle, 'asset_types.json');
-        state.companies = await readJsonFileFromDirectory(state.directoryHandle, 'company_master.json');
-        state.assets = await readJsonFileFromDirectory(state.directoryHandle, 'assets_master.json');
-        try { state.contractors = await readJsonFileFromDirectory(state.directoryHandle, 'contractors_master.json'); }
-        catch (_) { state.contractors = { schema:{ generated_at:new Date().toISOString() }, contractors:[] }; }
-        if (!state.companies.companies) state.companies.companies = [];
-        if (!state.assets.assets) state.assets.assets = [];
-        if (!state.contractors.contractors) state.contractors.contractors = [];
-        state.companies.companies = state.companies.companies.map(row => ({
+        const [legalTypes, assetTypes, companies, assets] = await Promise.all([
+          readJsonFileFromDirectory(state.directoryHandle, 'legal_types.json'),
+          readJsonFileFromDirectory(state.directoryHandle, 'asset_types.json'),
+          readJsonFileFromDirectory(state.directoryHandle, 'company_master.json'),
+          readJsonFileFromDirectory(state.directoryHandle, 'assets_master.json'),
+        ]);
+        let contractors;
+        try { contractors = await readJsonFileFromDirectory(state.directoryHandle, 'contractors_master.json'); }
+        catch (_) { contractors = { schema:{ generated_at:new Date().toISOString() }, contractors:[] }; }
+
+        const nextCompanies = {
+          schema: companies?.schema || { generated_at:new Date().toISOString() },
+          companies: Array.isArray(companies?.companies) ? companies.companies : []
+        };
+        const nextAssets = {
+          schema: assets?.schema || { generated_at:new Date().toISOString() },
+          assets: Array.isArray(assets?.assets) ? assets.assets : []
+        };
+        const nextContractors = {
+          schema: contractors?.schema || { generated_at:new Date().toISOString() },
+          contractors: Array.isArray(contractors?.contractors) ? contractors.contractors : []
+        };
+        nextCompanies.companies = nextCompanies.companies.map(row => ({
           ...row,
           absolute_company_root_path: normalizeAbsoluteRootPath(row.absolute_company_root_path || row.company_root_path || '')
         }));
-        state.assets.assets = state.assets.assets.map(row => ({
+        nextAssets.assets = nextAssets.assets.map(row => ({
           ...row,
           absolute_company_root_path: normalizeAbsoluteRootPath(row.absolute_company_root_path || '')
         }));
-        refreshReferenceDropdowns(); refreshCompanySelect(); refreshAssetSelect(); refreshContractorSelect(); renderTables();
-        if (state.companies.companies.length) loadCompanyForm(0); else newCompany();
-        if (state.assets.assets.length) loadAssetForm(0); else newAsset();
-        if (state.contractors.contractors.length) loadContractorForm(0); else newContractor();
+
+        state.legalTypes = legalTypes;
+        state.assetTypes = assetTypes;
+        state.companies = nextCompanies;
+        state.assets = nextAssets;
+        state.contractors = nextContractors;
+        invalidateLookupCaches();
+
+        syncUi({ refs:true, companySelectIndex:0, assetSelectIndex:0, contractorSelectIndex:0, tableScope:'all', companyFormIndex:0, assetFormIndex:0, contractorFormIndex:0 });
         setStatus('Working folder loaded', 'ok');
       } catch (err) {
         setStatus(`Load failed: ${err.message}`, 'bad');
@@ -710,7 +819,7 @@
     $('saveCompanyBtn').addEventListener('click', async ()=>{ if (saveCompanyRecord()) await saveJsonFilesToCurrentFolder('companies'); });
     $('deleteCompanyBtn').addEventListener('click', async ()=>{ deleteCurrentCompany(); await saveJsonFilesToCurrentFolder('all'); });
     $('newAssetBtn').addEventListener('click', newAsset);
-    $('saveAssetBtn').addEventListener('click', async ()=>{ saveAssetRecord(); await saveJsonFilesToCurrentFolder('assets'); });
+    $('saveAssetBtn').addEventListener('click', async ()=>{ if (saveAssetRecord()) await saveJsonFilesToCurrentFolder('assets'); });
     $('deleteAssetBtn').addEventListener('click', async ()=>{ deleteCurrentAsset(); await saveJsonFilesToCurrentFolder('assets'); });
     $('newContractorBtn').addEventListener('click', newContractor);
     $('saveContractorBtn').addEventListener('click', async ()=>{ if (saveContractorRecord()) await saveJsonFilesToCurrentFolder('contractors'); });
