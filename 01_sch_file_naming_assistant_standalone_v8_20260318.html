@@ -158,7 +158,7 @@
           </div>
           <div>
             <label for="ext">Extension</label>
-            <input id="ext" value="pdf" />
+              <select id="ext"></select>
           </div>
 
           <div>
@@ -357,6 +357,11 @@
       { greek: 'Εγγυητική', stem: 'guarantee' },
       { greek: 'Φορολογικό αρχείο', stem: 'tax-statutory-record' },
       { greek: 'Κοστολογική αναφορά', stem: 'cost-report' }
+    ];
+
+    const knownExtensions = [
+      'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx',
+      'md', 'txt', 'zip', 'rar', '7z', 'dwg', 'dxf', 'jpg', 'jpeg', 'png'
     ];
 
     function setStatus(message, cls = 'info') {
@@ -1077,7 +1082,7 @@
     els.date.addEventListener('input', debouncedGenerate);
     els.version.addEventListener('input', debouncedGenerate);
     els.status.addEventListener('change', generate);
-    els.ext.addEventListener('input', debouncedGenerate);
+    els.ext.addEventListener('change', generate);
     els.forceReview.addEventListener('change', generate);
 
     els.openFolderBtn.addEventListener('click', openWorkingFolder);
@@ -1104,6 +1109,8 @@
       els.counterparty.innerHTML = '<option value="">Load contractors_master.json</option>';
       els.otherCounterparty.innerHTML = '<option value="">Load contractors_master.json</option>';
       els.finStem.innerHTML = '<option value="">Load policy.json</option>';
+      fillSelect(els.ext, knownExtensions, value => value.toUpperCase(), value => value);
+      els.ext.value = 'pdf';
       els.workstream.innerHTML = '<option value="">Load policy.json</option>';
       els.phase.innerHTML = '<option value="">Load policy.json</option>';
       els.docType.innerHTML = '<option value="">Load policy.json</option>';
