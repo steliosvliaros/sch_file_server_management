@@ -1,11 +1,12 @@
 {
   "schema": {
-    "version": "1.0",
-    "generated_at": "2026-03-17T07:08:31.095Z",
+    "version": "1.1",
+    "generated_at": "2026-03-26T00:00:00Z",
     "source_files": [
-      "00_company_master.xlsx"
+      "00_company_master.xlsx",
+      "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx"
     ],
-    "notes": "Imported from company master workbook. typ3 values are normalized to SCH policy codes. absolute_company_root_path set for all companies to shared root \\\\192.168.200.4\\Files."
+    "notes": "Imported from company master workbook. typ3 values are normalized to SCH policy codes. absolute_company_root_path set for all companies to shared root \\\\192.168.200.4\\Files. Added provisional third-party owner companies from the SCH operations asset workbook for externally owned assets managed by SCH under O_M_only scope."
   },
   "companies": [
     {
@@ -1102,6 +1103,133 @@
       "company_folder": "NSPCON-ΜΑΕ-801169966",
       "is_active": true,
       "notes": "DEPA related company"
+    },
+    {
+      "company_id": "CMP-0074",
+      "display_name": "ILIATR",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "namecode": "ILIATR",
+      "typ3": "MIK",
+      "vat9": "998571296",
+      "company_folder": "ILIATR-MIK-998571296",
+      "is_active": true,
+      "relationship_to_group": "THIRD_PARTY",
+      "record_status": "PROVISIONAL",
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=ILIATR-MIK-998571296.",
+      "source_type_std": "MIK",
+      "source_company_folder": "ILIATR-MIK-998571296",
+      "validation_errors": [],
+      "source_row": 81
+    },
+    {
+      "company_id": "CMP-0075",
+      "display_name": "YPRION",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "namecode": "YPRION",
+      "typ3": "IKE",
+      "vat9": "801305631",
+      "company_folder": "YPRION-IKE-801305631",
+      "is_active": true,
+      "relationship_to_group": "THIRD_PARTY",
+      "record_status": "PROVISIONAL",
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=YPRION-IKE-801305631.",
+      "source_type_std": "IKE",
+      "source_company_folder": "YPRION-IKE-801305631",
+      "validation_errors": [],
+      "source_row": 82
+    },
+    {
+      "company_id": "CMP-0076",
+      "display_name": "ROMEIK",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "namecode": "ROMEIK",
+      "typ3": "OTH",
+      "vat9": "106780106",
+      "company_folder": "ROMEIK-OTH-106780106",
+      "is_active": true,
+      "relationship_to_group": "THIRD_PARTY",
+      "record_status": "PROVISIONAL",
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=ROMEIK-AT-106780106.",
+      "source_type_std": "AT",
+      "source_company_folder": "ROMEIK-AT-106780106",
+      "validation_errors": [
+        "unknown_source_legal_type:AT"
+      ],
+      "source_row": 87
+    },
+    {
+      "company_id": "CMP-0077",
+      "display_name": "ROMEIK",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "namecode": "ROMEIK",
+      "typ3": "OTH",
+      "vat9": "106774658",
+      "company_folder": "ROMEIK-OTH-106774658",
+      "is_active": true,
+      "relationship_to_group": "THIRD_PARTY",
+      "record_status": "PROVISIONAL",
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=ROMEIK-ANA-106774658.",
+      "source_type_std": "ANA",
+      "source_company_folder": "ROMEIK-ANA-106774658",
+      "validation_errors": [
+        "unknown_source_legal_type:ANA"
+      ],
+      "source_row": 88
+    },
+    {
+      "company_id": "CMP-0078",
+      "display_name": "OIXVVD",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "namecode": "OIXVVD",
+      "typ3": "AEE",
+      "vat9": "998646502",
+      "company_folder": "OIXVVD-AEE-998646502",
+      "is_active": true,
+      "relationship_to_group": "THIRD_PARTY",
+      "record_status": "PROVISIONAL",
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=OIXVVD-AE-998646502.",
+      "source_type_std": "AE",
+      "source_company_folder": "OIXVVD-AE-998646502",
+      "validation_errors": [
+        "shared_vat_across_multiple_source_company_codes:998646502"
+      ],
+      "source_row": 93
+    },
+    {
+      "company_id": "CMP-0079",
+      "display_name": "OIXGDP",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "namecode": "OIXGDP",
+      "typ3": "AEE",
+      "vat9": "998808335",
+      "company_folder": "OIXGDP-AEE-998808335",
+      "is_active": true,
+      "relationship_to_group": "THIRD_PARTY",
+      "record_status": "PROVISIONAL",
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=OIXGDP-AE-998646502. Corrected to 998808335",
+      "source_type_std": "AE",
+      "source_company_folder": "OIXGDP-AE-998808335",
+      "validation_errors": [
+        "shared_vat_across_multiple_source_company_codes:998646502"
+      ],
+      "source_row": 94
+    },
+    {
+      "company_id": "CMP-0080",
+      "display_name": "DIAPLS",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "namecode": "DIAPLS",
+      "typ3": "AEE",
+      "vat9": "998103102",
+      "company_folder": "DIAPLS-AEE-998103102",
+      "is_active": true,
+      "relationship_to_group": "THIRD_PARTY",
+      "record_status": "PROVISIONAL",
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=DIAPLS-AE-998103102.",
+      "source_type_std": "AE",
+      "source_company_folder": "DIAPLS-AE-998103102",
+      "validation_errors": [],
+      "source_row": 100
     }
   ]
 }
