@@ -257,6 +257,15 @@ type_catalog:
     - kWh
     metric_encoding: convert to kWh, then encode as XXpYYY
     example: 12.5 MWh -> 12p500
+  OFC:
+    label: Office
+    characteristic: floor_area
+    base_unit: m2
+    allowed_input_units:
+    - m2
+    - ha
+    metric_encoding: convert to m2, then encode as XXpYYY
+    example: 7000 m2 -> 07p000
   OTH:
     label: Other
     characteristic: user_defined
