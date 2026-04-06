@@ -295,15 +295,74 @@ def build_assets_master(master: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def build_asset_types(master: Dict[str, Any]) -> Dict[str, Any]:
+    type_catalog = master.get("type_catalog", {}) or {}
+    base_unit_multipliers = {
+        "MW": {"display_unit": "MW", "base_value_unit": "kW", "input_to_base_multiplier": {"MW": 1000, "kW": 1, "kWp": 1}},
+        "m2": {"display_unit": "m2", "base_value_unit": "m2", "input_to_base_multiplier": {"m2": 1, "ha": 10000}},
+        "tpy": {"display_unit": "tpy", "base_value_unit": "tpy", "input_to_base_multiplier": {"tpy": 1}},
+        "beds": {"display_unit": "beds", "base_value_unit": "beds", "input_to_base_multiplier": {"beds": 1}},
+        "kg_day": {"display_unit": "kg/day", "base_value_unit": "kg/day", "input_to_base_multiplier": {"kg/day": 1}},
+        "kWh": {"display_unit": "kWh", "base_value_unit": "kWh", "input_to_base_multiplier": {"MWh": 1000, "kWh": 1}},
+        "unit": {"display_unit": "unit", "base_value_unit": "unit", "input_to_base_multiplier": {"unit": 1}},
+    }
+    type_rows: List[Dict[str, Any]] = []
+    for type_code, entry in type_catalog.items():
+        base_unit = ensure_str(entry.get("base_unit"))
+        allowed_input_units = entry.get("allowed_input_units", [])
+        unit_config = base_unit_multipliers.get(base_unit, {
+            "display_unit": base_unit,
+            "base_value_unit": base_unit,
+            "input_to_base_multiplier": {unit: 1 for unit in (allowed_input_units or [base_unit])},
+        })
+        input_to_base_multiplier = {
+            unit: factor
+            for unit, factor in unit_config["input_to_base_multiplier"].items()
+            if unit in allowed_input_units
+        }
+        metric_rule = f"Convert input to integer {unit_config['base_value_unit']}, then metric = total//1000 as XX and total%1000 as YYY."
+        type_rows.append({
+            "type_code": type_code,
+            "label": ensure_str(entry.get("label")),
+            "characteristic": ensure_str(entry.get("characteristic")),
+            "display_unit": unit_config["display_unit"],
+            "base_value_unit": unit_config["base_value_unit"],
+            "allowed_input_units": allowed_input_units,
+            "input_to_base_multiplier": input_to_base_multiplier,
+            "metric_rule": metric_rule,
+            "example": ensure_str(entry.get("example")),
+        })
+    return {
+        "schema": {
+            "schema_id": "sch.fileserver.asset_types",
+            "schema_version": "1.0.0",
+            "generated_from": ensure_str(master.get("schema", {}).get("file_name", "master_policy.yaml")),
+            "generated_at": now_iso(),
+        },
+        "asset_types": type_rows,
+    }
+
+
 def write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def has_embedded_master_records(master: Dict[str, Any]) -> bool:
+    master_data = master.get("master_data", {}) or {}
+    return bool(
+        master_data.get("companies")
+        or master_data.get("assets")
+        or master.get("companies")
+        or master.get("assets")
+    )
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Export policy.json, company_master.json, and assets_master.json from master_policy.yaml")
+    parser = argparse.ArgumentParser(description="Export policy JSON, asset types, company master, and assets master from master_policy.yaml")
     parser.add_argument("master", nargs="?", default="/mnt/data/master_policy.yaml", help="Path to master_policy.yaml")
     parser.add_argument("--out-dir", default="/mnt/data", help="Output directory for JSON files")
     parser.add_argument("--policy-name", default="policy.json", help="Output filename for policy JSON")
+    parser.add_argument("--asset-types-name", default="asset_types.json", help="Output filename for asset types JSON")
     parser.add_argument("--company-name", default="company_master.json", help="Output filename for company master JSON")
     parser.add_argument("--assets-name", default="assets_master.json", help="Output filename for assets master JSON")
     args = parser.parse_args()
@@ -314,12 +373,25 @@ def main() -> None:
 
     master = load_yaml(master_path)
     write_json(out_dir / args.policy_name, build_policy_json(master))
-    write_json(out_dir / args.company_name, build_company_master(master))
-    write_json(out_dir / args.assets_name, build_assets_master(master))
+    write_json(out_dir / args.asset_types_name, build_asset_types(master))
+    wrote_company = False
+    wrote_assets = False
+    if has_embedded_master_records(master):
+        write_json(out_dir / args.company_name, build_company_master(master))
+        write_json(out_dir / args.assets_name, build_assets_master(master))
+        wrote_company = True
+        wrote_assets = True
 
     print(f"Wrote {out_dir / args.policy_name}")
-    print(f"Wrote {out_dir / args.company_name}")
-    print(f"Wrote {out_dir / args.assets_name}")
+    print(f"Wrote {out_dir / args.asset_types_name}")
+    if wrote_company:
+        print(f"Wrote {out_dir / args.company_name}")
+    else:
+        print(f"Skipped {out_dir / args.company_name} (no embedded company data in master policy)")
+    if wrote_assets:
+        print(f"Wrote {out_dir / args.assets_name}")
+    else:
+        print(f"Skipped {out_dir / args.assets_name} (no embedded asset data in master policy)")
 
 
 if __name__ == "__main__":

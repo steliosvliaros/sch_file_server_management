@@ -3,7 +3,7 @@
     "schema_id": "sch.fileserver.asset_types",
     "schema_version": "1.0.0",
     "generated_from": "master_policy.yaml",
-    "generated_at": "2026-03-15T15:39:54+00:00"
+    "generated_at": "2026-03-30T12:59:27+00:00"
   },
   "asset_types": [
     {
@@ -22,7 +22,7 @@
         "kW": 1,
         "kWp": 1
       },
-      "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.",
+      "metric_rule": "Convert input to integer kW, then metric = total//1000 as XX and total%1000 as YYY.",
       "example": "15.473 MW -> 15p473"
     },
     {
@@ -39,7 +39,7 @@
         "MW": 1000,
         "kW": 1
       },
-      "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.",
+      "metric_rule": "Convert input to integer kW, then metric = total//1000 as XX and total%1000 as YYY.",
       "example": "2.000 MW -> 02p000"
     },
     {
@@ -56,7 +56,7 @@
         "MW": 1000,
         "kW": 1
       },
-      "metric_rule": "Convert input to kW integer, then metric = total//1000 as XX and total%1000 as YYY.",
+      "metric_rule": "Convert input to integer kW, then metric = total//1000 as XX and total%1000 as YYY.",
       "example": "3.200 MW -> 03p200"
     },
     {
@@ -154,6 +154,23 @@
       "example": "12.5 MWh -> 12p500"
     },
     {
+      "type_code": "OFC",
+      "label": "Office",
+      "characteristic": "floor_area",
+      "display_unit": "m2",
+      "base_value_unit": "m2",
+      "allowed_input_units": [
+        "m2",
+        "ha"
+      ],
+      "input_to_base_multiplier": {
+        "m2": 1,
+        "ha": 10000
+      },
+      "metric_rule": "Convert input to integer m2, then metric = total//1000 as XX and total%1000 as YYY.",
+      "example": "7000 m2 -> 07p000"
+    },
+    {
       "type_code": "OTH",
       "label": "Other",
       "characteristic": "user_defined",
@@ -165,7 +182,7 @@
       "input_to_base_multiplier": {
         "unit": 1
       },
-      "metric_rule": "Convert input to integer units, then metric = total//1000 as XX and total%1000 as YYY.",
+      "metric_rule": "Convert input to integer unit, then metric = total//1000 as XX and total%1000 as YYY.",
       "example": "42 -> 00p042"
     }
   ]

@@ -137,6 +137,13 @@
       "value_per_kwh": 0.0,
       "notes": "Storage needs a different economic model than simple production-loss CF."
     },
+    "OFC": {
+      "label": "Office",
+      "calc_mode": "disabled",
+      "typical_cf": 0.0,
+      "value_per_kwh": 0.0,
+      "notes": "Floor-area assets need an area- or occupancy-based economic model before using loss calculations."
+    },
     "OTH": {
       "label": "Other",
       "calc_mode": "disabled",
@@ -148,6 +155,8 @@
   "approvals": {
     "enabled": true,
     "code_case_sensitive": false,
+    "notification_mode": "mailto",
+    "email_subject_prefix": "SCH Payment Priority",
     "keywords": {
       "tech": "change-me-tech",
       "econ": "change-me-econ",
@@ -158,6 +167,16 @@
       "econ": "Economic approval",
       "director": "Director approval"
     },
-    "notes": "Change the keywords before production use. This is workflow control, not strong security."
+    "emails": {
+      "tech": "technical5@schellas.gr",
+      "econ": "afrantzeskos@schellas.gr",
+      "director": "lpanagakos@schellas.gr"
+    },
+    "cc": {
+      "tech": "technical5@schellas.gr",
+      "econ": "technical5@schellas.gr",
+      "director": "technical5@schellas.gr"
+    },
+    "notes": "Set the approval emails to enable next-step mail drafts. In this standalone HTML app, mailto opens a draft in the local mail client; it does not send fully automatically."
   }
 }

@@ -3,32 +3,12 @@
     "schema_id": "sch.fileserver.assets_master",
     "schema_version": "1.2.0",
     "generated_from": "master_policy.yaml",
-    "generated_at": "2026-03-26T00:00:00Z",
+    "generated_at": "2026-03-30T13:08:45.251Z",
     "source_files": [
       "master_policy.yaml",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx",
       "company_master.json"
     ]
-  },
-  "fields": {
-    "asset_id": "Stable internal asset record id",
-    "company_id": "Foreign key to company_master.company_id",
-    "company_folder": "Canonical company root folder name",
-    "absolute_company_root_path": "Inherited from company master for full path validation",
-    "type": "3-letter project type",
-    "metric": "Encoded metric portion of TYPEID",
-    "ss": "2-digit collision sequence",
-    "typeid": "Canonical TYPEID",
-    "project_name": "Project name used in asset folder",
-    "location": "Location used in asset folder",
-    "asset_folder": "Canonical asset folder name",
-    "lifecycle_status": "Asset lifecycle state",
-    "is_active": "Whether asset is active for new filing",
-    "notes": "Free notes",
-    "input_value": "Original asset characteristic value in base unit",
-    "input_unit": "Base unit used to derive metric",
-    "management_scope": "Optional management scope; use O_M_only for third-party-owned assets operated by SCH",
-    "ownership_model": "Optional ownership/operator model metadata"
   },
   "assets": [
     {
@@ -808,7 +788,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 2.27,
       "input_unit": "MW",
@@ -826,7 +806,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 3.09,
       "input_unit": "MW",
@@ -844,7 +824,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 5,
       "input_unit": "MW",
@@ -862,7 +842,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 6.35,
       "input_unit": "MW",
@@ -880,7 +860,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 9.11,
       "input_unit": "MW",
@@ -898,7 +878,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 9.62,
       "input_unit": "MW",
@@ -916,7 +896,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.02,
       "input_unit": "MW",
@@ -934,7 +914,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.07,
       "input_unit": "MW",
@@ -952,7 +932,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.17,
       "input_unit": "MW",
@@ -970,7 +950,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.88,
       "input_unit": "MW",
@@ -988,7 +968,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 11,
       "input_unit": "MW",
@@ -1006,7 +986,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 12,
       "input_unit": "MW",
@@ -1024,7 +1004,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 13.85,
       "input_unit": "MW",
@@ -1042,7 +1022,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 14,
       "input_unit": "MW",
@@ -1060,7 +1040,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 16.67,
       "input_unit": "MW",
@@ -1078,7 +1058,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 19.96,
       "input_unit": "MW",
@@ -1096,7 +1076,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 43.43,
       "input_unit": "MW",
@@ -1114,7 +1094,7 @@
     {
       "company_id": "CMP-0073",
       "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "/192.168.200.4/Files",
+      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 50.68,
       "input_unit": "MW",
@@ -2276,6 +2256,24 @@
       "ownership_model": "third_party_owned_sch_operated",
       "is_active": true,
       "notes": "source_asset=PV00p500-00_ΔΙΑΠΛΑΣΗ_ΚΑΛΑΜΑΤΑ; source_company=DIAPLS-AE-998103102; source_operational_phase=Operation & Maintenance; source_ownership_status=Independent Operator (under contract/lease); source_type=PV; ownership_model=third_party_owned_sch_operated"
+    },
+    {
+      "asset_id": "AST-0125",
+      "company_id": "CMP-0032",
+      "company_folder": "RHIPSA-MIK-800907496",
+      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
+      "type": "OFC",
+      "input_value": 1533,
+      "input_unit": "m2",
+      "metric": "01p533",
+      "ss": "01",
+      "typeid": "OFC01p533-01",
+      "project_name": "kifisia-178",
+      "location": "MAROUSI",
+      "asset_folder": "OFC01p533-01_kifisia-178_MAROUSI",
+      "lifecycle_status": "active",
+      "is_active": true,
+      "notes": ""
     }
   ]
 }

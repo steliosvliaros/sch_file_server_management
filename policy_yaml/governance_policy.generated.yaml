@@ -176,6 +176,7 @@ exports_policy:
   - email_packs
   - portal_upload_sets
   - temporary_transmittal_bundles
+  cleanup_rule: Temporary export sets should be deleted after sending unless there is a specific operational reason to retain them.
 prohibited_patterns:
 - filing_master_records_directly_into_99_EXPORTS
 - creating_counterparty_subfolder_trees_under_workstreams

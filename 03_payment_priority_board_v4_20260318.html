@@ -432,9 +432,11 @@ const DEFAULT_CONFIG = {
     ],
   },
   approvals: {
-    tech: { label: 'Tech approval', keyword: 'change-me-tech' },
-    econ: { label: 'Econ approval', keyword: 'change-me-econ' },
-    director: { label: 'Director approval', keyword: 'change-me-director' },
+    notification_mode: 'mailto',
+    email_subject_prefix: 'SCH Payment Priority',
+    tech: { label: 'Tech approval', keyword: 'change-me-tech', email: '', cc: '' },
+    econ: { label: 'Econ approval', keyword: 'change-me-econ', email: '', cc: '' },
+    director: { label: 'Director approval', keyword: 'change-me-director', email: '', cc: '' },
   },
   type_economics: {},
 };
@@ -1306,7 +1308,104 @@ async function readFolderJson(name, optional=false){
   }
 }
 function getApprovalConfig(role){
-  return state.config?.approvals?.[role] || DEFAULT_CONFIG.approvals[role] || { label: role, keyword: '' };
+  const approvals = state.config?.approvals || {};
+  const fallback = DEFAULT_CONFIG.approvals[role] || { label: role, keyword: '', email: '', cc: '' };
+  const direct = approvals?.[role];
+  const labels = approvals?.labels || {};
+  const keywords = approvals?.keywords || {};
+  const emails = approvals?.emails || {};
+  const ccMap = approvals?.cc || {};
+  return {
+    ...fallback,
+    ...(direct && typeof direct === 'object' ? direct : {}),
+    label: direct?.label || labels?.[role] || fallback.label || role,
+    keyword: direct?.keyword || keywords?.[role] || fallback.keyword || '',
+    email: direct?.email || emails?.[role] || fallback.email || '',
+    cc: direct?.cc || ccMap?.[role] || fallback.cc || '',
+  };
+}
+function approvalKeywordMatches(entered, expected){
+  const caseSensitive = !!state.config?.approvals?.code_case_sensitive;
+  if (caseSensitive) return String(entered ?? '') === String(expected ?? '');
+  return String(entered ?? '').trim().toLowerCase() === String(expected ?? '').trim().toLowerCase();
+}
+function nextApprovalRole(role){
+  const chain = ['tech', 'econ', 'director'];
+  const idx = chain.indexOf(role);
+  return idx >= 0 && idx < chain.length - 1 ? chain[idx + 1] : null;
+}
+function buildNextApprovalMailto(job, approvedRole, nextRole){
+  const nextCfg = getApprovalConfig(nextRole);
+  if (!nextCfg.email) return null;
+  const approvedCfg = getApprovalConfig(approvedRole);
+  const subjectPrefix = state.config?.approvals?.email_subject_prefix || 'SCH Payment Priority';
+  const subject = `${subjectPrefix} - ${nextCfg.label} needed - ${job.title || 'Request'}`;
+  const body = [
+    'Hello,',
+    '',
+    `${approvedCfg.label} has been completed and your approval is now required.`,
+    '',
+    `Request: ${job.title || '-'}`,
+    `Asset: ${job.asset_folder || '-'}`,
+    `Company: ${job.company_name || '-'}`,
+    `Amount: ${formatCurrency(job.request_amount)}`,
+    `Priority: ${job.priority_class || '-'}`,
+    `Score: ${formatNum(job.priority_score,2)}`,
+    `Reason: ${job.priority_reason || '-'}`,
+    '',
+    'Please review this item in the SCH Payment Priority Board.',
+    '',
+    `Generated: ${new Date().toLocaleString()}`,
+  ].join('\n');
+  const params = new URLSearchParams();
+  params.set('subject', subject);
+  params.set('body', body);
+  if (nextCfg.cc) params.set('cc', nextCfg.cc);
+  return `mailto:${encodeURIComponent(nextCfg.email)}?${params.toString().replace(/\+/g, '%20')}`;
+}
+function rememberApprovalEmail(role, email){
+  const clean = String(email || '').trim();
+  if (!clean) return '';
+  if (!state.config.approvals || typeof state.config.approvals !== 'object') state.config.approvals = {};
+  if (!state.config.approvals[role] || typeof state.config.approvals[role] !== 'object') {
+    state.config.approvals[role] = { ...getApprovalConfig(role) };
+  }
+  state.config.approvals[role].email = clean;
+  return clean;
+}
+function notifyNextApprover(job, approvedRole){
+  const approvedCfg = getApprovalConfig(approvedRole);
+  const nextRole = nextApprovalRole(approvedRole);
+  if (!nextRole) {
+    setStatus(`${approvedCfg.label} recorded for ${job.title}. No further approval email is needed.`, 'good');
+    renderAll();
+    autosaveJobs();
+    return true;
+  }
+  const nextCfg = getApprovalConfig(nextRole);
+  let mailto = buildNextApprovalMailto(job, approvedRole, nextRole);
+  if (!mailto) {
+    const enteredEmail = window.prompt(`Enter email for ${nextCfg.label}`, nextCfg.email || '');
+    if (enteredEmail != null && String(enteredEmail).trim()) {
+      rememberApprovalEmail(nextRole, enteredEmail);
+      mailto = buildNextApprovalMailto(job, approvedRole, nextRole);
+    }
+  }
+  if (!mailto) {
+    setStatus(`${approvedCfg.label} recorded for ${job.title}. ${nextCfg.label} is next, but no email is configured.`, 'note');
+    renderAll();
+    autosaveJobs();
+    return true;
+  }
+  renderAll();
+  autosaveJobs();
+  try {
+    window.location.href = mailto;
+    setStatus(`${approvedCfg.label} recorded for ${job.title}. Email draft opened for ${nextCfg.label}.`, 'good');
+  } catch (err) {
+    setStatus(`${approvedCfg.label} recorded for ${job.title}, but the email draft could not be opened: ${err.message}`, 'alert');
+  }
+  return true;
 }
 function requestApproval(job, role){
   const prereq = { tech: [], econ: ['tech'], director: ['tech','econ'] };
@@ -1322,7 +1421,7 @@ function requestApproval(job, role){
     }
     const revokeEntered = window.prompt(`Enter ${cfg.label} keyword to revoke approval`);
     if (revokeEntered == null) return false;
-    if (String(revokeEntered) !== String(cfg.keyword || '')) {
+    if (!approvalKeywordMatches(revokeEntered, cfg.keyword || '')) {
       setStatus(`Wrong keyword for ${cfg.label}.`, 'alert');
       return false;
     }
@@ -1341,7 +1440,7 @@ function requestApproval(job, role){
   }
   const entered = window.prompt(`Enter ${cfg.label} keyword`);
   if (entered == null) return false;
-  if (String(entered) !== String(cfg.keyword || '')) {
+  if (!approvalKeywordMatches(entered, cfg.keyword || '')) {
     setStatus(`Wrong keyword for ${cfg.label}.`, 'alert');
     return false;
   }
@@ -1350,10 +1449,7 @@ function requestApproval(job, role){
   job.approvals[role].approved_at = approvedAt;
   job.approvals[role].last_approved_at = approvedAt;
   job.updated_at = approvedAt;
-  setStatus(`${cfg.label} recorded for ${job.title}.`, 'good');
-  renderAll();
-  autosaveJobs();
-  return true;
+  return notifyNextApprover(job, role);
 }
 
 async function idbSet(key, value){
