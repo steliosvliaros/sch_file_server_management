@@ -2,7 +2,7 @@
   "schema": {
     "id": "sch.payment-priority.jobs",
     "version": "2.0.0",
-    "generated_at": "2026-04-06T13:10:40.081Z",
+    "generated_at": "2026-04-06T13:20:28.922Z",
     "notes": "Live payment-priority queue using stable absolute scoring. Open items are ranked. Paid items remain in archive."
   },
   "jobs": [
@@ -83,7 +83,7 @@
       "id": "WB-0001",
       "status": "open",
       "created_at": "2026-02-22T00:00:00",
-      "updated_at": "2026-04-06T13:10:40.067Z",
+      "updated_at": "2026-04-06T13:20:28.907Z",
       "paid_at": null,
       "title": "Aitima gia tip blade",
       "description": "Exei ginei claim stin asfalistiki",
@@ -129,8 +129,8 @@
       },
       "approvals": {
         "tech": {
-          "approved": true,
-          "approved_at": "2026-04-06T13:10:40.067Z",
+          "approved": false,
+          "approved_at": null,
           "last_approved_at": "2026-04-06T13:10:40.067Z"
         },
         "econ": {
