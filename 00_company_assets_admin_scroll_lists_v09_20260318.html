@@ -145,16 +145,16 @@
 
         <div class="form-grid">
           <div>
+            <label for="assetCompany">Company</label>
+            <select id="assetCompany"></select>
+          </div>
+          <div>
             <label for="assetSelect">Asset record</label>
             <select id="assetSelect"></select>
           </div>
           <div>
             <label for="assetId">Asset ID</label>
             <input id="assetId" readonly />
-          </div>
-          <div>
-            <label for="assetCompany">Company</label>
-            <select id="assetCompany"></select>
           </div>
           <div>
             <label for="assetType">Type</label>
@@ -215,11 +215,11 @@
         <h2 style="margin-top:18px;">Asset list</h2>
         <div style="margin:8px 0 12px 0;">
           <label for="assetSearch">Search asset list</label>
-          <input id="assetSearch" placeholder="Filter asset list by ID, TYPEID, company, project, location" />
+          <input id="assetSearch" placeholder="Filter selected company assets by ID, TYPEID, project, location" />
         </div>
         <div class="list-scroll">
         <table>
-          <thead><tr><th>ID</th><th>TYPEID</th><th>Company</th><th>Asset folder</th><th>Active</th></tr></thead>
+          <thead><tr><th>ID</th><th>TYPEID</th><th>Company</th><th>Project</th><th>Location</th><th>Asset folder</th><th>Active</th></tr></thead>
           <tbody id="assetsTable"></tbody>
         </table>
         </div>
@@ -374,9 +374,15 @@
       const q = searchText(companyEls.search?.value);
       return (state.companies.companies||[]).map((row,index)=>({ row, index })).filter(({row}) => !q || [row.company_id, row.display_name, row.namecode, row.typ3, row.vat9, row.company_folder, row.absolute_company_root_path, row.notes].some(v => searchText(v).includes(q)));
     }
+    function getCurrentAssetCompanyId() {
+      return assetEls.company.value || state.companies.companies?.[state.currentCompanyIndex]?.company_id || '';
+    }
+    function getCompanyAssets(companyId = getCurrentAssetCompanyId()) {
+      return (state.assets.assets||[]).map((row,index)=>({ row, index })).filter(({row}) => !companyId || row.company_id === companyId);
+    }
     function getFilteredAssets() {
       const q = searchText(assetEls.search?.value);
-      return (state.assets.assets||[]).map((row,index)=>({ row, index })).filter(({row}) => !q || [row.asset_id, row.typeid, row.company_id, row.type, row.project_name, row.location, row.asset_folder, row.lifecycle_status, row.notes].some(v => searchText(v).includes(q)));
+      return getCompanyAssets().filter(({row}) => !q || [row.asset_id, row.typeid, row.company_id, companyById(row.company_id)?.display_name, row.type, row.project_name, row.location, row.asset_folder, row.lifecycle_status, row.notes].some(v => searchText(v).includes(q)));
     }
     function getFilteredContractors() {
       const q = searchText(contractorEls.search?.value);
@@ -391,11 +397,24 @@
       return selected;
     }
     function refreshAssetSelect(preferredIndex = state.currentAssetIndex) {
-      const rows = (state.assets.assets||[]).map((row,index)=>({ row, index }));
-      assetEls.select.innerHTML = rows.length ? rows.map(({row,index})=>`<option value="${index}">${escapeHtml(row.asset_id)} — ${escapeHtml(row.typeid || '(no TYPEID yet)')}</option>`).join('') : '<option value="">No assets</option>';
+      const rows = getCompanyAssets();
+      assetEls.select.innerHTML = rows.length
+        ? rows.map(({row,index})=>`<option value="${index}">${escapeHtml(row.typeid || row.asset_id || '(no TYPEID yet)')} — ${escapeHtml(row.project_name || '(no project name)')} — ${escapeHtml(row.location || '(no location)')}</option>`).join('')
+        : '<option value="">No assets for selected company</option>';
       if (!rows.length) return null;
       const selected = rows.some(x => x.index === preferredIndex) ? preferredIndex : rows[0].index;
       assetEls.select.value = String(selected);
+      return selected;
+    }
+    function handleAssetCompanyChange(preferredIndex = state.currentAssetIndex) {
+      const companyId = getCurrentAssetCompanyId();
+      const selected = refreshAssetSelect(preferredIndex);
+      renderTables('assets');
+      if (selected === null) {
+        newAsset({ companyId });
+        return null;
+      }
+      loadAssetForm(selected);
       return selected;
     }
     function refreshContractorSelect(preferredIndex = state.currentContractorIndex) {
@@ -410,7 +429,10 @@
       $('companiesTable').innerHTML = getFilteredCompanies().map(({row})=>`<tr><td>${escapeHtml(row.company_id)}</td><td>${escapeHtml(row.display_name)}</td><td class="mono">${escapeHtml(normalizeAbsoluteRootPath(row.absolute_company_root_path||row.company_root_path||''))}</td><td class="mono">${escapeHtml(row.company_folder||'')}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
     }
     function renderAssetsTable() {
-      $('assetsTable').innerHTML = getFilteredAssets().map(({row})=>`<tr><td>${escapeHtml(row.asset_id)}</td><td class="mono">${escapeHtml(row.typeid||'')}</td><td>${escapeHtml(row.company_id||'')}</td><td class="mono">${escapeHtml(row.asset_folder||'')}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
+      $('assetsTable').innerHTML = getFilteredAssets().map(({row})=>{
+        const company = companyById(row.company_id);
+        return `<tr><td>${escapeHtml(row.asset_id)}</td><td class="mono">${escapeHtml(row.typeid||'')}</td><td>${escapeHtml(company?.display_name || row.company_id || '')}</td><td>${escapeHtml(row.project_name||'')}</td><td>${escapeHtml(row.location||'')}</td><td class="mono">${escapeHtml(row.asset_folder||'')}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`;
+      }).join('');
     }
     function renderContractorsTable() {
       $('contractorsTable').innerHTML = getFilteredContractors().map(({row})=>`<tr><td>${escapeHtml(row.contractor_id)}</td><td>${escapeHtml(row.display_name||'')}</td><td class="mono">${escapeHtml(row.canonical_name||'')}</td><td>${escapeHtml((row.aliases||[]).join('; '))}</td><td>${row.is_active ? 'Yes' : 'No'}</td></tr>`).join('');
@@ -483,14 +505,17 @@
       companyEls.active.value = String(Boolean(row.is_active));
       companyEls.notes.value = row.notes || '';
       computeCompanyDerivedFields();
+      assetEls.company.value = row.company_id || '';
+      handleAssetCompanyChange();
     }
     function loadAssetForm(index) {
       state.currentAssetIndex = index;
       const row=(state.assets.assets||[])[index];
       if(!row) return;
+      assetEls.company.value = row.company_id || (state.companies.companies?.[state.currentCompanyIndex]?.company_id || state.companies.companies?.[0]?.company_id || '');
+      refreshAssetSelect(index);
       assetEls.select.value = String(index);
       assetEls.id.value = row.asset_id || '';
-      assetEls.company.value = row.company_id || (state.companies.companies?.[0]?.company_id || '');
       assetEls.type.value = row.type || (state.assetTypes.asset_types?.[0]?.type_code || '');
       updateAssetUnits();
       assetEls.inputValue.value = row.input_value ?? '';
@@ -529,10 +554,12 @@
       companyEls.notes.value = '';
       computeCompanyDerivedFields();
     }
-    function newAsset() {
+    function newAsset(options={}) {
+      const preferredCompanyId = options.companyId || assetEls.company.value || state.companies.companies?.[state.currentCompanyIndex]?.company_id || state.companies.companies?.[0]?.company_id || '';
       state.currentAssetIndex = -1;
       assetEls.id.value = nextRecordId(state.assets.assets,'AST','asset_id');
-      assetEls.company.value = state.companies.companies?.[0]?.company_id || '';
+      assetEls.company.value = preferredCompanyId;
+      refreshAssetSelect();
       assetEls.type.value = state.assetTypes.asset_types?.[0]?.type_code || '';
       updateAssetUnits();
       assetEls.inputValue.value = '';
@@ -825,6 +852,7 @@
     $('saveContractorBtn').addEventListener('click', async ()=>{ if (saveContractorRecord()) await saveJsonFilesToCurrentFolder('contractors'); });
     $('deleteContractorBtn').addEventListener('click', async ()=>{ deleteCurrentContractor(); await saveJsonFilesToCurrentFolder('contractors'); });
     companyEls.select.addEventListener('change', e=>loadCompanyForm(Number(e.target.value)));
+    assetEls.company.addEventListener('change', ()=>handleAssetCompanyChange());
     assetEls.select.addEventListener('change', e=>loadAssetForm(Number(e.target.value)));
     contractorEls.select.addEventListener('change', e=>loadContractorForm(Number(e.target.value)));
     [companyEls.displayName, companyEls.namecode, companyEls.typ3, companyEls.vat9].forEach(el=>el.addEventListener('input', computeCompanyDerivedFields));
