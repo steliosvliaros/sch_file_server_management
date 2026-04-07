@@ -3,7 +3,7 @@
     "schema_id": "sch.fileserver.assets_master",
     "schema_version": "1.2.0",
     "generated_from": "master_policy.yaml",
-    "generated_at": "2026-03-30T13:08:45.251Z",
+    "generated_at": "2026-04-07T11:17:34.504Z",
     "source_files": [
       "master_policy.yaml",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx",
@@ -768,22 +768,22 @@
       "asset_id": "AST-0042"
     },
     {
+      "asset_id": "AST-0043",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
-      "input_value": 15.27,
-      "input_unit": "MW",
-      "metric": "15p270",
+      "input_value": 1527,
+      "input_unit": "kW",
+      "metric": "01p527",
       "ss": "01",
-      "typeid": "PVS15p270-01",
+      "typeid": "PVS01p527-01",
       "project_name": "ntarani",
       "location": "THEBA",
-      "asset_folder": "PVS15p270-01_ntarani_THEBA",
+      "asset_folder": "PVS01p527-01_ntarani_THEBA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV1527-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0043"
+      "notes": "source_asset=PV1527-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
       "company_id": "CMP-0073",
@@ -1218,22 +1218,22 @@
       "asset_id": "AST-0067"
     },
     {
+      "asset_id": "AST-0068",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
-      "input_value": 4.499,
+      "input_value": 4.95,
       "input_unit": "MW",
-      "metric": "04p499",
+      "metric": "04p950",
       "ss": "01",
-      "typeid": "PVS04p499-01",
-      "project_name": "spentza",
-      "location": "KULLENE",
-      "asset_folder": "PVS04p499-01_spentza_KULLENE",
+      "typeid": "PVS04p950-01",
+      "project_name": "spentza-kyllini",
+      "location": "LECHAINA",
+      "asset_folder": "PVS04p950-01_spentza-kyllini_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0068"
+      "notes": "source_asset=PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
       "company_id": "CMP-0001",
@@ -1488,22 +1488,22 @@
       "asset_id": "AST-0082"
     },
     {
+      "asset_id": "AST-0083",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
-      "input_value": 0.996,
+      "input_value": 0.994,
       "input_unit": "MW",
-      "metric": "00p996",
+      "metric": "00p994",
       "ss": "01",
-      "typeid": "PVS00p996-01",
+      "typeid": "PVS00p994-01",
       "project_name": "gianopouleika",
-      "location": "KULLENE",
-      "asset_folder": "PVS00p996-01_gianopouleika_KULLENE",
+      "location": "ANDRAVIDA-KYLLINI",
+      "asset_folder": "PVS00p994-01_gianopouleika_ANDRAVIDA-KYLLINI",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p996-00_ΓΙΑΝΟΠΟΥΛΕΙΚΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0083"
+      "notes": "source_asset=PV00p996-00_ΓΙΑΝΟΠΟΥΛΕΙΚΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
       "company_id": "CMP-0049",

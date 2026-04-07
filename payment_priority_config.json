@@ -158,7 +158,9 @@
     "notification_mode": "mailto",
     "email_subject_prefix": "SCH Payment Priority",
     "keywords": {
-      "tech": "change-me-tech",
+      "tech": "
+      
+      ",
       "econ": "change-me-econ",
       "director": "change-me-director"
     },
