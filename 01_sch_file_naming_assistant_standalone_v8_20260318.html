@@ -135,14 +135,23 @@
             <select id="companySelect"></select>
           </div>
           <div>
+            <label for="companyMode">Company scope</label>
+            <select id="companyMode">
+              <option value="asset">Asset file</option>
+              <option value="portfolio-shared">Portfolio Shared</option>
+            </select>
+          </div>
+
+          <div class="full">
             <label for="assetSelect">Asset</label>
             <select id="assetSelect"></select>
+            <div class="hint" id="assetSelectHint">Shows assets for the selected company.</div>
           </div>
 
           <div class="full">
             <label for="companyRootPath">Absolute company root path</label>
             <input id="companyRootPath" readonly />
-            <div class="hint">Comes from <span class="mono">company_master.json</span> or inherited asset data.</div>
+            <div class="hint">Comes from <span class="mono">company_master.json</span> or inherited asset data. Portfolio Shared mode files directly under this root.</div>
           </div>
           <div>
             <label for="companyFolder">Company folder</label>
@@ -236,7 +245,7 @@
           <button id="copyFolderBtn" class="secondary">Copy folder</button>
           <button id="copyPathBtn" class="secondary">Copy full path</button>
         </div>
-        <div class="hint" style="margin-top:10px;">The folder-creation button uses the browser folder picker. Pick the parent location for the company folder, or the company folder itself, and the assistant will create the full structure from the company folder down: <span class="mono">CORPORATE</span>, <span class="mono">TEMPLATES</span>, <span class="mono">ARCHIVE</span>, <span class="mono">ASSETS</span>, the asset folder, and the policy tree. If you pick <span class="mono">ASSETS</span> or the asset folder itself, only the lower part of the structure can be created because the browser does not expose parent folders.</div>
+        <div class="hint" style="margin-top:10px;">The folder-creation button uses the browser folder picker. In normal asset mode, pick the parent location for the company folder, or the company folder itself, and the assistant will create the full structure from the company folder down: <span class="mono">CORPORATE</span>, <span class="mono">TEMPLATES</span>, <span class="mono">ARCHIVE</span>, <span class="mono">ASSETS</span>, the asset folder, and the policy tree. It will also create <span class="mono">__PORTFOLIO_SHARED__</span> with its standard shared subfolders when the selected location exposes the absolute company root path. In Portfolio Shared mode, pick the absolute company root path or the <span class="mono">__PORTFOLIO_SHARED__</span> folder itself.</div>
       </section>
 
       <section class="card">
@@ -279,7 +288,9 @@
 
     const els = {
       companySelect: document.getElementById('companySelect'),
+      companyMode: document.getElementById('companyMode'),
       assetSelect: document.getElementById('assetSelect'),
+      assetSelectHint: document.getElementById('assetSelectHint'),
       companyRootPath: document.getElementById('companyRootPath'),
       companyFolder: document.getElementById('companyFolder'),
       assetFolder: document.getElementById('assetFolder'),
@@ -362,6 +373,15 @@
     const knownExtensions = [
       'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx',
       'md', 'txt', 'zip', 'rar', '7z', 'dwg', 'dxf', 'jpg', 'jpeg', 'png'
+    ];
+
+    const portfolioSharedFolders = [
+      { value: '00_PORTFOLIO_MASTER', label: 'Portfolio master' },
+      { value: '01_SHARED_CONTRACTS', label: 'Shared contracts' },
+      { value: '02_SHARED_REGISTERS', label: 'Shared registers' },
+      { value: '03_SHARED_REPORTING', label: 'Shared reporting' },
+      { value: '04_SHARED_OPERATIONS', label: 'Shared operations' },
+      { value: '99_MISC_REVIEW', label: 'Misc review' }
     ];
 
     function setStatus(message, cls = 'info') {
@@ -478,6 +498,38 @@
       return state.policy?.core?.folder_index || {};
     }
 
+    function isPortfolioSharedMode() {
+      return els.companyMode.value === 'portfolio-shared';
+    }
+
+    function getPortfolioSharedTypeOptions() {
+      const typeCodes = [...new Set((state.assets || []).map(row => String(row?.type || '').trim().toUpperCase()).filter(Boolean))].sort();
+      if (!typeCodes.includes('XAST')) typeCodes.push('XAST');
+      return typeCodes.map(code => ({
+        value: code,
+        label: code === 'XAST' ? `${code} — Cross-asset shared files` : `${code} — Portfolio shared files for ${code}`
+      }));
+    }
+
+    function refreshWorkstreamOptions() {
+      const previousValue = els.workstream.value;
+      if (isPortfolioSharedMode()) {
+        fillSelect(els.workstream, portfolioSharedFolders, row => `${row.value} — ${row.label}`, row => row.value);
+        if (portfolioSharedFolders.some(row => row.value === previousValue)) els.workstream.value = previousValue;
+        else els.workstream.value = portfolioSharedFolders[0]?.value || '';
+        return;
+      }
+      const entries = Object.entries(state.policy?.core?.workstreams || {});
+      if (!entries.length) {
+        els.workstream.innerHTML = '<option value="">Load policy.json</option>';
+        return;
+      }
+      fillSelect(els.workstream, entries, ([code, ws]) => `${code} — ${ws.root_folder.name}`, ([code]) => code);
+      if (entries.some(([code]) => code === previousValue)) els.workstream.value = previousValue;
+      else if (state.policy?.core?.workstreams && Object.prototype.hasOwnProperty.call(state.policy.core.workstreams, 'TDE')) els.workstream.value = 'TDE';
+      else els.workstream.value = entries[0][0];
+    }
+
     function getSelectedCompany() {
       return state.companies.find(c => c.company_id === els.companySelect.value) || null;
     }
@@ -495,17 +547,41 @@
     }
 
     function refreshAssetSelect() {
+      if (isPortfolioSharedMode()) {
+        const portfolioTypes = getPortfolioSharedTypeOptions();
+        fillSelect(els.assetSelect, portfolioTypes, row => row.label, row => row.value);
+        if (!portfolioTypes.length) {
+          els.assetSelect.innerHTML = '<option value="">No asset type codes available</option>';
+        } else if (!portfolioTypes.some(row => row.value === els.assetSelect.value)) {
+          els.assetSelect.value = portfolioTypes[0].value;
+        }
+        if (els.assetSelectHint) els.assetSelectHint.textContent = 'Portfolio Shared mode shows asset type codes only, plus XAST for cross-asset files.';
+        applySelectedRecords();
+        return;
+      }
+
       const company = getSelectedCompany();
       const filtered = company ? state.assets.filter(a => a.company_id === company.company_id) : [];
       fillSelect(els.assetSelect, filtered, a => `${a.typeid || ''} — ${a.project_name || ''} — ${a.location || ''}`, a => a.asset_id || '');
       if (!filtered.length) {
         els.assetSelect.innerHTML = '<option value="">No assets for selected company</option>';
       }
+      if (els.assetSelectHint) els.assetSelectHint.textContent = 'Shows assets for the selected company.';
       applySelectedRecords();
     }
 
     function applySelectedRecords() {
       const company = getSelectedCompany();
+      if (isPortfolioSharedMode()) {
+        const rootPath = company?.absolute_company_root_path || company?.company_root_path || '';
+        const typeCode = String(els.assetSelect.value || '').trim().toUpperCase();
+        els.companyRootPath.value = toWindowsPath(rootPath);
+        els.companyFolder.value = company?.company_folder || '';
+        els.assetFolder.value = '__PORTFOLIO_SHARED__';
+        els.typeId.value = typeCode ? `PFS-${typeCode}` : '';
+        return;
+      }
+
       const asset = getSelectedAsset();
       const rootPath = asset?.absolute_company_root_path || company?.absolute_company_root_path || company?.company_root_path || '';
       els.companyRootPath.value = toWindowsPath(rootPath);
@@ -513,7 +589,6 @@
       els.assetFolder.value = asset?.asset_folder || '';
       els.typeId.value = asset?.typeid || '';
       if (!asset && state.assets.length && company) {
-        // attempt auto-pick first asset for company
         const first = state.assets.find(a => a.company_id === company.company_id);
         if (first) {
           els.assetSelect.value = first.asset_id;
@@ -561,6 +636,15 @@
     }
 
     function resolveRoute(docType, workstream, stage) {
+      if (isPortfolioSharedMode()) {
+        const selectedFolder = portfolioSharedFolders.find(row => row.value === workstream)?.value || portfolioSharedFolders[0]?.value || '00_PORTFOLIO_MASTER';
+        return {
+          folderId: `PFS_${selectedFolder}`,
+          folderPath: `__PORTFOLIO_SHARED__/${selectedFolder}`,
+          reason: `Portfolio Shared mode routes directly to ${selectedFolder}.`,
+          mode: 'portfolio-shared'
+        };
+      }
       const entry = state.policy?.routing?.route_registry?.[docType];
       const folderIndex = getFolderIndex();
       if (!entry) return { folderId: null, folderPath: '', reason: 'Doc type not found in route registry.', mode: 'unresolved' };
@@ -573,6 +657,16 @@
       }
       const folderId = entry.workstream_routes?.[workstream] || entry.fallback_folder_id;
       return { folderId, folderPath: folderIndex[folderId] || '', reason: `${docType} uses ${entry.mode} and resolved by workstream ${workstream}.`, mode: entry.mode };
+    }
+
+    async function ensurePortfolioSharedTree(rootHandle) {
+      const portfolioHandle = (rootHandle?.name || '').toUpperCase() === '__PORTFOLIO_SHARED__'
+        ? rootHandle
+        : await rootHandle.getDirectoryHandle('__PORTFOLIO_SHARED__', { create: true });
+      for (const row of portfolioSharedFolders) {
+        await portfolioHandle.getDirectoryHandle(row.value, { create: true });
+      }
+      return portfolioHandle;
     }
 
     function validate(filename, fullPath, issues) {
@@ -660,6 +754,31 @@
       }
       const companyFolder = (els.companyFolder.value || '').trim();
       const assetFolder = (els.assetFolder.value || '').trim();
+      const companyRootPath = normalizePath(els.companyRootPath.value.trim());
+      if (!companyRootPath) {
+        setStatus('Load a company first so the assistant knows the absolute company root path.', 'warn');
+        return;
+      }
+
+      if (isPortfolioSharedMode()) {
+        try {
+          const baseHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          const portfolioHandle = await ensurePortfolioSharedTree(baseHandle);
+          const createdSummary = portfolioSharedFolders.map(row => row.value).join(', ');
+          const locationLabel = (baseHandle.name || '').toUpperCase() === '__PORTFOLIO_SHARED__'
+            ? '__PORTFOLIO_SHARED__'
+            : `${baseHandle.name || 'selected root'}/__PORTFOLIO_SHARED__`;
+          setStatus(`Portfolio Shared tree ensured under ${locationLabel}: ${createdSummary}.`, 'ok');
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            setStatus('Folder creation was cancelled.', 'warn');
+            return;
+          }
+          setStatus(`Folder creation failed: ${err.message}`, 'bad');
+        }
+        return;
+      }
+
       if (!companyFolder || !assetFolder) {
         setStatus('Load company and asset master data first so the assistant knows where to build the tree.', 'warn');
         return;
@@ -677,6 +796,7 @@
         let assetsHandle = null;
         let assetBaseHandle = null;
         let createdSummary = '';
+        let portfolioNote = ' Pick the absolute company root path next time if you also want the sibling __PORTFOLIO_SHARED__ tree created automatically.';
 
         if (plan.companyHandleMode === 'parent-picked') {
           companyHandle = await baseHandle.getDirectoryHandle(companyFolder, { create: true });
@@ -685,7 +805,9 @@
           await companyHandle.getDirectoryHandle('ARCHIVE', { create: true });
           assetsHandle = await companyHandle.getDirectoryHandle('ASSETS', { create: true });
           assetBaseHandle = await assetsHandle.getDirectoryHandle(assetFolder, { create: true });
+          await ensurePortfolioSharedTree(baseHandle);
           createdSummary = `${companyFolder}/[CORPORATE, TEMPLATES, ARCHIVE, ASSETS/${assetFolder}]`;
+          portfolioNote = ' __PORTFOLIO_SHARED__ and its standard shared subfolders were also ensured at the selected root.';
         } else if (plan.companyHandleMode === 'company-picked') {
           await companyHandle.getDirectoryHandle('CORPORATE', { create: true });
           await companyHandle.getDirectoryHandle('TEMPLATES', { create: true });
@@ -708,7 +830,7 @@
         for (const relativePath of folderPaths) {
           await ensureRelativePath(assetBaseHandle, relativePath);
         }
-        setStatus(`Policy tree ensured: ${folderPaths.length} folders under ${plan.targetLabel}. Base created/ensured: ${createdSummary}. ${plan.note}`, 'ok');
+        setStatus(`Policy tree ensured: ${folderPaths.length} folders under ${plan.targetLabel}. Base created/ensured: ${createdSummary}. ${plan.note}${portfolioNote}`, 'ok');
       } catch (err) {
         if (err && err.name === 'AbortError') {
           setStatus('Folder creation was cancelled.', 'warn');
@@ -725,6 +847,7 @@
         els.validation.innerHTML = '<div>• Load policy.json first.</div>';
         return;
       }
+      const portfolioShared = isPortfolioSharedMode();
       const companyRootPath = normalizePath(els.companyRootPath.value.trim());
       const companyFolder = els.companyFolder.value.trim();
       const assetFolder = els.assetFolder.value.trim();
@@ -748,9 +871,9 @@
 
       const issues = [];
       if (!companyRootPath) issues.push('Missing absolute company root path');
-      if (!companyFolder) issues.push('Missing company folder');
-      if (!assetFolder) issues.push('Missing asset folder');
-      if (!typeId) issues.push('Missing TYPEID');
+      if (!portfolioShared && !companyFolder) issues.push('Missing company folder');
+      if (!assetFolder) issues.push(portfolioShared ? 'Missing portfolio shared base folder' : 'Missing asset folder');
+      if (!typeId) issues.push(portfolioShared ? 'Missing portfolio shared type code' : 'Missing TYPEID');
       if (!workstream) issues.push('Missing workstream');
       if (!phase) issues.push('Missing phase');
       if (!docType) issues.push('Missing doc type');
@@ -766,10 +889,12 @@
       if (docType === 'FIN' && !/^\d{1,6}$/.test(finSpecificRaw)) issues.push('FIN specific value must contain 1 to 6 digits');
 
       const route = resolveRoute(docType, workstream, stage);
-      if (!route.folderId || !route.folderPath) issues.push('Could not resolve target folder from policy route registry');
+      if (!route.folderId || !route.folderPath) issues.push(portfolioShared ? 'Could not resolve Portfolio Shared target folder' : 'Could not resolve target folder from policy route registry');
 
       const filename = `${typeId}_${phase}_${docType}_${description}_${date}_${version}_${status}.${ext}`;
-      const fullFolder = normalizePath(`${companyRootPath}/${companyFolder}/ASSETS/${assetFolder}/${route.folderPath || ''}`);
+      const fullFolder = portfolioShared
+        ? normalizePath(`${companyRootPath}/${route.folderPath || '__PORTFOLIO_SHARED__'}`)
+        : normalizePath(`${companyRootPath}/${companyFolder}/ASSETS/${assetFolder}/${route.folderPath || ''}`);
       const fullPath = normalizePath(`${fullFolder}/${filename}`);
       const allIssues = validate(filename, fullPath, issues);
       const manualReview = allIssues.length > 0 || els.forceReview.value === 'yes';
@@ -784,6 +909,9 @@
         `Route mode: ${route.mode || 'unresolved'}`,
         `Folder id: ${route.folderId || 'not resolved'}`,
         route.reason,
+        portfolioShared
+          ? `Portfolio Shared mode applied: target folder starts at __PORTFOLIO_SHARED__ and TYPEID uses PFS-{TYPE_CODE} such as ${typeId || 'PFS-XAST'}.`
+          : `Standard asset mode applied: company folder + ASSETS + asset folder + routed policy subfolder.`,
         (docType === 'FIN')
           ? `FIN naming rule applied: counterparty prefix + ${finStem || 'selected stem'} + ${finSpecific || '000000'} (left-padded from ${finSpecificRaw || '0'}) + normalized description.`
           : ((docType === 'CNT') ? 'Counterparty naming rule applied from contractors_master.json with uppercase canonical names.' : 'Standard description normalization applied.')
@@ -805,6 +933,7 @@
     }
 
     function resetDefaults() {
+      refreshWorkstreamOptions();
       els.ext.value = 'pdf';
       els.phase.value = 'DE';
       els.docType.value = 'FIN';
@@ -820,9 +949,15 @@
       els.date.value = '2026-03-15';
       els.version.value = '1';
       els.forceReview.value = 'no';
+      if (isPortfolioSharedMode()) els.workstream.value = portfolioSharedFolders[0]?.value || '';
       updateConditionalFields();
       if (els.status.options.length) els.status.value = 'FINAL';
       generate();
+    }
+
+    function syncModeDependentControls() {
+      refreshWorkstreamOptions();
+      refreshAssetSelect();
     }
 
     async function copyText(text) {
@@ -929,14 +1064,14 @@
     function loadPolicyObject(obj) {
       assertPolicyShape(obj);
       state.policy = obj;
-      fillSelect(els.workstream, Object.entries(obj.core.workstreams), ([code, ws]) => `${code} — ${ws.root_folder.name}`, ([code]) => code);
+      refreshWorkstreamOptions();
       fillSelect(els.phase, Object.entries(obj.core.enums.phases), ([code, label]) => `${code} — ${label}`, ([code]) => code);
       fillSelect(els.docType, Object.entries(obj.core.doc_type_catalog), ([code, meta]) => `${code} — ${meta.label}`, ([code]) => code);
       fillSelect(els.deliverableStage, obj.core.enums.deliverable_stages, v => v, v => v);
       fillSelect(els.status, obj.core.enums.statuses, v => v, v => v);
       populateFinStemSelect();
       if (obj.core.enums.statuses.includes('FINAL')) els.status.value = 'FINAL';
-      if (Object.prototype.hasOwnProperty.call(obj.core.workstreams, 'TDE')) els.workstream.value = 'TDE';
+      if (!isPortfolioSharedMode() && Object.prototype.hasOwnProperty.call(obj.core.workstreams, 'TDE')) els.workstream.value = 'TDE';
       updateConditionalFields();
     }
 
@@ -1068,6 +1203,7 @@
     }
 
     els.companySelect.addEventListener('change', () => { refreshAssetSelect(); generate(); });
+    els.companyMode.addEventListener('change', () => { syncModeDependentControls(); generate(); });
     els.assetSelect.addEventListener('change', () => { applySelectedRecords(); generate(); });
     els.docType.addEventListener('change', () => { updateConditionalFields(); generate(); });
     els.workstream.addEventListener('change', generate);
@@ -1121,6 +1257,7 @@
       els.fullPath.textContent = '';
       els.explanation.innerHTML = '<div>• No policy loaded yet.</div>';
       els.validation.innerHTML = '<div>• Load the JSON files first.</div>';
+      syncModeDependentControls();
       await restoreWorkingFolder();
     }
 
