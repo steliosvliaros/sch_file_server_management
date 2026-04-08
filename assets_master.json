@@ -3,7 +3,7 @@
     "schema_id": "sch.fileserver.assets_master",
     "schema_version": "1.2.0",
     "generated_from": "master_policy.yaml",
-    "generated_at": "2026-04-07T11:17:34.504Z",
+    "generated_at": "2026-04-08T13:06:40.048Z",
     "source_files": [
       "master_policy.yaml",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx",
@@ -779,8 +779,8 @@
       "ss": "01",
       "typeid": "PVS01p527-01",
       "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS01p527-01_ntarani_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS01p527-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "source_asset=PV1527-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
@@ -1110,24 +1110,25 @@
       "asset_id": "AST-0061"
     },
     {
+      "asset_id": "AST-0062",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
-      "input_value": 3.73,
-      "input_unit": "MW",
-      "metric": "03p730",
+      "input_value": 4103,
+      "input_unit": "kW",
+      "metric": "04p103",
       "ss": "01",
-      "typeid": "PVS03p730-01",
-      "project_name": "sale-pegadi",
-      "location": "KULLENE",
-      "asset_folder": "PVS03p730-01_sale-pegadi_KULLENE",
+      "typeid": "PVS04p103-01",
+      "project_name": "andravida",
+      "location": "LECHAINA",
+      "asset_folder": "PVS04p103-01_andravida_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV03p730-00_ΣΑΛΗ-ΠΗΓΑΔΙ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0062"
+      "notes": "source_asset=PV03p730-00_ΣΑΛΗ-ΠΗΓΑΔΙ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0063",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1138,14 +1139,14 @@
       "ss": "01",
       "typeid": "PVS00p320-01",
       "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS00p320-01_ntarani_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p320-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p320-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0063"
+      "notes": "source_asset=PV00p320-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0064",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1156,14 +1157,14 @@
       "ss": "01",
       "typeid": "PVS00p592-01",
       "project_name": "morokampos",
-      "location": "THEBA",
-      "asset_folder": "PVS00p592-01_morokampos_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p592-01_morokampos_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p592-00_ΜΩΡΟΚΑΜΠΟΣ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0064"
+      "notes": "source_asset=PV00p592-00_ΜΩΡΟΚΑΜΠΟΣ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0065",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1174,14 +1175,14 @@
       "ss": "01",
       "typeid": "PVS00p296-01",
       "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS00p296-01_ntarani_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p296-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p296-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0065"
+      "notes": "source_asset=PV00p296-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0066",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1191,15 +1192,15 @@
       "metric": "00p276",
       "ss": "01",
       "typeid": "PVS00p276-01",
-      "project_name": "lukobouni",
-      "location": "THEBA",
-      "asset_folder": "PVS00p276-01_lukobouni_THEBA",
+      "project_name": "likovouni",
+      "location": "THIVA",
+      "asset_folder": "PVS00p276-01_likovouni_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p276-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0066"
+      "notes": "source_asset=PV00p276-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0067",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1210,12 +1211,11 @@
       "ss": "01",
       "typeid": "PVS00p805-01",
       "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS00p805-01_ntarani_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p805-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p805-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0067"
+      "notes": "source_asset=PV00p805-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
       "asset_id": "AST-0068",
@@ -1236,6 +1236,7 @@
       "notes": "source_asset=PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0069",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1246,14 +1247,14 @@
       "ss": "01",
       "typeid": "PVS00p176-01",
       "project_name": "lukobouni",
-      "location": "THEBA",
-      "asset_folder": "PVS00p176-01_lukobouni_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p176-01_lukobouni_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p176-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0069"
+      "notes": "source_asset=PV00p176-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0070",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1264,14 +1265,14 @@
       "ss": "01",
       "typeid": "PVS01p527-01",
       "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS01p527-01_ntarani_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS01p527-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV01p527-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0070"
+      "notes": "source_asset=PV01p527-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0071",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1281,15 +1282,15 @@
       "metric": "01p990",
       "ss": "01",
       "typeid": "PVS01p990-01",
-      "project_name": "lekhaina",
-      "location": "KULLENE",
-      "asset_folder": "PVS01p990-01_lekhaina_KULLENE",
+      "project_name": "spentza-rachi",
+      "location": "LECHAINA",
+      "asset_folder": "PVS01p990-01_spentza-rachi_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV01p990-00_ΛΕΧΑΙΝΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0071"
+      "notes": "source_asset=PV01p990-00_ΛΕΧΑΙΝΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0072",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1300,14 +1301,14 @@
       "ss": "02",
       "typeid": "PVS00p805-02",
       "project_name": "konizos",
-      "location": "THEBA",
-      "asset_folder": "PVS00p805-02_konizos_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p805-02_konizos_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p805-00_ΚΟΝΙΖΟΣ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0072"
+      "notes": "source_asset=PV00p805-00_ΚΟΝΙΖΟΣ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0073",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1318,14 +1319,14 @@
       "ss": "01",
       "typeid": "PVS00p201-01",
       "project_name": "konizos",
-      "location": "THEBA",
-      "asset_folder": "PVS00p201-01_konizos_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p201-01_konizos_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p201-00_ΚΟΝΙΖΟΣ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0073"
+      "notes": "source_asset=PV00p201-00_ΚΟΝΙΖΟΣ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0074",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1335,15 +1336,15 @@
       "metric": "00p499",
       "ss": "01",
       "typeid": "PVS00p499-01",
-      "project_name": "kabasila",
-      "location": "PENEIOS",
-      "asset_folder": "PVS00p499-01_kabasila_PENEIOS",
+      "project_name": "kavasila",
+      "location": "PINEIOS",
+      "asset_folder": "PVS00p499-01_kavasila_PINEIOS",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p499-00_ΚΑΒΑΣΙΛΑ_ΠΗΝΕΙΟΣ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0074"
+      "notes": "source_asset=PV00p499-00_ΚΑΒΑΣΙΛΑ_ΠΗΝΕΙΟΣ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0075",
       "company_id": "CMP-0009",
       "company_folder": "BONITS-AEE-998383734",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1354,14 +1355,14 @@
       "ss": "01",
       "typeid": "PVS00p449-01",
       "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS00p449-01_ntarani_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p449-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p449-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=BONITS-AE-998383734; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0075"
+      "notes": "source_asset=PV00p449-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=BONITS-AE-998383734; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0076",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1372,14 +1373,14 @@
       "ss": "02",
       "typeid": "PVS00p592-02",
       "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS00p592-02_ntarani_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p592-02_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p592-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0076"
+      "notes": "source_asset=PV00p592-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0077",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1389,15 +1390,15 @@
       "metric": "02p913",
       "ss": "01",
       "typeid": "PVS02p913-01",
-      "project_name": "lekhaina",
-      "location": "KULLENE",
-      "asset_folder": "PVS02p913-01_lekhaina_KULLENE",
+      "project_name": "lianovourli",
+      "location": "LECHAINA",
+      "asset_folder": "PVS02p913-01_lianovourli_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV02p913-00_ΛΕΧΑΙΝΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0077"
+      "notes": "source_asset=PV02p913-00_ΛΕΧΑΙΝΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0078",
       "company_id": "CMP-0001",
       "company_folder": "4EENER-AEE-998808360",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1407,15 +1408,15 @@
       "metric": "00p864",
       "ss": "01",
       "typeid": "PVS00p864-01",
-      "project_name": "ntarani",
-      "location": "THEBA",
-      "asset_folder": "PVS00p864-01_ntarani_THEBA",
+      "project_name": "ntarali",
+      "location": "THIVA",
+      "asset_folder": "PVS00p864-01_ntarali_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p864-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0078"
+      "notes": "source_asset=PV00p864-00_ΝΤΑΡΑΝΙ_ΘΗΒΑ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0079",
       "company_id": "CMP-0041",
       "company_folder": "SLFACT-EPE-999012590",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1426,14 +1427,14 @@
       "ss": "01",
       "typeid": "PVS00p497-01",
       "project_name": "sale-pegadi",
-      "location": "ELIEIAS",
-      "asset_folder": "PVS00p497-01_sale-pegadi_ELIEIAS",
+      "location": "ANDRAVIDA",
+      "asset_folder": "PVS00p497-01_sale-pegadi_ANDRAVIDA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p497-00_ΣΑΛΗ-ΠΗΓΑΔΙ_ΗΛΙΕΙΑΣ; source_company=SLFACT-EPE-999012590; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0079"
+      "notes": "source_asset=PV00p497-00_ΣΑΛΗ-ΠΗΓΑΔΙ_ΗΛΙΕΙΑΣ; source_company=SLFACT-EPE-999012590; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0080",
       "company_id": "CMP-0013",
       "company_folder": "HABITA-AEE-800341539",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1444,14 +1445,14 @@
       "ss": "01",
       "typeid": "PVS00p436-01",
       "project_name": "bipe-patron-31",
-      "location": "AKHAIA",
-      "asset_folder": "PVS00p436-01_bipe-patron-31_AKHAIA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p436-01_bipe-patron-31_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p436-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ; source_company=HABITA-AE-800341539; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0080"
+      "notes": "source_asset=PV00p436-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ; source_company=HABITA-AE-800341539; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0081",
       "company_id": "CMP-0013",
       "company_folder": "HABITA-AEE-800341539",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1462,14 +1463,14 @@
       "ss": "01",
       "typeid": "PVS00p317-01",
       "project_name": "bipe-patron-31",
-      "location": "AKHAIA",
-      "asset_folder": "PVS00p317-01_bipe-patron-31_AKHAIA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p317-01_bipe-patron-31_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p317-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ; source_company=HABITA-AE-800341539; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0081"
+      "notes": "source_asset=PV00p317-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ; source_company=HABITA-AE-800341539; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
+      "asset_id": "AST-0082",
       "company_id": "CMP-0002",
       "company_folder": "ADMOTE-AEE-094459299",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
@@ -1480,12 +1481,11 @@
       "ss": "01",
       "typeid": "PVS00p213-01",
       "project_name": "admotec",
-      "location": "THEBA",
-      "asset_folder": "PVS00p213-01_admotec_THEBA",
+      "location": "THIVA",
+      "asset_folder": "PVS00p213-01_admotec_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p213-00_ADMOTEC_ΘΗΒΑ; source_company=ADMOTE-AE-094459299; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV",
-      "asset_id": "AST-0082"
+      "notes": "source_asset=PV00p213-00_ADMOTEC_ΘΗΒΑ; source_company=ADMOTE-AE-094459299; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
     },
     {
       "asset_id": "AST-0083",
@@ -1495,12 +1495,12 @@
       "type": "PVS",
       "input_value": 0.994,
       "input_unit": "MW",
-      "metric": "00p996",
+      "metric": "00p994",
       "ss": "01",
-      "typeid": "PVS00p996-01",
+      "typeid": "PVS00p994-01",
       "project_name": "gianopouleika",
-      "location": "ANDRAVIDA-KYLLINI",
-      "asset_folder": "PVS00p994-01_gianopouleika_ANDRAVIDA-KYLLINI",
+      "location": "LECHAINA",
+      "asset_folder": "PVS00p994-01_gianopouleika_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "source_asset=PV00p996-00_ΓΙΑΝΟΠΟΥΛΕΙΚΑ_ΚΥΛΛΗΝΗ; source_company=4EENER-AE-998808360; source_operational_phase=Operation & Maintenance; source_ownership_status=Full Owner & Operator; source_type=PV"
