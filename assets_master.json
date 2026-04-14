@@ -3,7 +3,7 @@
     "schema_id": "sch.fileserver.assets_master",
     "schema_version": "1.2.0",
     "generated_from": "master_policy.yaml",
-    "generated_at": "2026-04-08T13:06:40.048Z",
+    "generated_at": "2026-04-14T07:09:28.271Z",
     "source_files": [
       "master_policy.yaml",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx",
@@ -1650,22 +1650,22 @@
       "asset_id": "AST-0091"
     },
     {
+      "asset_id": "AST-0092",
       "company_id": "CMP-0019",
       "company_folder": "MAKMIK-MIK-801416484",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
-      "input_value": 0.5,
+      "input_value": 0.499,
       "input_unit": "MW",
-      "metric": "00p500",
+      "metric": "00p499",
       "ss": "01",
-      "typeid": "PVS00p500-01",
+      "typeid": "PVS00p499-01",
       "project_name": "agros-146-147",
       "location": "PHARKADONA",
-      "asset_folder": "PVS00p500-01_agros-146-147_PHARKADONA",
+      "asset_folder": "PVS00p499-01_agros-146-147_PHARKADONA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p500-00_ΑΓΡΟΣ-146-147_ΦΑΡΚΑΔΩΝΑ; source_company=MAKMIK-MIK-801416484; source_operational_phase=Operation & Maintenance; source_ownership_status=Independent Operator (under contract/lease); source_type=PV",
-      "asset_id": "AST-0092"
+      "notes": "source_asset=PV00p500-00_ΑΓΡΟΣ-146-147_ΦΑΡΚΑΔΩΝΑ; source_company=MAKMIK-MIK-801416484; source_operational_phase=Operation & Maintenance; source_ownership_status=Independent Operator (under contract/lease); source_type=PV"
     },
     {
       "company_id": "CMP-0035",
@@ -1776,22 +1776,22 @@
       "asset_id": "AST-0098"
     },
     {
+      "asset_id": "AST-0099",
       "company_id": "CMP-0024",
       "company_folder": "NIKMIK-MIK-801429387",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
-      "input_value": 0.5,
+      "input_value": 0.499,
       "input_unit": "MW",
-      "metric": "00p500",
+      "metric": "00p499",
       "ss": "01",
-      "typeid": "PVS00p500-01",
+      "typeid": "PVS00p499-01",
       "project_name": "agros-34",
-      "location": "PHARKADONA",
-      "asset_folder": "PVS00p500-01_agros-34_PHARKADONA",
+      "location": "FARKADONA",
+      "asset_folder": "PVS00p499-01_agros-34_FARKADONA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": "source_asset=PV00p500-00_ΑΓΡΟΣ-34_ΦΑΡΚΑΔΩΝΑ; source_company=NIKMIK-MIK-801429387; source_operational_phase=Operation & Maintenance; source_ownership_status=Independent Operator (under contract/lease); source_type=PV",
-      "asset_id": "AST-0099"
+      "notes": "source_asset=PV00p500-00_ΑΓΡΟΣ-34_ΦΑΡΚΑΔΩΝΑ; source_company=NIKMIK-MIK-801429387; source_operational_phase=Operation & Maintenance; source_ownership_status=Independent Operator (under contract/lease); source_type=PV"
     },
     {
       "company_id": "CMP-0028",
