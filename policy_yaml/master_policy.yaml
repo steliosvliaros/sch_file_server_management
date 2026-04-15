@@ -72,6 +72,64 @@ special_asset_folders:
     id: ASSET_SPECIAL_BACKUP
     name: _BACKUP
     path_template: '{ASSET_ROOT}/_BACKUP'
+portfolio_shared:
+  root:
+    id: PORTFOLIO_SHARED_ROOT
+    name: __PORTFOLIO_SHARED__
+    path_template: '__PORTFOLIO_SHARED__'
+    description: Cross-company shared folder at the company root level, outside individual company folders.
+  standard_subfolders:
+    PORTFOLIO_MASTER:
+      id: PS_PORTFOLIO_MASTER
+      name: 00_PORTFOLIO_MASTER
+      path_template: '__PORTFOLIO_SHARED__/00_PORTFOLIO_MASTER'
+      description: Master portfolio registers, dashboards, and cross-company summaries.
+    SHARED_CONTRACTS:
+      id: PS_SHARED_CONTRACTS
+      name: 01_SHARED_CONTRACTS
+      path_template: '__PORTFOLIO_SHARED__/01_SHARED_CONTRACTS'
+      description: Contracts shared across multiple companies or projects.
+    SHARED_REGISTERS:
+      id: PS_SHARED_REGISTERS
+      name: 02_SHARED_REGISTERS
+      path_template: '__PORTFOLIO_SHARED__/02_SHARED_REGISTERS'
+      description: Portfolio-level registers (asset register, counterparty register, etc.).
+    SHARED_REPORTING:
+      id: PS_SHARED_REPORTING
+      name: 03_SHARED_REPORTING
+      path_template: '__PORTFOLIO_SHARED__/03_SHARED_REPORTING'
+      description: Cross-portfolio and group-level reporting.
+    SHARED_OPERATIONS:
+      id: PS_SHARED_OPERATIONS
+      name: 04_SHARED_OPERATIONS
+      path_template: '__PORTFOLIO_SHARED__/04_SHARED_OPERATIONS'
+      description: Shared operational documents and procedures.
+    MISC_REVIEW:
+      id: PS_MISC_REVIEW
+      name: 99_MISC_REVIEW
+      path_template: '__PORTFOLIO_SHARED__/99_MISC_REVIEW'
+      description: Miscellaneous items pending review or classification.
+server_root_status_buckets:
+  DEFERRED:
+    id: SRB_DEFERRED
+    name: __DEFERRED__
+    path_template: '__DEFERRED__'
+    description: Projects that have been formally deferred; no active development underway. Sibling of __PORTFOLIO_SHARED__ at the server root.
+  NO_SCOPE:
+    id: SRB_NO_SCOPE
+    name: __NO_SCOPE__
+    path_template: '__NO_SCOPE__'
+    description: Projects that were constructed and sold; the company retains no operational or development scope. Sibling of __PORTFOLIO_SHARED__ at the server root.
+  PIPELINE:
+    id: SRB_PIPELINE
+    name: __PIPELINE__
+    path_template: '__PIPELINE__'
+    description: Projects in early development or origination that do not yet have a dedicated company folder. Sibling of __PORTFOLIO_SHARED__ at the server root.
+  SUPERSEDED:
+    id: SRB_SUPERSEDED
+    name: __SUPERSEDED__
+    path_template: '__SUPERSEDED__'
+    description: Portfolio-level folders that have been superseded by a reorganisation or rename. Sibling of __PORTFOLIO_SHARED__ at the server root.
 enums:
   phases:
     FS: Feasibility

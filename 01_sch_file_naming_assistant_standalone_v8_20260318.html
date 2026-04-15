@@ -245,7 +245,7 @@
           <button id="copyFolderBtn" class="secondary">Copy folder</button>
           <button id="copyPathBtn" class="secondary">Copy full path</button>
         </div>
-        <div class="hint" style="margin-top:10px;">The folder-creation button uses the browser folder picker. In normal asset mode, pick the parent location for the company folder, or the company folder itself, and the assistant will create the full structure from the company folder down: <span class="mono">CORPORATE</span>, <span class="mono">TEMPLATES</span>, <span class="mono">ARCHIVE</span>, <span class="mono">ASSETS</span>, the asset folder, and the policy tree. It will also create <span class="mono">__PORTFOLIO_SHARED__</span> with its standard shared subfolders when the selected location exposes the absolute company root path. In Portfolio Shared mode, pick the absolute company root path or the <span class="mono">__PORTFOLIO_SHARED__</span> folder itself.</div>
+        <div class="hint" style="margin-top:10px;">The folder-creation button uses the browser folder picker. In normal asset mode, pick the parent location for the company folder, or the company folder itself, and the assistant will create the full structure from the company folder down: <span class="mono">CORPORATE</span>, <span class="mono">TEMPLATES</span>, <span class="mono">ARCHIVE</span>, <span class="mono">ASSETS</span>, the asset folder, and the policy tree. It will also create <span class="mono">__PORTFOLIO_SHARED__</span> with its standard shared subfolders and the server root buckets (<span class="mono">__DEFERRED__</span>, <span class="mono">__NO_SCOPE__</span>, <span class="mono">__PIPELINE__</span>, <span class="mono">__SUPERSEDED__</span>) when the selected location is the server root. In Portfolio Shared mode, pick the server root to create <span class="mono">__PORTFOLIO_SHARED__</span> and all four server root buckets, or pick <span class="mono">__PORTFOLIO_SHARED__</span> itself to only update its subfolders.</div>
       </section>
 
       <section class="card">
@@ -382,6 +382,13 @@
       { value: '03_SHARED_REPORTING', label: 'Shared reporting' },
       { value: '04_SHARED_OPERATIONS', label: 'Shared operations' },
       { value: '99_MISC_REVIEW', label: 'Misc review' }
+    ];
+
+    const serverRootStatusBuckets = [
+      '__DEFERRED__',
+      '__NO_SCOPE__',
+      '__PIPELINE__',
+      '__SUPERSEDED__'
     ];
 
     function setStatus(message, cls = 'info') {
@@ -669,6 +676,12 @@
       return portfolioHandle;
     }
 
+    async function ensureServerRootBuckets(rootHandle) {
+      for (const name of serverRootStatusBuckets) {
+        await rootHandle.getDirectoryHandle(name, { create: true });
+      }
+    }
+
     function validate(filename, fullPath, issues) {
       const out = [...issues];
       const limits = state.policy?.core?.constraints || {};
@@ -763,12 +776,20 @@
       if (isPortfolioSharedMode()) {
         try {
           const baseHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          const isInsidePortfolio = (baseHandle.name || '').toUpperCase() === '__PORTFOLIO_SHARED__';
           const portfolioHandle = await ensurePortfolioSharedTree(baseHandle);
           const createdSummary = portfolioSharedFolders.map(row => row.value).join(', ');
-          const locationLabel = (baseHandle.name || '').toUpperCase() === '__PORTFOLIO_SHARED__'
+          let bucketsNote = '';
+          if (!isInsidePortfolio) {
+            await ensureServerRootBuckets(baseHandle);
+            bucketsNote = ` Server root buckets also ensured: ${serverRootStatusBuckets.join(', ')}.`;
+          } else {
+            bucketsNote = ' To also create the server root buckets, pick the parent server root folder instead of __PORTFOLIO_SHARED__ itself.';
+          }
+          const locationLabel = isInsidePortfolio
             ? '__PORTFOLIO_SHARED__'
             : `${baseHandle.name || 'selected root'}/__PORTFOLIO_SHARED__`;
-          setStatus(`Portfolio Shared tree ensured under ${locationLabel}: ${createdSummary}.`, 'ok');
+          setStatus(`Portfolio Shared tree ensured under ${locationLabel}: ${createdSummary}.${bucketsNote}`, 'ok');
         } catch (err) {
           if (err && err.name === 'AbortError') {
             setStatus('Folder creation was cancelled.', 'warn');
@@ -806,8 +827,9 @@
           assetsHandle = await companyHandle.getDirectoryHandle('ASSETS', { create: true });
           assetBaseHandle = await assetsHandle.getDirectoryHandle(assetFolder, { create: true });
           await ensurePortfolioSharedTree(baseHandle);
+          await ensureServerRootBuckets(baseHandle);
           createdSummary = `${companyFolder}/[CORPORATE, TEMPLATES, ARCHIVE, ASSETS/${assetFolder}]`;
-          portfolioNote = ' __PORTFOLIO_SHARED__ and its standard shared subfolders were also ensured at the selected root.';
+          portfolioNote = ` __PORTFOLIO_SHARED__ and its standard shared subfolders were also ensured at the selected root, along with server root buckets: ${serverRootStatusBuckets.join(', ')}.`;
         } else if (plan.companyHandleMode === 'company-picked') {
           await companyHandle.getDirectoryHandle('CORPORATE', { create: true });
           await companyHandle.getDirectoryHandle('TEMPLATES', { create: true });
