@@ -2,7 +2,7 @@
   "schema": {
     "id": "sch.payment-priority.jobs",
     "version": "2.0.0",
-    "generated_at": "2026-04-07T11:57:30.814Z",
+    "generated_at": "2026-04-17T11:57:46.850Z",
     "notes": "Live payment-priority queue using stable absolute scoring. Open items are ranked. Paid items remain in archive."
   },
   "jobs": [

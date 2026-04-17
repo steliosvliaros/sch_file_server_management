@@ -8,7 +8,7 @@
     "currency": "EUR",
     "high_risk_threshold": 16,
     "medium_risk_threshold": 8,
-    "eps": 1e-06,
+    "eps": 0.000001,
     "weights": {
       "exposure": 0.45,
       "security": 0.275,
@@ -158,9 +158,7 @@
     "notification_mode": "mailto",
     "email_subject_prefix": "SCH Payment Priority",
     "keywords": {
-      "tech": "
-      
-      ",
+      "tech": "change-me-tech",
       "econ": "change-me-econ",
       "director": "change-me-director"
     },

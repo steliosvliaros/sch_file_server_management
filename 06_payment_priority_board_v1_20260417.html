@@ -190,21 +190,7 @@ tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px v
         <button id="newJobsBtn" class="ghost">New empty jobs file</button>
         <button id="resetSelectionBtn" class="ghost">Clear selection</button>
       </div>
-      <div class="controls" style="margin-top:10px;">
-        <button id="loadAssetsBtn" class="ghost">Load assets_master.json</button>
-        <button id="loadCompaniesBtn" class="ghost">Load company_master.json</button>
-        <button id="loadAssetTypesBtn" class="ghost">Load asset_types.json</button>
-        <button id="loadConfigBtn" class="ghost">Load payment_priority_config.json</button>
-        <button id="loadContractorsBtn" class="ghost">Load contractors_master.json</button>
-        <button id="loadLegalBtn" class="ghost">Load legal_types.json</button>
-      </div>
-      <input id="assetsLoader" type="file" accept=".json" class="hidden">
-      <input id="companiesLoader" type="file" accept=".json" class="hidden">
-      <input id="assetTypesLoader" type="file" accept=".json" class="hidden">
-      <input id="configLoader" type="file" accept=".json" class="hidden">
       <input id="jobsLoader" type="file" accept=".json" class="hidden">
-      <input id="contractorsLoader" type="file" accept=".json" class="hidden">
-      <input id="legalLoader" type="file" accept=".json" class="hidden">
       <div id="statusMessage" class="alert" style="margin-top:12px;">Load the working folder or the required JSON files first.</div>
       <div class="status-row">
         <div class="status-chip"><strong>Folder</strong><span id="statusFolder">Not connected</span></div>
@@ -703,7 +689,7 @@ function assetView(asset){
     asset,
     company,
     capacity: cap,
-    label: `${imported}${asset.asset_folder || asset.typeid || asset.asset_id}${company.display_name || asset.company_folder ? ' | ' + (company.display_name || asset.company_folder) : ''}${asset.location ? ' | ' + asset.location : ''}`,
+    label: `${imported}${company.display_name || asset.company_folder || asset.company_id || ''}${company.display_name || asset.company_folder ? ' › ' : ''}${asset.asset_folder || asset.typeid || asset.asset_id}${asset.location ? ' | ' + asset.location : ''}`,
   };
 }
 function refreshVirtualAssetsFromJobs(){
@@ -915,7 +901,7 @@ function populateAssetSelect(){
   const assets = mergedAssets().filter(a => a && a.is_active !== false).filter(asset => {
     if (!term) return true;
     const company = companies.get(asset.company_id) || {};
-    const hay = [asset.asset_folder, asset.project_name, asset.location, asset.type, company.display_name, company.company_folder, asset.company_folder].filter(Boolean).join(' ').toLowerCase();
+    const hay = [asset.asset_id, asset.typeid, asset.asset_folder, asset.project_name, asset.location, asset.type, company.display_name, company.namecode, company.company_folder, asset.company_folder].filter(Boolean).join(' ').toLowerCase();
     return hay.includes(term);
   });
   const current = dom.assetSelect.value;
@@ -1621,13 +1607,7 @@ function createNewJobsFile(){
 }
 function bindEvents(){
   dom.openFolderBtn.addEventListener('click', openWorkingFolder);
-  dom.loadAssetsBtn.addEventListener('click', () => dom.assetsLoader.click());
-  dom.loadCompaniesBtn.addEventListener('click', () => dom.companiesLoader.click());
-  dom.loadAssetTypesBtn.addEventListener('click', () => dom.assetTypesLoader.click());
-  dom.loadConfigBtn.addEventListener('click', () => dom.configLoader.click());
   dom.loadJobsBtn.addEventListener('click', () => dom.jobsLoader.click());
-  dom.loadContractorsBtn.addEventListener('click', () => dom.contractorsLoader.click());
-  dom.loadLegalBtn.addEventListener('click', () => dom.legalLoader.click());
   dom.saveJobsBtn.addEventListener('click', () => saveJobsToFolder().catch(err => setStatus('Could not save jobs JSON: ' + err.message, 'alert')));
   dom.exportCsvBtn.addEventListener('click', exportOpenCsv);
   dom.newJobsBtn.addEventListener('click', createNewJobsFile);
@@ -1641,16 +1621,10 @@ function bindEvents(){
   dom.openTableBody.addEventListener('click', handleTableClick);
   dom.paidTableBody.addEventListener('click', handleTableClick);
 
-  dom.assetsLoader.addEventListener('change', () => loadSingleFromFileInput(dom.assetsLoader, normalizeAssets, value => state.assets = value, 'assets', 'assets master'));
-  dom.companiesLoader.addEventListener('change', () => loadSingleFromFileInput(dom.companiesLoader, normalizeCompanies, value => state.companies = value, 'companies', 'company master'));
-  dom.assetTypesLoader.addEventListener('change', () => loadSingleFromFileInput(dom.assetTypesLoader, normalizeAssetTypes, value => state.assetTypes = value, 'assetTypes', 'asset types'));
-  dom.configLoader.addEventListener('change', () => loadSingleFromFileInput(dom.configLoader, normalizeConfig, value => state.config = value, 'config', 'economics config'));
   dom.jobsLoader.addEventListener('change', () => loadSingleFromFileInput(dom.jobsLoader, normalizeJobs, value => state.jobs = value, 'jobs', 'jobs file'));
-  dom.contractorsLoader.addEventListener('change', () => loadSingleFromFileInput(dom.contractorsLoader, normalizeContractors, value => state.contractors = value, 'contractors', 'contractors master'));
-  dom.legalLoader.addEventListener('change', () => loadSingleFromFileInput(dom.legalLoader, normalizeLegalTypes, value => state.legalTypes = value, 'legalTypes', 'legal types'));
 }
 function setDomRefs(){
-  ['openFolderBtn','saveJobsBtn','loadJobsBtn','exportCsvBtn','newJobsBtn','resetSelectionBtn','loadAssetsBtn','loadCompaniesBtn','loadAssetTypesBtn','loadConfigBtn','loadContractorsBtn','loadLegalBtn','assetsLoader','companiesLoader','assetTypesLoader','configLoader','jobsLoader','contractorsLoader','legalLoader','statusMessage','statusFolder','statusMasters','statusJobsFile','statusAssetsCount','kpiCards','assetSearch','assetSelect','metaAsset','metaCompany','metaType','metaCapacity','metaCf','metaValueKwh','metaCalcNote','requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical','addRequestBtn','updateRequestBtn','clearFormBtn','liveMetrics','selectedRequestLabel','openTableBody','paidTableBody','chartPriority','chartAmountByAsset','chartBuckets'].forEach(id => dom[id] = q(id));
+  ['openFolderBtn','saveJobsBtn','loadJobsBtn','exportCsvBtn','newJobsBtn','resetSelectionBtn','jobsLoader','statusMessage','statusFolder','statusMasters','statusJobsFile','statusAssetsCount','kpiCards','assetSearch','assetSelect','metaAsset','metaCompany','metaType','metaCapacity','metaCf','metaValueKwh','metaCalcNote','requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical','addRequestBtn','updateRequestBtn','clearFormBtn','liveMetrics','selectedRequestLabel','openTableBody','paidTableBody','chartPriority','chartAmountByAsset','chartBuckets'].forEach(id => dom[id] = q(id));
 }
 function initDefaults(){
   dom.assetSelect.innerHTML = '<option value="">Load data first</option>';
