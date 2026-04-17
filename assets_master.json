@@ -14,8 +14,6 @@
     {
       "asset_id": "AST-0001",
       "company_id": "CMP-0031",
-      "company_folder": "RESCOR-IKE-803025296",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "DTC",
       "input_value": 12,
       "input_unit": "MW",
@@ -32,8 +30,6 @@
     {
       "asset_id": "AST-0002",
       "company_id": "CMP-0010",
-      "company_folder": "CLDCOR-IKE-803025339",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "DTC",
       "input_value": 12,
       "input_unit": "MW",
@@ -50,8 +46,6 @@
     {
       "asset_id": "AST-0003",
       "company_id": "CMP-0070",
-      "company_folder": "PHOS01-MIK-803155402",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "DTC",
       "input_value": 15,
       "input_unit": "MW",
@@ -68,8 +62,6 @@
     {
       "asset_id": "AST-0004",
       "company_id": "CMP-0070",
-      "company_folder": "PHOS01-MIK-803155402",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "DTC",
       "input_value": 5,
       "input_unit": "MW",
@@ -86,8 +78,6 @@
     {
       "asset_id": "AST-0005",
       "company_id": "CMP-0071",
-      "company_folder": "PHOS02-MIK-",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "DTC",
       "input_value": 13,
       "input_unit": "MW",
@@ -104,8 +94,6 @@
     {
       "asset_id": "AST-0006",
       "company_id": "CMP-0072",
-      "company_folder": "PHOS03-MIK-",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "DTC",
       "input_value": 8,
       "input_unit": "MW",
@@ -122,8 +110,6 @@
     {
       "asset_id": "AST-0007",
       "company_id": "CMP-0045",
-      "company_folder": "SONADO-IKE-801455240",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HTL",
       "input_value": 49,
       "input_unit": "beds",
@@ -139,8 +125,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0,
       "input_unit": "MW",
@@ -158,8 +142,6 @@
     {
       "asset_id": "AST-0009",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 3.02,
       "input_unit": "MW",
@@ -176,8 +158,6 @@
     {
       "asset_id": "AST-0010",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 6.15,
       "input_unit": "MW",
@@ -194,8 +174,6 @@
     {
       "asset_id": "AST-0011",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 6.83,
       "input_unit": "MW",
@@ -212,8 +190,6 @@
     {
       "asset_id": "AST-0012",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 7.86,
       "input_unit": "MW",
@@ -230,8 +206,6 @@
     {
       "asset_id": "AST-0013",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 7.86,
       "input_unit": "MW",
@@ -247,8 +221,6 @@
     },
     {
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 8.04,
       "input_unit": "MW",
@@ -266,8 +238,6 @@
     {
       "asset_id": "AST-0015",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 8.04,
       "input_unit": "MW",
@@ -284,8 +254,6 @@
     {
       "asset_id": "AST-0016",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 9.23,
       "input_unit": "MW",
@@ -302,8 +270,6 @@
     {
       "asset_id": "AST-0017",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.05,
       "input_unit": "MW",
@@ -320,8 +286,6 @@
     {
       "asset_id": "AST-0018",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.05,
       "input_unit": "MW",
@@ -338,8 +302,6 @@
     {
       "asset_id": "AST-0019",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.05,
       "input_unit": "MW",
@@ -356,8 +318,6 @@
     {
       "asset_id": "AST-0020",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.26,
       "input_unit": "MW",
@@ -373,8 +333,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.5,
       "input_unit": "MW",
@@ -392,8 +350,6 @@
     {
       "asset_id": "AST-0022",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.52,
       "input_unit": "MW",
@@ -410,8 +366,6 @@
     {
       "asset_id": "AST-0023",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.52,
       "input_unit": "MW",
@@ -428,8 +382,6 @@
     {
       "asset_id": "AST-0024",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 11.12,
       "input_unit": "MW",
@@ -446,8 +398,6 @@
     {
       "asset_id": "AST-0025",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 11.18,
       "input_unit": "MW",
@@ -464,8 +414,6 @@
     {
       "asset_id": "AST-0026",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 11.99,
       "input_unit": "MW",
@@ -482,8 +430,6 @@
     {
       "asset_id": "AST-0027",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 13,
       "input_unit": "MW",
@@ -500,8 +446,6 @@
     {
       "asset_id": "AST-0028",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 14,
       "input_unit": "MW",
@@ -518,8 +462,6 @@
     {
       "asset_id": "AST-0029",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 15.01,
       "input_unit": "MW",
@@ -535,8 +477,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 17.62,
       "input_unit": "MW",
@@ -553,8 +493,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 19.83,
       "input_unit": "MW",
@@ -572,8 +510,6 @@
     {
       "asset_id": "AST-0032",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 20.9,
       "input_unit": "MW",
@@ -590,8 +526,6 @@
     {
       "asset_id": "AST-0033",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 21.98,
       "input_unit": "MW",
@@ -608,8 +542,6 @@
     {
       "asset_id": "AST-0034",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 22.29,
       "input_unit": "MW",
@@ -625,8 +557,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 26.73,
       "input_unit": "MW",
@@ -644,8 +574,6 @@
     {
       "asset_id": "AST-0036",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 29.01,
       "input_unit": "MW",
@@ -661,8 +589,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 30.02,
       "input_unit": "MW",
@@ -679,8 +605,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 30.02,
       "input_unit": "MW",
@@ -697,8 +621,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 30.02,
       "input_unit": "MW",
@@ -715,8 +637,6 @@
     },
     {
       "company_id": "CMP-0034",
-      "company_folder": "SAISL2-AEE-801224474",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 30.03,
       "input_unit": "MW",
@@ -734,8 +654,6 @@
     {
       "asset_id": "AST-0041",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 37.05,
       "input_unit": "MW",
@@ -752,8 +670,6 @@
     {
       "asset_id": "AST-0042",
       "company_id": "CMP-0033",
-      "company_folder": "SAISL1-AEE-801224517",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 80.06,
       "input_unit": "MW",
@@ -770,8 +686,6 @@
     {
       "asset_id": "AST-0043",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 1527,
       "input_unit": "kW",
@@ -787,8 +701,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 2.27,
       "input_unit": "MW",
@@ -805,8 +717,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 3.09,
       "input_unit": "MW",
@@ -823,8 +733,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 5,
       "input_unit": "MW",
@@ -841,8 +749,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 6.35,
       "input_unit": "MW",
@@ -859,8 +765,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 9.11,
       "input_unit": "MW",
@@ -877,8 +781,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 9.62,
       "input_unit": "MW",
@@ -895,8 +797,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.02,
       "input_unit": "MW",
@@ -913,8 +813,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.07,
       "input_unit": "MW",
@@ -931,8 +829,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.17,
       "input_unit": "MW",
@@ -949,8 +845,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 10.88,
       "input_unit": "MW",
@@ -967,8 +861,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 11,
       "input_unit": "MW",
@@ -985,8 +877,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 12,
       "input_unit": "MW",
@@ -1003,8 +893,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 13.85,
       "input_unit": "MW",
@@ -1021,8 +909,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 14,
       "input_unit": "MW",
@@ -1039,8 +925,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 16.67,
       "input_unit": "MW",
@@ -1057,8 +941,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 19.96,
       "input_unit": "MW",
@@ -1075,8 +957,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 43.43,
       "input_unit": "MW",
@@ -1093,8 +973,6 @@
     },
     {
       "company_id": "CMP-0073",
-      "company_folder": "NSPCON-ΜΑΕ-801169966",
-      "absolute_company_root_path": "\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 50.68,
       "input_unit": "MW",
@@ -1112,8 +990,6 @@
     {
       "asset_id": "AST-0062",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 4103,
       "input_unit": "kW",
@@ -1130,8 +1006,6 @@
     {
       "asset_id": "AST-0063",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.32,
       "input_unit": "MW",
@@ -1148,8 +1022,6 @@
     {
       "asset_id": "AST-0064",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.592,
       "input_unit": "MW",
@@ -1166,8 +1038,6 @@
     {
       "asset_id": "AST-0065",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.296,
       "input_unit": "MW",
@@ -1184,8 +1054,6 @@
     {
       "asset_id": "AST-0066",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.276,
       "input_unit": "MW",
@@ -1202,8 +1070,6 @@
     {
       "asset_id": "AST-0067",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.805,
       "input_unit": "MW",
@@ -1220,8 +1086,6 @@
     {
       "asset_id": "AST-0068",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 4.95,
       "input_unit": "MW",
@@ -1238,8 +1102,6 @@
     {
       "asset_id": "AST-0069",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.176,
       "input_unit": "MW",
@@ -1256,8 +1118,6 @@
     {
       "asset_id": "AST-0070",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 1.527,
       "input_unit": "MW",
@@ -1274,8 +1134,6 @@
     {
       "asset_id": "AST-0071",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 1.99,
       "input_unit": "MW",
@@ -1292,8 +1150,6 @@
     {
       "asset_id": "AST-0072",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.805,
       "input_unit": "MW",
@@ -1310,8 +1166,6 @@
     {
       "asset_id": "AST-0073",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.201,
       "input_unit": "MW",
@@ -1328,8 +1182,6 @@
     {
       "asset_id": "AST-0074",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.499,
       "input_unit": "MW",
@@ -1346,8 +1198,6 @@
     {
       "asset_id": "AST-0075",
       "company_id": "CMP-0009",
-      "company_folder": "BONITS-AEE-998383734",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.449,
       "input_unit": "MW",
@@ -1364,8 +1214,6 @@
     {
       "asset_id": "AST-0076",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.592,
       "input_unit": "MW",
@@ -1382,8 +1230,6 @@
     {
       "asset_id": "AST-0077",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 2.913,
       "input_unit": "MW",
@@ -1400,8 +1246,6 @@
     {
       "asset_id": "AST-0078",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.864,
       "input_unit": "MW",
@@ -1418,8 +1262,6 @@
     {
       "asset_id": "AST-0079",
       "company_id": "CMP-0041",
-      "company_folder": "SLFACT-EPE-999012590",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.497,
       "input_unit": "MW",
@@ -1436,8 +1278,6 @@
     {
       "asset_id": "AST-0080",
       "company_id": "CMP-0013",
-      "company_folder": "HABITA-AEE-800341539",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.436,
       "input_unit": "MW",
@@ -1454,8 +1294,6 @@
     {
       "asset_id": "AST-0081",
       "company_id": "CMP-0013",
-      "company_folder": "HABITA-AEE-800341539",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.317,
       "input_unit": "MW",
@@ -1472,8 +1310,6 @@
     {
       "asset_id": "AST-0082",
       "company_id": "CMP-0002",
-      "company_folder": "ADMOTE-AEE-094459299",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.213,
       "input_unit": "MW",
@@ -1490,8 +1326,6 @@
     {
       "asset_id": "AST-0083",
       "company_id": "CMP-0001",
-      "company_folder": "4EENER-AEE-998808360",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.994,
       "input_unit": "MW",
@@ -1508,8 +1342,6 @@
     {
       "asset_id": "AST-0084",
       "company_id": "CMP-0049",
-      "company_folder": "SPSOL2-AEE-800341484",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 4.403,
       "input_unit": "MW",
@@ -1525,8 +1357,6 @@
     },
     {
       "company_id": "CMP-0059",
-      "company_folder": "ΕΝΕLV3-MIK-801768674",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.5,
       "input_unit": "MW",
@@ -1543,8 +1373,6 @@
     },
     {
       "company_id": "CMP-0021",
-      "company_folder": "MINING-MIK-801360202",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.279,
       "input_unit": "MW",
@@ -1561,8 +1389,6 @@
     },
     {
       "company_id": "CMP-0060",
-      "company_folder": "HLEKTR-IKE-997945805",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.02,
       "input_unit": "MW",
@@ -1579,8 +1405,6 @@
     },
     {
       "company_id": "CMP-0060",
-      "company_folder": "HLEKTR-IKE-997945805",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.02,
       "input_unit": "MW",
@@ -1597,8 +1421,6 @@
     },
     {
       "company_id": "CMP-0060",
-      "company_folder": "HLEKTR-IKE-997945805",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.02,
       "input_unit": "MW",
@@ -1615,8 +1437,6 @@
     },
     {
       "company_id": "CMP-0060",
-      "company_folder": "HLEKTR-IKE-997945805",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.02,
       "input_unit": "MW",
@@ -1634,8 +1454,6 @@
     {
       "asset_id": "AST-0091",
       "company_id": "CMP-0008",
-      "company_folder": "AVLIEN-MIK-801621154",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.5,
       "input_unit": "MW",
@@ -1652,8 +1470,6 @@
     {
       "asset_id": "AST-0092",
       "company_id": "CMP-0019",
-      "company_folder": "MAKMIK-MIK-801416484",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.499,
       "input_unit": "MW",
@@ -1670,8 +1486,6 @@
     {
       "asset_id": "AST-0093",
       "company_id": "CMP-0035",
-      "company_folder": "SOFTA_-MIK-801421181",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.5,
       "input_unit": "MW",
@@ -1688,8 +1502,6 @@
     {
       "asset_id": "AST-0094",
       "company_id": "CMP-0043",
-      "company_folder": "SOLST2-IKE-801457927",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.5,
       "input_unit": "MW",
@@ -1705,8 +1517,6 @@
     },
     {
       "company_id": "CMP-0030",
-      "company_folder": "REGION-AEE-997801489",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "OTH",
       "input_value": 3500,
       "input_unit": "unit",
@@ -1723,8 +1533,6 @@
     },
     {
       "company_id": "CMP-0030",
-      "company_folder": "REGION-AEE-997801489",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "OTH",
       "input_value": 5037,
       "input_unit": "unit",
@@ -1741,8 +1549,6 @@
     },
     {
       "company_id": "CMP-0030",
-      "company_folder": "REGION-AEE-997801489",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "OTH",
       "input_value": 516,
       "input_unit": "unit",
@@ -1760,8 +1566,6 @@
     {
       "asset_id": "AST-0098",
       "company_id": "CMP-0015",
-      "company_folder": "IPSOLR-IKE-801404412",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.5,
       "input_unit": "MW",
@@ -1778,8 +1582,6 @@
     {
       "asset_id": "AST-0099",
       "company_id": "CMP-0024",
-      "company_folder": "NIKMIK-MIK-801429387",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.499,
       "input_unit": "MW",
@@ -1795,8 +1597,6 @@
     },
     {
       "company_id": "CMP-0028",
-      "company_folder": "PAPENE-AEE-800372393",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "WND",
       "input_value": 18,
       "input_unit": "MW",
@@ -1813,8 +1613,6 @@
     },
     {
       "company_id": "CMP-0028",
-      "company_folder": "PAPENE-AEE-800372393",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "WND",
       "input_value": 24,
       "input_unit": "MW",
@@ -1831,8 +1629,6 @@
     },
     {
       "company_id": "CMP-0053",
-      "company_folder": "TAFFPR-AEE-800466035",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "WND",
       "input_value": 16,
       "input_unit": "MW",
@@ -1849,8 +1645,6 @@
     },
     {
       "company_id": "CMP-0053",
-      "company_folder": "TAFFPR-AEE-800466035",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "WND",
       "input_value": 18,
       "input_unit": "MW",
@@ -1867,8 +1661,6 @@
     },
     {
       "company_id": "CMP-0009",
-      "company_folder": "BONITS-AEE-998383734",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.999,
       "input_unit": "MW",
@@ -1885,8 +1677,6 @@
     },
     {
       "company_id": "CMP-0003",
-      "company_folder": "ATHBIO-IKE-803026649",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "BCH",
       "input_value": 1800,
       "input_unit": "tpy",
@@ -1903,8 +1693,6 @@
     },
     {
       "company_id": "CMP-0003",
-      "company_folder": "ATHBIO-IKE-803026649",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "BCH",
       "input_value": 1800,
       "input_unit": "tpy",
@@ -1921,8 +1709,6 @@
     },
     {
       "company_id": "CMP-0065",
-      "company_folder": "LEOLAK-IKE-802135149",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "BMS",
       "input_value": 3500,
       "input_unit": "tpy",
@@ -1939,8 +1725,6 @@
     },
     {
       "company_id": "CMP-0066",
-      "company_folder": "LEOPEL-IKE-802135113",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "BMS",
       "input_value": 3500,
       "input_unit": "tpy",
@@ -1957,8 +1741,6 @@
     },
     {
       "company_id": "CMP-0064",
-      "company_folder": "LEOGIA-IKE-802134614",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "BMS",
       "input_value": 3500,
       "input_unit": "tpy",
@@ -1975,8 +1757,6 @@
     },
     {
       "company_id": "CMP-0005",
-      "company_folder": "AGRBRY-MIK-803059656",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 10248,
       "input_unit": "m2",
@@ -1993,8 +1773,6 @@
     },
     {
       "company_id": "CMP-0057",
-      "company_folder": "GEOELF-MIK-803060053",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 10979,
       "input_unit": "m2",
@@ -2012,8 +1790,6 @@
     {
       "asset_id": "AST-0112",
       "company_id": "CMP-0016",
-      "company_folder": "KALLOS-IKE-803082426",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 3638,
       "input_unit": "m2",
@@ -2030,8 +1806,6 @@
     {
       "asset_id": "AST-0113",
       "company_id": "CMP-0016",
-      "company_folder": "KALLOS-IKE-803082426",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 5580,
       "input_unit": "m2",
@@ -2048,8 +1822,6 @@
     {
       "asset_id": "AST-0114",
       "company_id": "CMP-0020",
-      "company_folder": "KOFIDM-IKE-801386057",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 7810,
       "input_unit": "m2",
@@ -2066,8 +1838,6 @@
     {
       "asset_id": "AST-0115",
       "company_id": "CMP-0020",
-      "company_folder": "KOFIDM-IKE-801386057",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 5902,
       "input_unit": "m2",
@@ -2084,8 +1854,6 @@
     {
       "asset_id": "AST-0116",
       "company_id": "CMP-0022",
-      "company_folder": "MOVOFR-MIK-803082414",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 6762,
       "input_unit": "m2",
@@ -2102,8 +1870,6 @@
     {
       "asset_id": "AST-0117",
       "company_id": "CMP-0022",
-      "company_folder": "MOVOFR-MIK-803082414",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "HYP",
       "input_value": 2502,
       "input_unit": "m2",
@@ -2120,8 +1886,6 @@
     {
       "asset_id": "AST-0118",
       "company_id": "CMP-0074",
-      "company_folder": "ILIATR-MIK-998571296",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.474,
       "input_unit": "MW",
@@ -2138,8 +1902,6 @@
     {
       "asset_id": "AST-0119",
       "company_id": "CMP-0075",
-      "company_folder": "YPRION-IKE-801305631",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.499,
       "input_unit": "MW",
@@ -2156,8 +1918,6 @@
     {
       "asset_id": "AST-0120",
       "company_id": "CMP-0076",
-      "company_folder": "ROMEIK-OTH-106780106",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.1,
       "input_unit": "MW",
@@ -2174,8 +1934,6 @@
     {
       "asset_id": "AST-0121",
       "company_id": "CMP-0077",
-      "company_folder": "ROMEIK-OTH-106774658",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.1,
       "input_unit": "MW",
@@ -2192,8 +1950,6 @@
     {
       "asset_id": "AST-0122",
       "company_id": "CMP-0078",
-      "company_folder": "OIXVVD-AEE-998646502",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.703,
       "input_unit": "MW",
@@ -2210,8 +1966,6 @@
     {
       "asset_id": "AST-0123",
       "company_id": "CMP-0079",
-      "company_folder": "OIXGDP-AEE-998808335",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 1.968,
       "input_unit": "MW",
@@ -2228,8 +1982,6 @@
     {
       "asset_id": "AST-0124",
       "company_id": "CMP-0080",
-      "company_folder": "DIAPLS-AEE-998103102",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "PVS",
       "input_value": 0.5,
       "input_unit": "MW",
@@ -2246,8 +1998,6 @@
     {
       "asset_id": "AST-0125",
       "company_id": "CMP-0032",
-      "company_folder": "RHIPSA-MIK-800907496",
-      "absolute_company_root_path": "\\\\192.168.200.4\\Files",
       "type": "OFC",
       "input_value": 1533,
       "input_unit": "m2",
