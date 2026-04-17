@@ -662,7 +662,11 @@
       }));
       const seenKeys = new Set();
       const extra = [];
-      (state.assetTypes.asset_types || []).forEach(t => {
+      const typeFilter = (typeof els !== 'undefined' && els.filterType) ? els.filterType.value : '';
+      const typesToScan = typeFilter
+        ? (state.assetTypes.asset_types || []).filter(t => t.type_code === typeFilter)
+        : (state.assetTypes.asset_types || []);
+      typesToScan.forEach(t => {
         (t.extra_fields || []).forEach(f => {
           if (!seenKeys.has(f.key)) {
             seenKeys.add(f.key);
@@ -1051,7 +1055,7 @@
     els.fieldProjectName.addEventListener('blur', () => computeDerived({ applyProjectName: true }));
 
     els.searchInput.addEventListener('input', debounce(renderTable));
-    els.filterType.addEventListener('change', renderTable);
+    els.filterType.addEventListener('change', () => { initCols(); renderColPicker(); renderTable(); });
     els.filterStatus.addEventListener('change', renderTable);
     els.filterCompany.addEventListener('change', renderTable);
     els.filterLocation.addEventListener('change', renderTable);
