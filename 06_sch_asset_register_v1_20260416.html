@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCH Asset Register</title>
+  <style>
+    :root {
+      --bg:#f6f7fb; --card:#ffffff; --text:#1f2937; --muted:#6b7280;
+      --line:#e5e7eb; --soft:#f3f4f6; --ok:#065f46; --warn:#92400e;
+      --bad:#991b1b; --info:#1d4ed8; --btn:#111827; --btn-text:#ffffff;
+      --row-hover:#f0f4ff; --row-expanded:#e8eeff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8;
+        --line:#334155; --soft:#1a2332; --ok:#065f46; --warn:#92400e;
+        --bad:#991b1b; --info:#3b82f6; --btn:#334155; --btn-text:#f1f5f9;
+        --row-hover:#1e3050; --row-expanded:#1e3a5f;
+      }
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:1600px; margin:0 auto; padding:24px; }
+    .hero h1 { margin:0 0 6px; font-size:30px; }
+    .hero p { margin:0 0 14px; color:var(--muted); line-height:1.5; }
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,.05); margin-bottom:16px; }
+    .card h2 { margin:0 0 14px; font-size:18px; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:14px; }
+    .ok   { background:#ecfdf5; color:var(--ok); }
+    .warn { background:#fff7ed; color:var(--warn); }
+    .bad  { background:#fef2f2; color:var(--bad); }
+    .info { background:#eff6ff; color:var(--info); }
+    @media (prefers-color-scheme: dark) {
+      .ok { background:#064e3b; } .warn { background:#78350f; }
+      .bad { background:#7f1d1d; } .info { background:#1e3a8a; }
+    }
+    button { border:0; border-radius:12px; padding:10px 14px; background:var(--btn); color:var(--btn-text); cursor:pointer; font-weight:700; font-size:13px; }
+    button.secondary { background:var(--card); color:var(--text); border:1px solid var(--line); }
+    button.danger { background:#b91c1c; color:#fff; }
+    button.sm { padding:5px 10px; font-size:12px; border-radius:8px; }
+    @media (prefers-color-scheme: dark) { button.danger { background:#dc2626; } }
+    .form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .full { grid-column:1/-1; }
+    .span2 { grid-column:span 2; }
+    label { display:block; font-size:12px; font-weight:700; margin-bottom:5px; }
+    input, select, textarea {
+      width:100%; border:1px solid var(--line); border-radius:12px;
+      padding:10px 12px; font-size:14px; background:var(--card); color:var(--text);
+    }
+    input[readonly] { background:var(--soft); }
+    textarea { min-height:72px; resize:vertical; }
+    .small { font-size:12px; color:var(--muted); line-height:1.4; margin-top:4px; }
+    .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; word-break:break-all; font-size:12px; }
+    .panel { background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:12px; }
+    .form-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+    .filters { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr auto; gap:12px; align-items:end; }
+    @media (max-width:1200px) { .filters { grid-template-columns:1fr 1fr 1fr; } }
+    @media (max-width:700px)  { .filters { grid-template-columns:1fr; } }
+    .filter-actions { display:flex; flex-direction:column; gap:6px; justify-content:flex-end; }
+    .summary-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+    .count-badge { font-size:13px; color:var(--muted); }
+    .count-badge strong { color:var(--text); }
+    .table-wrap { overflow-x:auto; border-radius:16px; border:1px solid var(--line); }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead th {
+      background:var(--soft); padding:10px 12px; text-align:left;
+      font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+      color:var(--muted); white-space:nowrap; cursor:pointer; user-select:none;
+      border-bottom:1px solid var(--line); position:sticky; top:0; z-index:2;
+    }
+    thead th:hover { color:var(--text); }
+    thead th.sort-asc::after  { content:' ↑'; }
+    thead th.sort-desc::after { content:' ↓'; }
+    tbody tr.data-row { border-bottom:1px solid var(--line); cursor:pointer; transition:background .1s; }
+    tbody tr.data-row:hover { background:var(--row-hover); }
+    tbody tr.data-row.expanded { background:var(--row-expanded); }
+    tbody tr.detail-row td { padding:0; cursor:default; }
+    tbody tr.detail-row:hover { background:var(--row-expanded); }
+    td { padding:9px 12px; vertical-align:middle; }
+    .inactive-row td { opacity:.45; }
+    .type-badge { display:inline-block; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700; background:var(--soft); border:1px solid var(--line); }
+    .status-badge { display:inline-block; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:600; }
+    .s-operational { background:#ecfdf5; color:var(--ok); }
+    .s-development  { background:#eff6ff; color:var(--info); }
+    .s-other        { background:#fff7ed; color:var(--warn); }
+    @media (prefers-color-scheme: dark) {
+      .s-operational { background:#064e3b; }
+      .s-development { background:#1e3a8a; }
+      .s-other       { background:#78350f; }
+    }
+    .detail-panel { padding:16px 20px; background:var(--soft); border-top:1px solid var(--line); }
+    .detail-grid  { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; margin-bottom:14px; }
+    .df-label { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+    .df-value { font-size:13px; word-break:break-all; }
+    .detail-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .no-results { padding:36px; text-align:center; color:var(--muted); font-size:14px; }
+    @media (max-width:900px) { .form-grid { grid-template-columns:1fr 1fr; } }
+    @media (max-width:600px) { .form-grid { grid-template-columns:1fr; } .span2 { grid-column:1/-1; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>SCH Asset Register</h1>
+      <p>Manage asset records in <span class="mono">assets_master.json</span>. Requires <span class="mono">company_master.json</span> and <span class="mono">asset_types.json</span>. Open the working folder to load, edit, and save back directly.</p>
+    </div>
+
+    <div class="toolbar">
+      <button id="openFolderBtn">Open working folder</button>
+      <button id="reloadBtn" class="secondary">Reload folder</button>
+      <button id="autoloadBtn" class="secondary">Auto-load same folder</button>
+      <button id="downloadBtn" class="secondary">Download assets_master.json</button>
+    </div>
+
+    <div id="statusBadge" class="pill info">Load a working folder or use Auto-load.</div>
+
+    <!-- CRUD form -->
+    <div class="card">
+      <h2>Asset record</h2>
+      <div class="form-grid">
+        <div>
+          <label for="fieldCompany">Company</label>
+          <select id="fieldCompany"></select>
+        </div>
+        <div class="span2">
+          <label for="selectRecord">Asset record (scoped to company)</label>
+          <select id="selectRecord"></select>
+        </div>
+
+        <div>
+          <label for="fieldId">Asset ID</label>
+          <input id="fieldId" readonly />
+        </div>
+        <div>
+          <label for="fieldType">Asset type</label>
+          <select id="fieldType"></select>
+        </div>
+        <div>
+          <label for="fieldLifecycle">Lifecycle status</label>
+          <select id="fieldLifecycle">
+            <option value="development">development</option>
+            <option value="pipeline">pipeline</option>
+            <option value="construction">construction</option>
+            <option value="operational">operational</option>
+            <option value="no-scope">no-scope</option>
+            <option value="o-and-m">o-and-m</option>
+            <option value="archived">archived</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="fieldInputValue">Input value</label>
+          <input id="fieldInputValue" type="number" step="0.001" />
+        </div>
+        <div>
+          <label for="fieldInputUnit">Input unit</label>
+          <select id="fieldInputUnit"></select>
+        </div>
+        <div>
+          <label for="fieldSs">SS</label>
+          <input id="fieldSs" value="01" maxlength="2" />
+        </div>
+
+        <div>
+          <label for="fieldMetric">Metric (generated)</label>
+          <input id="fieldMetric" readonly />
+        </div>
+        <div>
+          <label for="fieldTypeid">TYPEID (generated)</label>
+          <input id="fieldTypeid" readonly />
+        </div>
+        <div>
+          <label for="fieldActive">Active</label>
+          <select id="fieldActive">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <div class="span2">
+          <label for="fieldProjectName">Project name</label>
+          <input id="fieldProjectName" placeholder="my project name" spellcheck="false" />
+          <div class="small">Type normal words with spaces. Converted to lowercase hyphen-separated on save.</div>
+        </div>
+        <div>
+          <label for="fieldLocation">Location</label>
+          <input id="fieldLocation" />
+          <div class="small">Stored as uppercase only.</div>
+        </div>
+
+        <div class="full">
+          <label for="fieldFolder">Asset folder (generated)</label>
+          <input id="fieldFolder" readonly />
+        </div>
+        <div class="full">
+          <label for="fieldNotes">Notes</label>
+          <textarea id="fieldNotes"></textarea>
+        </div>
+      </div>
+
+      <div class="panel small" id="assetRuleSummary" style="margin-top:14px;">Select an asset type to see the metric rule.</div>
+
+      <div class="form-actions">
+        <button id="newBtn">New asset</button>
+        <button id="saveBtn" class="secondary">Save asset</button>
+        <button id="createFolderBtn" class="secondary">Create asset folder</button>
+        <button id="deleteBtn" class="danger">Delete asset</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+      <div class="filters">
+        <div>
+          <label for="searchInput">Search</label>
+          <input id="searchInput" type="search" placeholder="Project, TYPEID, location, company, notes…" />
+        </div>
+        <div>
+          <label for="filterType">Asset type</label>
+          <select id="filterType"><option value="">All types</option></select>
+        </div>
+        <div>
+          <label for="filterStatus">Lifecycle status</label>
+          <select id="filterStatus">
+            <option value="">All statuses</option>
+            <option value="development">development</option>
+            <option value="pipeline">pipeline</option>
+            <option value="construction">construction</option>
+            <option value="operational">operational</option>
+            <option value="no-scope">no-scope</option>
+            <option value="o-and-m">o-and-m</option>
+            <option value="archived">archived</option>
+          </select>
+        </div>
+        <div>
+          <label for="filterCompany">Company</label>
+          <select id="filterCompany"><option value="">All companies</option></select>
+        </div>
+        <div>
+          <label for="filterLocation">Location</label>
+          <select id="filterLocation"><option value="">All locations</option></select>
+        </div>
+        <div class="filter-actions">
+          <button id="clearFiltersBtn" class="secondary sm">Clear filters</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-bar">
+      <div class="count-badge" id="countBadge">Load data to see assets.</div>
+      <button id="copyTableBtn" class="secondary sm">Copy table (paste to Excel)</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="typeid">TYPEID</th>
+            <th data-col="project_name">Project</th>
+            <th data-col="location">Location</th>
+            <th data-col="type">Type</th>
+            <th data-col="capacity">Capacity</th>
+            <th data-col="company_display">Company</th>
+            <th data-col="lifecycle_status">Status</th>
+            <th data-col="is_active">Active</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="8" class="no-results">Load data to view assets.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_ASSET_TYPES = [
+      { type_code:'PVS', label:'PV plant', characteristic:'capacity', allowed_input_units:['MW','kW','kWp'], input_to_base_multiplier:{ MW:1000, kW:1, kWp:1 }, metric_rule:'Convert input to kW integer, then encode XXpYYY.', example:'15.473 MW → 15p473' },
+      { type_code:'DTC', label:'Datacenter', characteristic:'contracted IT load', allowed_input_units:['MW','kW'], input_to_base_multiplier:{ MW:1000, kW:1 }, metric_rule:'Convert input to kW integer, then encode XXpYYY.', example:'3.200 MW → 03p200' },
+      { type_code:'HYP', label:'Hydroponics', characteristic:'cultivation area', allowed_input_units:['m2','ha'], input_to_base_multiplier:{ m2:1, ha:10000 }, metric_rule:'Convert input to integer m2, then encode XXpYYY.', example:'7000 m2 → 07p000' }
+    ];
+
+    const state = {
+      companies: [],
+      assets: { schema: { generated_at: new Date().toISOString() }, assets: [] },
+      assetTypes: { asset_types: DEFAULT_ASSET_TYPES },
+      directoryHandle: null,
+      currentIndex: -1,
+      sortCol: 'type',
+      sortDir: 'asc',
+      expandedId: null,
+      _atMap: null,
+      _cmMap: null
+    };
+
+    const $ = id => document.getElementById(id);
+    const els = {
+      statusBadge:    $('statusBadge'),
+      fieldCompany:   $('fieldCompany'),
+      selectRecord:   $('selectRecord'),
+      fieldId:        $('fieldId'),
+      fieldType:      $('fieldType'),
+      fieldLifecycle: $('fieldLifecycle'),
+      fieldInputValue:$('fieldInputValue'),
+      fieldInputUnit: $('fieldInputUnit'),
+      fieldSs:        $('fieldSs'),
+      fieldMetric:    $('fieldMetric'),
+      fieldTypeid:    $('fieldTypeid'),
+      fieldActive:    $('fieldActive'),
+      fieldProjectName:$('fieldProjectName'),
+      fieldLocation:  $('fieldLocation'),
+      fieldFolder:    $('fieldFolder'),
+      fieldNotes:     $('fieldNotes'),
+      searchInput:    $('searchInput'),
+      filterType:     $('filterType'),
+      filterStatus:   $('filterStatus'),
+      filterCompany:  $('filterCompany'),
+      filterLocation: $('filterLocation'),
+      countBadge:     $('countBadge'),
+      tableBody:      $('tableBody')
+    };
+
+    // ── Utilities ──────────────────────────────────────────────────────────────
+    function setStatus(msg, cls = 'info') { els.statusBadge.className = `pill ${cls}`; els.statusBadge.textContent = msg; }
+    function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function debounce(fn, wait = 160) { let t = null; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+    function searchText(v) { return String(v || '').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+    function slug(v) { return String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9\s\-_]/g,'').trim().replace(/[_\s]+/g,'-').replace(/-+/g,'-').replace(/^[-_]+|[-_]+$/g,''); }
+    function normalizeProjectName(v) { return slug(v).toLowerCase().replace(/-+/g,'-').replace(/^-+|-+$/g,''); }
+    function normalizeLocation(v) { return slug(v).toUpperCase(); }
+    function padSs(v) { const d = String(v||'').replace(/\D/g,'').slice(-2); return d ? d.padStart(2,'0') : '01'; }
+    function nextId(items, prefix, key) {
+      let max = 0;
+      (items||[]).forEach(item => { const m = String(item?.[key]||'').toUpperCase().match(new RegExp(`^${prefix}-(\\d+)$`)); if (m) max = Math.max(max, Number(m[1])); });
+      return `${prefix}-${String(max+1).padStart(4,'0')}`;
+    }
+    function uniqueSorted(arr) {
+      return [...new Set(arr.filter(v => v != null && v !== ''))].sort((a, b) =>
+        String(a).localeCompare(String(b), undefined, { sensitivity: 'base' })
+      );
+    }
+
+    // ── Lookup caches ──────────────────────────────────────────────────────────
+    function atMap() {
+      if (!state._atMap) state._atMap = Object.fromEntries((state.assetTypes.asset_types||[]).map(x => [x.type_code, x]));
+      return state._atMap;
+    }
+    function cmMap() {
+      if (!state._cmMap) state._cmMap = new Map((state.companies||[]).map(c => [c.company_id, c]));
+      return state._cmMap;
+    }
+    function companyById(id) { return cmMap().get(id) || null; }
+    function invalidateCaches() { state._atMap = null; state._cmMap = null; }
+
+    // ── Metric / TYPEID computation ────────────────────────────────────────────
+    function computeMetric(typeCode, inputValue, inputUnit) {
+      const rule = atMap()[typeCode];
+      const n = Number(inputValue);
+      if (!rule || !Number.isFinite(n)) return '';
+      const mult = Number((rule.input_to_base_multiplier||{})[inputUnit]);
+      if (!Number.isFinite(mult)) return '';
+      const total = Math.round(n * mult);
+      return `${String(Math.floor(total/1000)).padStart(2,'0')}p${String(total%1000).padStart(3,'0')}`;
+    }
+    function buildTypeid(typeCode, metric, ss) { return `${String(typeCode||'').toUpperCase()}${metric}-${padSs(ss)}`; }
+    function buildAssetFolder(typeid, projectName, location) { return `${typeid}_${normalizeProjectName(projectName)}_${normalizeLocation(location)}`; }
+
+    // ── Reference dropdowns ────────────────────────────────────────────────────
+    function refreshTypeSelect() {
+      const prev = els.fieldType.value;
+      els.fieldType.innerHTML = (state.assetTypes.asset_types||[]).map(r =>
+        `<option value="${esc(r.type_code)}">${esc(r.type_code)} — ${esc(r.label)}</option>`
+      ).join('');
+      if (prev && [...els.fieldType.options].some(o => o.value === prev)) els.fieldType.value = prev;
+    }
+    function refreshCompanySelect() {
+      const prev = els.fieldCompany.value;
+      els.fieldCompany.innerHTML = (state.companies||[]).length
+        ? (state.companies||[]).map(c => `<option value="${esc(c.company_id)}">${esc(c.company_id)} — ${esc(c.display_name)}</option>`).join('')
+        : '<option value="">No companies loaded</option>';
+      if (prev && [...els.fieldCompany.options].some(o => o.value === prev)) els.fieldCompany.value = prev;
+    }
+    function refreshAssetUnits() {
+      const rule = atMap()[els.fieldType.value];
+      const units = rule ? rule.allowed_input_units : [];
+      const prev = els.fieldInputUnit.value;
+      els.fieldInputUnit.innerHTML = units.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('');
+      if (units.includes(prev)) els.fieldInputUnit.value = prev;
+      else if (units.length) els.fieldInputUnit.value = units[0];
+      $('assetRuleSummary').innerHTML = rule
+        ? `<strong>${esc(rule.label)}</strong> — ${esc(rule.characteristic)} | Units: ${esc(rule.allowed_input_units.join(', '))} | Rule: ${esc(rule.metric_rule)} | Example: <span class="mono">${esc(rule.example)}</span>`
+        : 'No asset type selected.';
+      computeDerived();
+    }
+    function refreshRecordSelect(preferredIndex = state.currentIndex) {
+      const companyId = els.fieldCompany.value;
+      const rows = (state.assets.assets||[]).map((row, i) => ({ row, i })).filter(({ row }) => !companyId || row.company_id === companyId);
+      els.selectRecord.innerHTML = rows.length
+        ? rows.map(({ row, i }) => `<option value="${i}">${esc(row.typeid || row.asset_id || '—')} — ${esc(row.project_name || '(no project)')} — ${esc(row.location || '')}</option>`).join('')
+        : '<option value="">No assets for selected company</option>';
+      if (!rows.length) return null;
+      const match = rows.find(x => x.i === preferredIndex);
+      const sel = match ? preferredIndex : rows[0].i;
+      els.selectRecord.value = String(sel);
+      return sel;
+    }
+
+    // ── Derived fields ─────────────────────────────────────────────────────────
+    function computeDerived(options = {}) {
+      const applyProjectName = Boolean(options.applyProjectName);
+      const normProject = normalizeProjectName(els.fieldProjectName.value);
+      const normLocation = normalizeLocation(els.fieldLocation.value);
+      els.fieldId.value = els.fieldId.value.trim() || nextId(state.assets.assets, 'AST', 'asset_id');
+      if (applyProjectName) els.fieldProjectName.value = normProject;
+      els.fieldLocation.value = normLocation;
+      els.fieldSs.value = padSs(els.fieldSs.value);
+      els.fieldMetric.value = computeMetric(els.fieldType.value, els.fieldInputValue.value, els.fieldInputUnit.value);
+      els.fieldTypeid.value  = els.fieldMetric.value ? buildTypeid(els.fieldType.value, els.fieldMetric.value, els.fieldSs.value) : '';
+      els.fieldFolder.value  = els.fieldTypeid.value  ? buildAssetFolder(els.fieldTypeid.value, normProject, normLocation) : '';
+    }
+
+    // ── Form load / clear ──────────────────────────────────────────────────────
+    function loadForm(index) {
+      state.currentIndex = index;
+      const row = (state.assets.assets || [])[index];
+      if (!row) return;
+      els.fieldCompany.value    = row.company_id || els.fieldCompany.value;
+      refreshRecordSelect(index);
+      els.selectRecord.value    = String(index);
+      els.fieldId.value         = row.asset_id || '';
+      els.fieldType.value       = row.type || (state.assetTypes.asset_types?.[0]?.type_code || '');
+      refreshAssetUnits();
+      els.fieldInputValue.value = row.input_value ?? '';
+      els.fieldInputUnit.value  = row.input_unit || els.fieldInputUnit.value;
+      els.fieldSs.value         = row.ss || '01';
+      els.fieldLifecycle.value  = row.lifecycle_status || 'development';
+      els.fieldProjectName.value= normalizeProjectName(row.project_name || '');
+      els.fieldLocation.value   = normalizeLocation(row.location || '');
+      els.fieldActive.value     = String(row.is_active !== false);
+      els.fieldNotes.value      = row.notes || '';
+      computeDerived();
+    }
+    function newRecord(options = {}) {
+      state.currentIndex = -1;
+      const preferredCompanyId = options.companyId || els.fieldCompany.value || (state.companies||[])[0]?.company_id || '';
+      els.fieldCompany.value    = preferredCompanyId;
+      refreshRecordSelect();
+      els.fieldId.value         = nextId(state.assets.assets, 'AST', 'asset_id');
+      els.fieldType.value       = state.assetTypes.asset_types?.[0]?.type_code || '';
+      refreshAssetUnits();
+      els.fieldInputValue.value = '';
+      els.fieldSs.value         = '01';
+      els.fieldLifecycle.value  = 'development';
+      els.fieldProjectName.value= '';
+      els.fieldLocation.value   = '';
+      els.fieldActive.value     = 'true';
+      els.fieldNotes.value      = '';
+      computeDerived();
+    }
+
+    // ── Save / Delete ──────────────────────────────────────────────────────────
+    function saveRecord() {
+      computeDerived({ applyProjectName: true });
+      if (!els.fieldCompany.value) { setStatus('Company is required.', 'bad'); return false; }
+      if (!els.fieldType.value)    { setStatus('Asset type is required.', 'bad'); return false; }
+      if (!els.fieldTypeid.value || !els.fieldFolder.value) { setStatus('TYPEID and folder must be generated before saving.', 'bad'); return false; }
+      const dup = (state.assets.assets||[]).some((r,i) => i !== state.currentIndex && r.asset_id === els.fieldId.value);
+      if (dup) { setStatus('asset_id must be unique.', 'bad'); return false; }
+      const company = companyById(els.fieldCompany.value);
+      const row = {
+        asset_id:    els.fieldId.value,
+        company_id:  els.fieldCompany.value,
+        type:        els.fieldType.value,
+        input_value: els.fieldInputValue.value === '' ? '' : Number(els.fieldInputValue.value),
+        input_unit:  els.fieldInputUnit.value,
+        metric:      els.fieldMetric.value,
+        ss:          els.fieldSs.value,
+        typeid:      els.fieldTypeid.value,
+        project_name:els.fieldProjectName.value,
+        location:    els.fieldLocation.value,
+        asset_folder:els.fieldFolder.value,
+        lifecycle_status: els.fieldLifecycle.value,
+        is_active:   els.fieldActive.value === 'true',
+        notes:       els.fieldNotes.value.trim()
+      };
+      if (state.currentIndex >= 0) {
+        state.assets.assets[state.currentIndex] = row;
+      } else {
+        state.assets.assets.push(row);
+        state.currentIndex = state.assets.assets.length - 1;
+      }
+      state.assets.schema.generated_at = new Date().toISOString();
+      refreshRecordSelect(state.currentIndex);
+      populateFilterDropdowns();
+      renderTable();
+      setStatus('Asset saved.', 'ok');
+      return true;
+    }
+    function deleteRecord() {
+      if (state.currentIndex < 0) return;
+      const row = state.assets.assets[state.currentIndex];
+      if (!row) return;
+      if (!window.confirm(`Delete asset ${row.asset_id} — ${row.typeid || ''}?`)) return;
+      state.assets.assets.splice(state.currentIndex, 1);
+      state.assets.schema.generated_at = new Date().toISOString();
+      const sel = refreshRecordSelect(0);
+      populateFilterDropdowns();
+      renderTable();
+      if (sel !== null) loadForm(sel); else newRecord();
+      setStatus('Asset deleted.', 'ok');
+    }
+
+    // ── Join ──────────────────────────────────────────────────────────────────
+    function buildJoined() {
+      const cm = Object.fromEntries((state.companies||[]).map(c => [c.company_id, c]));
+      return (state.assets.assets||[]).map(a => {
+        const c = cm[a.company_id] || {};
+        return {
+          ...a,
+          company_display: c.display_name ? `${c.display_name} — ${a.company_folder || a.company_id || ''}` : (a.company_folder || a.company_id || ''),
+          capacity: a.input_value != null ? `${a.input_value} ${a.input_unit || ''}`.trim() : ''
+        };
+      });
+    }
+
+    function populateFilterDropdowns() {
+      const joined = buildJoined();
+      const snap = { type: els.filterType.value, company: els.filterCompany.value, location: els.filterLocation.value };
+      const fill = (sel, items, allLabel) => {
+        sel.innerHTML = `<option value="">${allLabel}</option>` + items.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+      };
+      fill(els.filterType,     uniqueSorted(joined.map(a => a.type)),            'All types');
+      fill(els.filterCompany,  uniqueSorted(joined.map(a => a.company_display)), 'All companies');
+      fill(els.filterLocation, uniqueSorted(joined.map(a => a.location)),        'All locations');
+      if (snap.type     && [...els.filterType.options].some(o => o.value === snap.type))     els.filterType.value = snap.type;
+      if (snap.company  && [...els.filterCompany.options].some(o => o.value === snap.company)) els.filterCompany.value = snap.company;
+      if (snap.location && [...els.filterLocation.options].some(o => o.value === snap.location)) els.filterLocation.value = snap.location;
+    }
+
+    // ── Filter + sort ──────────────────────────────────────────────────────────
+    function statusCls(s) {
+      if (!s) return 's-other';
+      const l = s.toLowerCase();
+      if (l === 'operational') return 's-operational';
+      if (l.includes('development') || l.includes('pipeline') || l.includes('construction')) return 's-development';
+      return 's-other';
+    }
+
+    function getRows() {
+      const q      = els.searchInput.value.trim().toLowerCase();
+      const typeF  = els.filterType.value;
+      const statF  = els.filterStatus.value;
+      const compF  = els.filterCompany.value;
+      const locF   = els.filterLocation.value;
+      let rows = buildJoined().filter(a => {
+        if (typeF && a.type             !== typeF)  return false;
+        if (statF && a.lifecycle_status !== statF)  return false;
+        if (compF && a.company_display  !== compF)  return false;
+        if (locF  && a.location         !== locF)   return false;
+        if (q) {
+          const hay = [a.typeid, a.project_name, a.location, a.type,
+            a.company_display, a.company_folder, a.asset_folder,
+            a.lifecycle_status, a.notes, a.asset_id, a.capacity
+          ].join(' ').toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+      const col = state.sortCol;
+      const dir = state.sortDir === 'asc' ? 1 : -1;
+      rows.sort((a, b) => {
+        if (col === 'capacity') return ((parseFloat(a.input_value)||0) - (parseFloat(b.input_value)||0)) * dir;
+        return String(a[col]??'').localeCompare(String(b[col]??''), undefined, { sensitivity:'base' }) * dir;
+      });
+      return rows;
+    }
+
+    function renderTable() {
+      const rows  = getRows();
+      const total = (state.assets.assets||[]).length;
+      els.countBadge.innerHTML = `Showing <strong>${rows.length}</strong> of <strong>${total}</strong> assets`;
+      if (!rows.length) {
+        els.tableBody.innerHTML = '<tr><td colspan="8" class="no-results">No assets match the current filters.</td></tr>';
+        return;
+      }
+      // find actual index in state.assets.assets for each joined row
+      const assetIdxMap = new Map((state.assets.assets||[]).map((a, i) => [a.asset_id, i]));
+      els.tableBody.innerHTML = rows.map(a => {
+        const isExp  = state.expandedId === a.asset_id;
+        const inact  = a.is_active === false ? ' inactive-row' : '';
+        const assetIdx = assetIdxMap.get(a.asset_id) ?? -1;
+        let detail = '';
+        if (isExp) {
+          const fields = [
+            ['Asset ID',      a.asset_id],
+            ['TYPEID',        a.typeid],
+            ['Type code',     a.type],
+            ['Metric',        a.metric],
+            ['SS',            a.ss],
+            ['Capacity',      a.capacity || '—'],
+            ['Project name',  a.project_name],
+            ['Location',      a.location],
+            ['Lifecycle',     a.lifecycle_status || '—'],
+            ['Active',        a.is_active === false ? 'No' : 'Yes'],
+            ['Company',       a.company_display],
+            ['Company folder',a.company_folder],
+            ['Asset folder',  a.asset_folder],
+            ['Notes',         a.notes || '—']
+          ];
+          detail = `<tr class="detail-row"><td colspan="8"><div class="detail-panel">
+            <div class="detail-grid">
+              ${fields.map(([l,v]) => `<div><div class="df-label">${esc(l)}</div><div class="df-value mono">${esc(String(v??'—'))}</div></div>`).join('')}
+            </div>
+            <div class="detail-actions">
+              <button class="sm secondary copy-btn" data-val="${esc(a.asset_id)}">Copy asset ID</button>
+              <button class="sm secondary copy-btn" data-val="${esc(a.typeid)}">Copy TYPEID</button>
+              <button class="sm secondary copy-btn" data-val="${esc(a.company_folder)}">Copy company folder</button>
+              <button class="sm secondary copy-btn" data-val="${esc(a.asset_folder)}">Copy asset folder</button>
+              <button class="sm secondary edit-btn" data-idx="${assetIdx}" data-company="${esc(a.company_id)}">Edit</button>
+            </div>
+          </div></td></tr>`;
+        }
+        return `<tr class="data-row${inact}${isExp ? ' expanded' : ''}" data-id="${esc(a.asset_id)}">
+          <td class="mono">${esc(a.typeid || '—')}</td>
+          <td>${esc(a.project_name || '—')}</td>
+          <td>${esc(a.location || '—')}</td>
+          <td><span class="type-badge">${esc(a.type || '—')}</span></td>
+          <td>${esc(a.capacity || '—')}</td>
+          <td title="${esc(a.company_folder)}">${esc(a.company_display)}</td>
+          <td><span class="status-badge ${statusCls(a.lifecycle_status)}">${esc(a.lifecycle_status || '—')}</span></td>
+          <td>${a.is_active === false ? 'No' : 'Yes'}</td>
+        </tr>${detail}`;
+      }).join('');
+
+      els.tableBody.querySelectorAll('tr.data-row').forEach(tr => {
+        tr.addEventListener('click', () => {
+          const id = tr.dataset.id;
+          state.expandedId = state.expandedId === id ? null : id;
+          renderTable();
+        });
+      });
+      els.tableBody.querySelectorAll('button.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          e.stopPropagation();
+          try { await navigator.clipboard.writeText(btn.dataset.val || ''); setStatus(`Copied: ${btn.dataset.val}`, 'ok'); }
+          catch (_) { setStatus('Could not copy.', 'bad'); }
+        });
+      });
+      els.tableBody.querySelectorAll('button.edit-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const idx = Number(btn.dataset.idx);
+          els.fieldCompany.value = btn.dataset.company;
+          refreshRecordSelect(idx);
+          loadForm(idx);
+          state.expandedId = null;
+          renderTable();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }
+
+    function updateSortHeaders() {
+      document.querySelectorAll('thead th[data-col]').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.col === state.sortCol) th.classList.add(`sort-${state.sortDir}`);
+      });
+    }
+
+    // ── IndexedDB handle persistence ───────────────────────────────────────────
+    const HANDLE_DB = 'sch-folder-handles', HANDLE_STORE = 'settings', HANDLE_KEY = 'asset-register-folder';
+    let dbPromise = null;
+    function openDb() {
+      if (!window.indexedDB) return Promise.resolve(null);
+      if (dbPromise) return dbPromise;
+      dbPromise = new Promise((res, rej) => {
+        const req = indexedDB.open(HANDLE_DB, 1);
+        req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(HANDLE_STORE)) req.result.createObjectStore(HANDLE_STORE); };
+        req.onsuccess = () => { req.result.onversionchange = () => { req.result.close(); dbPromise = null; }; res(req.result); };
+        req.onerror = () => rej(req.error);
+      });
+      return dbPromise;
+    }
+    async function readHandle() { const db = await openDb(); if (!db) return null; return new Promise((res,rej) => { const t=db.transaction(HANDLE_STORE,'readonly'); const r=t.objectStore(HANDLE_STORE).get(HANDLE_KEY); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error); }); }
+    async function writeHandle(h) { const db = await openDb(); if (!db) return; await new Promise((res,rej) => { const t=db.transaction(HANDLE_STORE,'readwrite'); t.oncomplete=res; t.onerror=()=>rej(t.error); t.objectStore(HANDLE_STORE).put(h,HANDLE_KEY); }); }
+    async function clearHandle() { const db = await openDb(); if (!db) return; await new Promise((res,rej) => { const t=db.transaction(HANDLE_STORE,'readwrite'); t.oncomplete=res; t.onerror=()=>rej(t.error); t.objectStore(HANDLE_STORE).delete(HANDLE_KEY); }); }
+
+    async function readJson(dir, name) {
+      const h = await dir.getFileHandle(name);
+      const text = await (await h.getFile()).text();
+      try { return JSON.parse(text); } catch (e) { throw new Error(`Invalid JSON in ${name}: ${e.message}`); }
+    }
+    async function writeJson(dir, name, data) {
+      const h = await dir.getFileHandle(name, { create: true });
+      const w = await h.createWritable();
+      await w.write(JSON.stringify(data, null, 2) + '\n');
+      await w.close();
+    }
+
+    function applyLoadedData(co, ao, at) {
+      if (!Array.isArray(co?.companies)) throw new Error('company_master.json must contain a companies array.');
+      if (!Array.isArray(ao?.assets))    throw new Error('assets_master.json must contain an assets array.');
+      if (at?.asset_types) state.assetTypes = at;
+      state.companies = co.companies;
+      state.assets = { schema: ao.schema || { generated_at: new Date().toISOString() }, assets: ao.assets };
+      invalidateCaches();
+      refreshTypeSelect();
+      refreshCompanySelect();
+      const sel = refreshRecordSelect(0);
+      populateFilterDropdowns();
+      updateSortHeaders();
+      renderTable();
+      if (sel !== null) loadForm(sel); else newRecord();
+    }
+
+    async function loadFromDir(dir, source = 'manual') {
+      let at = state.assetTypes;
+      try { at = await readJson(dir, 'asset_types.json'); } catch (_) {}
+      const [co, ao] = await Promise.all([
+        readJson(dir, 'company_master.json'),
+        readJson(dir, 'assets_master.json')
+      ]);
+      state.directoryHandle = dir;
+      applyLoadedData(co, ao, at);
+      setStatus(
+        (source === 'restored' ? 'Restored last folder. ' : 'Loaded. ') +
+        `${state.assets.assets.length} assets across ${state.companies.length} companies.`, 'ok'
+      );
+    }
+
+    async function saveToDir() {
+      if (!state.directoryHandle) { setStatus('No folder open — use Download instead.', 'warn'); return; }
+      try { await writeJson(state.directoryHandle, 'assets_master.json', state.assets); setStatus('Saved to working folder.', 'ok'); }
+      catch (err) { setStatus(`Save failed: ${err.message}`, 'bad'); }
+    }
+
+    function downloadJson() {
+      const blob = new Blob([JSON.stringify(state.assets, null, 2) + '\n'], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'assets_master.json'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ── Event bindings ─────────────────────────────────────────────────────────
+    $('openFolderBtn').addEventListener('click', async () => {
+      if (!window.showDirectoryPicker) { setStatus('Folder access not supported. Use Auto-load or Download.', 'warn'); return; }
+      try {
+        const dir = await window.showDirectoryPicker();
+        await writeHandle(dir).catch(() => null);
+        await loadFromDir(dir, 'manual');
+      } catch (err) { if (err?.name !== 'AbortError') setStatus(`Open failed: ${err.message}`, 'bad'); }
+    });
+
+    $('reloadBtn').addEventListener('click', async () => {
+      if (!state.directoryHandle) { setStatus('No folder open.', 'warn'); return; }
+      try { await loadFromDir(state.directoryHandle, 'manual'); }
+      catch (e) { setStatus(`Reload failed: ${e.message}`, 'bad'); }
+    });
+
+    $('autoloadBtn').addEventListener('click', async () => {
+      if (location.protocol === 'file:') { setStatus('Auto-load blocked under file://. Use Open working folder.', 'warn'); return; }
+      try {
+        const [cr, ar, atr] = await Promise.all([
+          fetch('./company_master.json', { cache: 'no-store' }),
+          fetch('./assets_master.json',  { cache: 'no-store' }),
+          fetch('./asset_types.json',    { cache: 'no-store' }).catch(() => null)
+        ]);
+        if (!cr.ok || !ar.ok) throw new Error('company_master.json or assets_master.json not found next to the HTML file.');
+        const co = await cr.json();
+        const ao = await ar.json();
+        const at = (atr && atr.ok) ? await atr.json() : state.assetTypes;
+        applyLoadedData(co, ao, at);
+        setStatus(`Auto-loaded. ${state.assets.assets.length} assets.`, 'ok');
+      } catch (e) { setStatus(`Auto-load failed: ${e.message}`, 'bad'); }
+    });
+
+    const ASSET_SUBFOLDERS = [
+      '00_ASSET_MASTER',
+      '00_ASSET_MASTER/99_MISC_REVIEW',
+      '00_ASSET_MASTER/01_IDENTITY_REGISTERS',
+      '00_ASSET_MASTER/02_MASTER_DATA',
+      '00_ASSET_MASTER/03_STATUS_MILESTONES',
+      '01_DEVELOPMENT',
+      '01_DEVELOPMENT/99_MISC_REVIEW',
+      '01_DEVELOPMENT/01_PROGRAMME_WBS',
+      '01_DEVELOPMENT/02_PROGRESS_REPORTING',
+      '01_DEVELOPMENT/03_COST_RISK_CHANGE',
+      '01_DEVELOPMENT/04_MEETINGS_ACTIONS',
+      '02_LAND_SITE',
+      '02_LAND_SITE/99_MISC_REVIEW',
+      '02_LAND_SITE/01_OWNERSHIP_SURVEYS',
+      '02_LAND_SITE/02_AGREEMENTS',
+      '02_LAND_SITE/03_SITE_INVESTIGATIONS',
+      '02_LAND_SITE/04_PAYMENTS_COMPENSATIONS',
+      '03_PERMITTING_APPROVALS',
+      '03_PERMITTING_APPROVALS/99_MISC_REVIEW',
+      '03_PERMITTING_APPROVALS/01_PERMITS_LICENSES',
+      '03_PERMITTING_APPROVALS/02_SUBMISSIONS_RESPONSES',
+      '03_PERMITTING_APPROVALS/03_SUPPORT_CONTRACTS',
+      '03_PERMITTING_APPROVALS/04_FEES_PAYMENTS',
+      '04_TECHNICAL_DESIGN',
+      '04_TECHNICAL_DESIGN/99_MISC_REVIEW',
+      '04_TECHNICAL_DESIGN/01_STUDIES',
+      '04_TECHNICAL_DESIGN/02_DRAWINGS',
+      '04_TECHNICAL_DESIGN/03_MODELS_CALCULATIONS',
+      '04_TECHNICAL_DESIGN/04_CONSULTANT_CONTRACTS',
+      '04_TECHNICAL_DESIGN/05_PAYMENTS',
+      '05_COMMERCIAL_PROCUREMENT',
+      '05_COMMERCIAL_PROCUREMENT/99_MISC_REVIEW',
+      '05_COMMERCIAL_PROCUREMENT/01_RFQ_BIDS_EVALUATION',
+      '05_COMMERCIAL_PROCUREMENT/02_PURCHASE_ORDERS_SUPPLY_CONTRACTS',
+      '05_COMMERCIAL_PROCUREMENT/03_DELIVERIES_EXPEDITING',
+      '05_COMMERCIAL_PROCUREMENT/04_PAYMENTS',
+      '06_FINANCE_INSURANCE',
+      '06_FINANCE_INSURANCE/99_MISC_REVIEW',
+      '06_FINANCE_INSURANCE/01_BUDGETS_CASHFLOW',
+      '06_FINANCE_INSURANCE/02_BANKS_INSURANCE',
+      '06_FINANCE_INSURANCE/03_PAYABLES',
+      '06_FINANCE_INSURANCE/04_RECEIVABLES',
+      '06_FINANCE_INSURANCE/05_TAX_STATUTORY',
+      '06_FINANCE_INSURANCE/06_COST_REPORTING',
+      '07_CONSTRUCTION_DELIVERY',
+      '07_CONSTRUCTION_DELIVERY/99_MISC_REVIEW',
+      '07_CONSTRUCTION_DELIVERY/01_DRAWINGS',
+      '07_CONSTRUCTION_DELIVERY/02_SITE_DIARY_PROGRESS',
+      '07_CONSTRUCTION_DELIVERY/03_BOQ_BOM_QUANTITIES',
+      '07_CONSTRUCTION_DELIVERY/04_CONTRACTS_SUBCONTRACTS',
+      '07_CONSTRUCTION_DELIVERY/05_PAYMENTS_IPC_COST',
+      '07_CONSTRUCTION_DELIVERY/06_QAQC_HSE',
+      '07_CONSTRUCTION_DELIVERY/07_HANDOVER_CLOSEOUT',
+      '08_OPERATIONS_MAINTENANCE',
+      '08_OPERATIONS_MAINTENANCE/99_MISC_REVIEW',
+      '08_OPERATIONS_MAINTENANCE/01_ASSET_DOCUMENTS',
+      '08_OPERATIONS_MAINTENANCE/02_SERVICE_CONTRACTS',
+      '08_OPERATIONS_MAINTENANCE/03_PAYMENTS',
+      '08_OPERATIONS_MAINTENANCE/04_REPORTING_EVENTS',
+      '09_DECOMMISSIONING',
+      '09_DECOMMISSIONING/99_MISC_REVIEW',
+      '09_DECOMMISSIONING/01_STUDIES_PERMITS',
+      '09_DECOMMISSIONING/02_CLOSING_AGREEMENTS',
+      '09_DECOMMISSIONING/03_PAYMENTS',
+      '09_DECOMMISSIONING/04_DISPOSAL_SALE_RECORDS',
+      '99_EXPORTS',
+      '_SUPERSEDED',
+      '_DUPLICATED',
+      '_DEPRECATED',
+      '_BACKUP'
+    ];
+
+    async function ensureRelativePath(baseHandle, relativePath) {
+      let current = baseHandle;
+      for (const part of relativePath.split('/').filter(Boolean)) {
+        current = await current.getDirectoryHandle(part, { create: true });
+      }
+      return current;
+    }
+
+    async function createAssetFolder() {
+      if (!window.showDirectoryPicker) { setStatus('This browser does not support the File System Access API.', 'warn'); return; }
+      const assetFolder = els.fieldFolder.value.trim();
+      if (!assetFolder) { setStatus('Save the record first to generate a folder name.', 'warn'); return; }
+      try {
+        const baseHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        const assetDir = await baseHandle.getDirectoryHandle(assetFolder, { create: true });
+        for (const sub of ASSET_SUBFOLDERS) {
+          await ensureRelativePath(assetDir, sub);
+        }
+        setStatus(`Folder tree created: ${baseHandle.name}/${assetFolder} with ${ASSET_SUBFOLDERS.length} subfolders.`, 'ok');
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+        setStatus(`Could not create folder: ${err.message}`, 'bad');
+      }
+    }
+
+    $('downloadBtn').addEventListener('click', downloadJson);
+    $('newBtn').addEventListener('click', () => newRecord());
+    $('saveBtn').addEventListener('click', async () => { if (saveRecord()) await saveToDir(); });
+    $('createFolderBtn').addEventListener('click', createAssetFolder);
+    $('deleteBtn').addEventListener('click', async () => { deleteRecord(); await saveToDir(); });
+
+    els.selectRecord.addEventListener('change', e => loadForm(Number(e.target.value)));
+    els.fieldCompany.addEventListener('change', () => {
+      const sel = refreshRecordSelect();
+      if (sel !== null) loadForm(sel); else newRecord({ companyId: els.fieldCompany.value });
+    });
+    els.fieldType.addEventListener('change', refreshAssetUnits);
+    [els.fieldInputValue, els.fieldInputUnit, els.fieldSs, els.fieldProjectName, els.fieldLocation].forEach(el =>
+      el.addEventListener('input', () => computeDerived())
+    );
+    els.fieldProjectName.addEventListener('blur', () => computeDerived({ applyProjectName: true }));
+
+    document.querySelectorAll('thead th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        state.sortDir = state.sortCol === th.dataset.col && state.sortDir === 'asc' ? 'desc' : 'asc';
+        state.sortCol = th.dataset.col;
+        updateSortHeaders();
+        renderTable();
+      });
+    });
+
+    els.searchInput.addEventListener('input', debounce(renderTable));
+    els.filterType.addEventListener('change', renderTable);
+    els.filterStatus.addEventListener('change', renderTable);
+    els.filterCompany.addEventListener('change', renderTable);
+    els.filterLocation.addEventListener('change', renderTable);
+    $('clearFiltersBtn').addEventListener('click', () => {
+      els.searchInput.value = ''; els.filterType.value = ''; els.filterStatus.value = '';
+      els.filterCompany.value = ''; els.filterLocation.value = '';
+      state.expandedId = null; renderTable();
+    });
+    $('copyTableBtn').addEventListener('click', async () => {
+      const rows = getRows();
+      if (!rows.length) { setStatus('No rows to copy.', 'warn'); return; }
+      const cols = ['asset_id','typeid','project_name','location','type','capacity','company_display','company_folder','asset_folder','lifecycle_status','is_active','notes'];
+      const q = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+      const tsv = [cols.join('\t'), ...rows.map(r => cols.map(c => q(r[c])).join('\t'))].join('\n');
+      try { await navigator.clipboard.writeText(tsv); setStatus(`Copied ${rows.length} rows — paste into Excel.`, 'ok'); }
+      catch (_) { setStatus('Could not copy.', 'bad'); }
+    });
+
+    async function init() {
+      refreshTypeSelect();
+      refreshCompanySelect();
+      refreshRecordSelect();
+      updateSortHeaders();
+      renderTable();
+      newRecord();
+      if (!window.showDirectoryPicker) return;
+      try {
+        const h = await readHandle(); if (!h) return;
+        if ((await h.queryPermission?.({ mode: 'read' })) !== 'granted') return;
+        await loadFromDir(h, 'restored');
+      } catch (_) { await clearHandle().catch(() => null); }
+    }
+
+    init().catch(err => setStatus(`Init failed: ${err.message}`, 'bad'));
+  </script>
+</body>
+</html>

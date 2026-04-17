@@ -182,7 +182,7 @@
           </div>
           <div>
             <label for="lifecycleStatus">Lifecycle status</label>
-            <select id="lifecycleStatus"><option value="active">active</option><option value="pipeline">pipeline</option><option value="construction">construction</option><option value="operational">operational</option><option value="oper-no-scope">oper-no-scope</option><option value="oper-o-and-m">oper-o-and-m</option><option value="archived">archived</option></select>
+            <select id="lifecycleStatus"><option value="development">development</option><option value="pipeline">pipeline</option><option value="construction">construction</option><option value="operational">operational</option><option value="no-scope">no-scope</option><option value="o-and-m">o-and-m</option><option value="archived">archived</option></select>
           </div>
           <div class="full">
             <label for="projectName">Project name</label>
@@ -521,7 +521,7 @@
       assetEls.inputValue.value = row.input_value ?? '';
       assetEls.inputUnit.value = row.input_unit || assetEls.inputUnit.value;
       assetEls.ss.value = row.ss || '01';
-      assetEls.lifecycleStatus.value = row.lifecycle_status || 'active';
+      assetEls.lifecycleStatus.value = row.lifecycle_status || 'development';
       assetEls.projectName.value = normalizeProjectName(row.project_name || '');
       assetEls.location.value = normalizeLocation(row.location || '');
       assetEls.active.value = String(Boolean(row.is_active));
@@ -564,7 +564,7 @@
       updateAssetUnits();
       assetEls.inputValue.value = '';
       assetEls.ss.value = '01';
-      assetEls.lifecycleStatus.value = 'active';
+      assetEls.lifecycleStatus.value = 'development';
       assetEls.projectName.value = '';
       assetEls.location.value = '';
       assetEls.active.value = 'true';

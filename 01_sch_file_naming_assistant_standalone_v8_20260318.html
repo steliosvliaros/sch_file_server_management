@@ -151,7 +151,7 @@
           <div class="full">
             <label for="companyRootPath">Absolute company root path</label>
             <input id="companyRootPath" readonly />
-            <div class="hint">Comes from <span class="mono">company_master.json</span> or inherited asset data. Portfolio Shared mode files directly under this root.</div>
+            <div class="hint">Comes from <span class="mono">company_master.json</span>. Portfolio Shared mode files directly under this root.</div>
           </div>
           <div>
             <label for="companyFolder">Company folder</label>
@@ -240,12 +240,11 @@
         <div class="actions" style="margin-top: 12px;">
           <button id="generateBtn">Generate</button>
           <button id="resetBtn" class="secondary">Reset defaults</button>
-          <button id="createFoldersBtn" class="secondary">Create policy folders</button>
           <button id="copyFileBtn" class="secondary">Copy filename</button>
           <button id="copyFolderBtn" class="secondary">Copy folder</button>
           <button id="copyPathBtn" class="secondary">Copy full path</button>
         </div>
-        <div class="hint" style="margin-top:10px;">The folder-creation button uses the browser folder picker. In normal asset mode, pick the parent location for the company folder, or the company folder itself, and the assistant will create the full structure from the company folder down: <span class="mono">CORPORATE</span>, <span class="mono">TEMPLATES</span>, <span class="mono">ARCHIVE</span>, <span class="mono">ASSETS</span>, the asset folder, and the policy tree. It will also create <span class="mono">__PORTFOLIO_SHARED__</span> with its standard shared subfolders and the server root buckets (<span class="mono">__DEFERRED__</span>, <span class="mono">__NO_SCOPE__</span>, <span class="mono">__PIPELINE__</span>, <span class="mono">__SUPERSEDED__</span>) when the selected location is the server root. In Portfolio Shared mode, pick the server root to create <span class="mono">__PORTFOLIO_SHARED__</span> and all four server root buckets, or pick <span class="mono">__PORTFOLIO_SHARED__</span> itself to only update its subfolders.</div>
+
       </section>
 
       <section class="card">
@@ -334,7 +333,6 @@
       contractorsFileInput: document.getElementById('contractorsFileInput'),
       generateBtn: document.getElementById('generateBtn'),
       resetBtn: document.getElementById('resetBtn'),
-      createFoldersBtn: document.getElementById('createFoldersBtn'),
       copyFileBtn: document.getElementById('copyFileBtn'),
       copyFolderBtn: document.getElementById('copyFolderBtn'),
       copyPathBtn: document.getElementById('copyPathBtn')
@@ -590,9 +588,9 @@
       }
 
       const asset = getSelectedAsset();
-      const rootPath = asset?.absolute_company_root_path || company?.absolute_company_root_path || company?.company_root_path || '';
+      const rootPath = company?.absolute_company_root_path || company?.company_root_path || '';
       els.companyRootPath.value = toWindowsPath(rootPath);
-      els.companyFolder.value = asset?.company_folder || company?.company_folder || '';
+      els.companyFolder.value = company?.company_folder || '';
       els.assetFolder.value = asset?.asset_folder || '';
       els.typeId.value = asset?.typeid || '';
       if (!asset && state.assets.length && company) {
@@ -601,8 +599,6 @@
           els.assetSelect.value = first.asset_id;
           els.assetFolder.value = first.asset_folder || '';
           els.typeId.value = first.typeid || '';
-          els.companyFolder.value = first.company_folder || company.company_folder || '';
-          els.companyRootPath.value = toWindowsPath(first.absolute_company_root_path || company.absolute_company_root_path || company.company_root_path || '');
         }
       }
     }
@@ -666,22 +662,6 @@
       return { folderId, folderPath: folderIndex[folderId] || '', reason: `${docType} uses ${entry.mode} and resolved by workstream ${workstream}.`, mode: entry.mode };
     }
 
-    async function ensurePortfolioSharedTree(rootHandle) {
-      const portfolioHandle = (rootHandle?.name || '').toUpperCase() === '__PORTFOLIO_SHARED__'
-        ? rootHandle
-        : await rootHandle.getDirectoryHandle('__PORTFOLIO_SHARED__', { create: true });
-      for (const row of portfolioSharedFolders) {
-        await portfolioHandle.getDirectoryHandle(row.value, { create: true });
-      }
-      return portfolioHandle;
-    }
-
-    async function ensureServerRootBuckets(rootHandle) {
-      for (const name of serverRootStatusBuckets) {
-        await rootHandle.getDirectoryHandle(name, { create: true });
-      }
-    }
-
     function validate(filename, fullPath, issues) {
       const out = [...issues];
       const limits = state.policy?.core?.constraints || {};
@@ -690,176 +670,6 @@
       const depth = fullPath.split('/').filter(Boolean).length;
       if (limits.max_depth_segments && depth > limits.max_depth_segments) out.push(`Path depth is ${depth}; limit is ${limits.max_depth_segments}`);
       return out;
-    }
-
-    function getPolicyFolderPaths() {
-      const raw = Object.values(getFolderIndex())
-        .filter(Boolean)
-        .map(value => normalizePath(String(value)).replace(/^\/+/, ''));
-      return [...new Set(raw)].sort((a, b) => {
-        const depthDiff = a.split('/').filter(Boolean).length - b.split('/').filter(Boolean).length;
-        return depthDiff || a.localeCompare(b);
-      });
-    }
-
-    function splitRelativePath(path) {
-      return normalizePath(path).split('/').filter(Boolean).filter(part => part !== '.' && part !== '..');
-    }
-
-    async function ensureRelativePath(baseHandle, relativePath) {
-      let current = baseHandle;
-      for (const part of splitRelativePath(relativePath)) {
-        current = await current.getDirectoryHandle(part, { create: true });
-      }
-      return current;
-    }
-
-    function resolveFolderCreationPlan(selectedFolderName) {
-      const companyFolder = (els.companyFolder.value || '').trim();
-      const assetFolder = (els.assetFolder.value || '').trim();
-      if (!companyFolder || !assetFolder) {
-        return {
-          companyHandleMode: 'as-picked',
-          targetLabel: selectedFolderName || 'selected folder',
-          note: 'Company or asset folder is missing from the loaded master data.'
-        };
-      }
-
-      if (selectedFolderName === assetFolder) {
-        return {
-          companyHandleMode: 'below-company-asset',
-          targetLabel: assetFolder,
-          note: 'Selected folder matches the asset folder, so only the internal policy tree can be created. To build the full structure from the company folder down, pick the company folder or its parent location.'
-        };
-      }
-
-      if ((selectedFolderName || '').toUpperCase() === 'ASSETS') {
-        return {
-          companyHandleMode: 'below-company-assets',
-          targetLabel: `ASSETS/${assetFolder}`,
-          note: 'Selected folder is ASSETS, so the asset folder and internal policy tree will be created. To also create CORPORATE, TEMPLATES, and ARCHIVE, pick the company folder or its parent location.'
-        };
-      }
-
-      if (selectedFolderName === companyFolder) {
-        return {
-          companyHandleMode: 'company-picked',
-          targetLabel: companyFolder,
-          note: 'Selected folder matches the company folder, so the assistant will ensure the full company structure and the asset policy tree under it.'
-        };
-      }
-
-      return {
-        companyHandleMode: 'parent-picked',
-        targetLabel: `${companyFolder}`,
-        note: 'Selected folder is treated as the parent location, so the assistant will create the full company structure from the company folder down.'
-      };
-    }
-
-    async function createPolicyFolders() {
-      if (!state.policy) {
-        setStatus('Load policy.json before creating folders.', 'warn');
-        return;
-      }
-      if (!window.showDirectoryPicker) {
-        setStatus('This browser does not support folder creation through the File System Access API.', 'warn');
-        return;
-      }
-      const companyFolder = (els.companyFolder.value || '').trim();
-      const assetFolder = (els.assetFolder.value || '').trim();
-      const companyRootPath = normalizePath(els.companyRootPath.value.trim());
-      if (!companyRootPath) {
-        setStatus('Load a company first so the assistant knows the absolute company root path.', 'warn');
-        return;
-      }
-
-      if (isPortfolioSharedMode()) {
-        try {
-          const baseHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-          const isInsidePortfolio = (baseHandle.name || '').toUpperCase() === '__PORTFOLIO_SHARED__';
-          const portfolioHandle = await ensurePortfolioSharedTree(baseHandle);
-          const createdSummary = portfolioSharedFolders.map(row => row.value).join(', ');
-          let bucketsNote = '';
-          if (!isInsidePortfolio) {
-            await ensureServerRootBuckets(baseHandle);
-            bucketsNote = ` Server root buckets also ensured: ${serverRootStatusBuckets.join(', ')}.`;
-          } else {
-            bucketsNote = ' To also create the server root buckets, pick the parent server root folder instead of __PORTFOLIO_SHARED__ itself.';
-          }
-          const locationLabel = isInsidePortfolio
-            ? '__PORTFOLIO_SHARED__'
-            : `${baseHandle.name || 'selected root'}/__PORTFOLIO_SHARED__`;
-          setStatus(`Portfolio Shared tree ensured under ${locationLabel}: ${createdSummary}.${bucketsNote}`, 'ok');
-        } catch (err) {
-          if (err && err.name === 'AbortError') {
-            setStatus('Folder creation was cancelled.', 'warn');
-            return;
-          }
-          setStatus(`Folder creation failed: ${err.message}`, 'bad');
-        }
-        return;
-      }
-
-      if (!companyFolder || !assetFolder) {
-        setStatus('Load company and asset master data first so the assistant knows where to build the tree.', 'warn');
-        return;
-      }
-      const folderPaths = getPolicyFolderPaths();
-      if (!folderPaths.length) {
-        setStatus('No folder_index entries were found in the loaded policy.', 'warn');
-        return;
-      }
-      try {
-        const baseHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-        const plan = resolveFolderCreationPlan(baseHandle.name);
-
-        let companyHandle = baseHandle;
-        let assetsHandle = null;
-        let assetBaseHandle = null;
-        let createdSummary = '';
-        let portfolioNote = ' Pick the absolute company root path next time if you also want the sibling __PORTFOLIO_SHARED__ tree created automatically.';
-
-        if (plan.companyHandleMode === 'parent-picked') {
-          companyHandle = await baseHandle.getDirectoryHandle(companyFolder, { create: true });
-          await companyHandle.getDirectoryHandle('CORPORATE', { create: true });
-          await companyHandle.getDirectoryHandle('TEMPLATES', { create: true });
-          await companyHandle.getDirectoryHandle('ARCHIVE', { create: true });
-          assetsHandle = await companyHandle.getDirectoryHandle('ASSETS', { create: true });
-          assetBaseHandle = await assetsHandle.getDirectoryHandle(assetFolder, { create: true });
-          await ensurePortfolioSharedTree(baseHandle);
-          await ensureServerRootBuckets(baseHandle);
-          createdSummary = `${companyFolder}/[CORPORATE, TEMPLATES, ARCHIVE, ASSETS/${assetFolder}]`;
-          portfolioNote = ` __PORTFOLIO_SHARED__ and its standard shared subfolders were also ensured at the selected root, along with server root buckets: ${serverRootStatusBuckets.join(', ')}.`;
-        } else if (plan.companyHandleMode === 'company-picked') {
-          await companyHandle.getDirectoryHandle('CORPORATE', { create: true });
-          await companyHandle.getDirectoryHandle('TEMPLATES', { create: true });
-          await companyHandle.getDirectoryHandle('ARCHIVE', { create: true });
-          assetsHandle = await companyHandle.getDirectoryHandle('ASSETS', { create: true });
-          assetBaseHandle = await assetsHandle.getDirectoryHandle(assetFolder, { create: true });
-          createdSummary = `${companyFolder}/[CORPORATE, TEMPLATES, ARCHIVE, ASSETS/${assetFolder}]`;
-        } else if (plan.companyHandleMode === 'below-company-assets') {
-          assetsHandle = baseHandle;
-          assetBaseHandle = await assetsHandle.getDirectoryHandle(assetFolder, { create: true });
-          createdSummary = `ASSETS/${assetFolder}`;
-        } else if (plan.companyHandleMode === 'below-company-asset') {
-          assetBaseHandle = baseHandle;
-          createdSummary = assetFolder;
-        } else {
-          assetBaseHandle = await ensureRelativePath(baseHandle, `ASSETS/${assetFolder}`);
-          createdSummary = `${baseHandle.name || 'selected-folder'}/ASSETS/${assetFolder}`;
-        }
-
-        for (const relativePath of folderPaths) {
-          await ensureRelativePath(assetBaseHandle, relativePath);
-        }
-        setStatus(`Policy tree ensured: ${folderPaths.length} folders under ${plan.targetLabel}. Base created/ensured: ${createdSummary}. ${plan.note}${portfolioNote}`, 'ok');
-      } catch (err) {
-        if (err && err.name === 'AbortError') {
-          setStatus('Folder creation was cancelled.', 'warn');
-          return;
-        }
-        setStatus(`Folder creation failed: ${err.message}`, 'bad');
-      }
     }
 
     function generate() {
@@ -1252,7 +1062,6 @@
 
     els.generateBtn.addEventListener('click', generate);
     els.resetBtn.addEventListener('click', resetDefaults);
-    els.createFoldersBtn.addEventListener('click', createPolicyFolders);
     els.copyFileBtn.addEventListener('click', () => copyResultText(els.fileName.textContent, 'filename'));
     els.copyFolderBtn.addEventListener('click', () => copyResultText(els.targetFolder.textContent, 'target folder'));
     els.copyPathBtn.addEventListener('click', () => copyResultText(els.fullPath.textContent, 'full destination path'));

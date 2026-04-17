@@ -1,7 +1,7 @@
 {
   "schema": {
     "version": "1.1",
-    "generated_at": "2026-03-26T00:00:00Z",
+    "generated_at": "2026-04-17T05:43:38.447Z",
     "source_files": [
       "00_company_master.xlsx",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx"
@@ -13,16 +13,12 @@
       "company_id": "CMP-0001",
       "display_name": "4Ε ΕΝΕΡΓΕΙΑΚΗ ΕΤΑΙΡΕΙΑ ΑΕ",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
-      "namecode": "4EENER",
+      "namecode": "EENER",
       "typ3": "AEE",
       "vat9": "998808360",
-      "company_folder": "4EENER-AEE-998808360",
+      "company_folder": "EENER-AEE-998808360",
       "is_active": true,
-      "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files",
-      "source_type_std": "AE",
-      "source_company_folder": "4EENER-AE-998808360",
-      "validation_errors": [],
-      "source_row": 2
+      "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files"
     },
     {
       "company_id": "CMP-0002",
@@ -1140,41 +1136,25 @@
     },
     {
       "company_id": "CMP-0076",
-      "display_name": "ROMEIK",
+      "display_name": "ΡΑΧΩΒΙΤΣΑ ΑΝΤΙΓΟΝΗ",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
-      "namecode": "ROMEIK",
-      "typ3": "OTH",
+      "namecode": "RACHAG",
+      "typ3": "",
       "vat9": "106780106",
-      "company_folder": "ROMEIK-OTH-106780106",
+      "company_folder": "RACHAG--106780106",
       "is_active": true,
-      "relationship_to_group": "THIRD_PARTY",
-      "record_status": "PROVISIONAL",
-      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=ROMEIK-AT-106780106.",
-      "source_type_std": "AT",
-      "source_company_folder": "ROMEIK-AT-106780106",
-      "validation_errors": [
-        "unknown_source_legal_type:AT"
-      ],
-      "source_row": 87
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=ROMEIK-AT-106780106."
     },
     {
       "company_id": "CMP-0077",
-      "display_name": "ROMEIK",
+      "display_name": "ΡΑΧΩΒΙΤΣΑ ΑΝΑΣΤΑΣΙΑ",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
-      "namecode": "ROMEIK",
-      "typ3": "OTH",
+      "namecode": "RACHAN",
+      "typ3": "AEE",
       "vat9": "106774658",
-      "company_folder": "ROMEIK-OTH-106774658",
+      "company_folder": "RACHAN-AEE-106774658",
       "is_active": true,
-      "relationship_to_group": "THIRD_PARTY",
-      "record_status": "PROVISIONAL",
-      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=ROMEIK-ANA-106774658.",
-      "source_type_std": "ANA",
-      "source_company_folder": "ROMEIK-ANA-106774658",
-      "validation_errors": [
-        "unknown_source_legal_type:ANA"
-      ],
-      "source_row": 88
+      "notes": "Provisional third-party owner record created from operations asset workbook for O_M-only managed asset. Legal display name was not present in the workbook; source_company_folder=ROMEIK-ANA-106774658."
     },
     {
       "company_id": "CMP-0078",

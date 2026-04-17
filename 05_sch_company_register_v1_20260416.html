@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCH Company Register</title>
+  <style>
+    :root {
+      --bg:#f6f7fb; --card:#ffffff; --text:#1f2937; --muted:#6b7280;
+      --line:#e5e7eb; --soft:#f3f4f6; --ok:#065f46; --warn:#92400e;
+      --bad:#991b1b; --info:#1d4ed8; --btn:#111827; --btn-text:#ffffff;
+      --row-hover:#f0f4ff; --row-expanded:#e8eeff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8;
+        --line:#334155; --soft:#1a2332; --ok:#065f46; --warn:#92400e;
+        --bad:#991b1b; --info:#3b82f6; --btn:#334155; --btn-text:#f1f5f9;
+        --row-hover:#1e3050; --row-expanded:#1e3a5f;
+      }
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:1600px; margin:0 auto; padding:24px; }
+    .hero h1 { margin:0 0 6px; font-size:30px; }
+    .hero p { margin:0 0 14px; color:var(--muted); line-height:1.5; }
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,.05); margin-bottom:16px; }
+    .card h2 { margin:0 0 14px; font-size:18px; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:14px; }
+    .ok   { background:#ecfdf5; color:var(--ok); }
+    .warn { background:#fff7ed; color:var(--warn); }
+    .bad  { background:#fef2f2; color:var(--bad); }
+    .info { background:#eff6ff; color:var(--info); }
+    @media (prefers-color-scheme: dark) {
+      .ok { background:#064e3b; } .warn { background:#78350f; }
+      .bad { background:#7f1d1d; } .info { background:#1e3a8a; }
+    }
+    button { border:0; border-radius:12px; padding:10px 14px; background:var(--btn); color:var(--btn-text); cursor:pointer; font-weight:700; font-size:13px; }
+    button.secondary { background:var(--card); color:var(--text); border:1px solid var(--line); }
+    button.danger { background:#b91c1c; color:#fff; }
+    button.sm { padding:5px 10px; font-size:12px; border-radius:8px; }
+    @media (prefers-color-scheme: dark) { button.danger { background:#dc2626; } }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .full { grid-column:1/-1; }
+    label { display:block; font-size:12px; font-weight:700; margin-bottom:5px; }
+    input, select, textarea {
+      width:100%; border:1px solid var(--line); border-radius:12px;
+      padding:10px 12px; font-size:14px; background:var(--card); color:var(--text);
+    }
+    input[readonly] { background:var(--soft); }
+    textarea { min-height:72px; resize:vertical; }
+    .small { font-size:12px; color:var(--muted); line-height:1.4; margin-top:4px; }
+    .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; word-break:break-all; font-size:12px; }
+    .form-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+    .filters { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:12px; align-items:end; }
+    @media (max-width:900px) { .filters { grid-template-columns:1fr 1fr; } }
+    .filter-actions { display:flex; flex-direction:column; gap:6px; justify-content:flex-end; }
+    .summary-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+    .count-badge { font-size:13px; color:var(--muted); }
+    .count-badge strong { color:var(--text); }
+    .table-wrap { overflow-x:auto; border-radius:16px; border:1px solid var(--line); }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead th {
+      background:var(--soft); padding:10px 12px; text-align:left;
+      font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+      color:var(--muted); white-space:nowrap; cursor:pointer; user-select:none;
+      border-bottom:1px solid var(--line); position:sticky; top:0; z-index:2;
+    }
+    thead th:hover { color:var(--text); }
+    thead th.sort-asc::after  { content:' ↑'; }
+    thead th.sort-desc::after { content:' ↓'; }
+    tbody tr.data-row { border-bottom:1px solid var(--line); cursor:pointer; transition:background .1s; }
+    tbody tr.data-row:hover { background:var(--row-hover); }
+    tbody tr.data-row.expanded { background:var(--row-expanded); }
+    tbody tr.detail-row td { padding:0; cursor:default; }
+    tbody tr.detail-row:hover { background:var(--row-expanded); }
+    td { padding:9px 12px; vertical-align:middle; }
+    .inactive-row td { opacity:.45; }
+    .status-badge { display:inline-block; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:600; }
+    .s-yes { background:#ecfdf5; color:var(--ok); }
+    .s-no  { background:#fff7ed; color:var(--warn); }
+    @media (prefers-color-scheme: dark) { .s-yes { background:#064e3b; } .s-no { background:#78350f; } }
+    .detail-panel { padding:16px 20px; background:var(--soft); border-top:1px solid var(--line); }
+    .detail-grid  { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin-bottom:14px; }
+    .df-label { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+    .df-value { font-size:13px; word-break:break-all; }
+    .detail-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .no-results { padding:36px; text-align:center; color:var(--muted); font-size:14px; }
+    @media (max-width:768px) { .form-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>SCH Company Register</h1>
+      <p>Manage company records in <span class="mono">company_master.json</span>. Open the working folder to load, edit, and save back directly.</p>
+    </div>
+
+    <div class="toolbar">
+      <button id="openFolderBtn">Open working folder</button>
+      <button id="reloadBtn" class="secondary">Reload folder</button>
+      <button id="autoloadBtn" class="secondary">Auto-load same folder</button>
+      <button id="downloadBtn" class="secondary">Download company_master.json</button>
+    </div>
+
+    <div id="statusBadge" class="pill info">Load a working folder or use Auto-load.</div>
+
+    <!-- CRUD form -->
+    <div class="card">
+      <h2>Company record</h2>
+      <div class="form-grid">
+        <div>
+          <label for="selectRecord">Record</label>
+          <select id="selectRecord"></select>
+        </div>
+        <div>
+          <label for="fieldId">Company ID</label>
+          <input id="fieldId" readonly />
+        </div>
+        <div class="full">
+          <label for="fieldDisplayName">Display name</label>
+          <input id="fieldDisplayName" placeholder="My Energy Company IKE" />
+        </div>
+        <div class="full">
+          <label for="fieldRootPath">Absolute company root path</label>
+          <input id="fieldRootPath" placeholder="D:\SCH_SERVER  or  \\NAS01\Projects" />
+          <div class="small">Enter the real absolute path used on your file server.</div>
+        </div>
+        <div>
+          <label for="fieldNamecode">NAMECODE</label>
+          <input id="fieldNamecode" maxlength="6" />
+          <div class="small">Letters only, uppercase, max 6.</div>
+        </div>
+        <div>
+          <label for="fieldTyp3">TYP3</label>
+          <select id="fieldTyp3"></select>
+        </div>
+        <div>
+          <label for="fieldVat9">VAT9</label>
+          <input id="fieldVat9" maxlength="9" />
+        </div>
+        <div>
+          <label for="fieldActive">Active</label>
+          <select id="fieldActive">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="fieldFolder">Company folder (generated)</label>
+          <input id="fieldFolder" readonly />
+        </div>
+        <div class="full">
+          <label for="fieldNotes">Notes</label>
+          <textarea id="fieldNotes"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button id="newBtn">New company</button>
+        <button id="saveBtn" class="secondary">Save company</button>
+        <button id="createFolderBtn" class="secondary">Create company folder</button>
+        <button id="deleteBtn" class="danger">Delete company</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+      <div class="filters">
+        <div>
+          <label for="searchInput">Search</label>
+          <input id="searchInput" type="search" placeholder="ID, name, folder, VAT, root path, notes…" />
+        </div>
+        <div>
+          <label for="filterActive">Active</label>
+          <select id="filterActive">
+            <option value="">All</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <div>
+          <label for="filterTyp3">Type (TYP3)</label>
+          <select id="filterTyp3"><option value="">All types</option></select>
+        </div>
+        <div class="filter-actions">
+          <button id="clearFiltersBtn" class="secondary sm">Clear filters</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-bar">
+      <div class="count-badge" id="countBadge">Load data to see companies.</div>
+      <button id="copyTableBtn" class="secondary sm">Copy table (paste to Excel)</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="company_id">ID</th>
+            <th data-col="display_name">Display name</th>
+            <th data-col="company_folder">Folder</th>
+            <th data-col="namecode">Namecode</th>
+            <th data-col="typ3">TYP3</th>
+            <th data-col="absolute_company_root_path">Root path</th>
+            <th data-col="is_active">Active</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="7" class="no-results">Load data to view companies.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      companies: { schema: { generated_at: new Date().toISOString() }, companies: [] },
+      legalTypes: { legal_types: [
+        { typ3:'AEE', label:'Anonymous Energy Company' },
+        { typ3:'EPE', label:'Limited Liability Company' },
+        { typ3:'EEE', label:'General Commercial Company' },
+        { typ3:'OEE', label:'General Partnership' },
+        { typ3:'IKE', label:'Private Company' },
+        { typ3:'MIK', label:'Single Member Private Company' }
+      ]},
+      directoryHandle: null,
+      currentIndex: -1,
+      sortCol: 'display_name',
+      sortDir: 'asc',
+      expandedId: null
+    };
+
+    const $ = id => document.getElementById(id);
+    const els = {
+      statusBadge:    $('statusBadge'),
+      selectRecord:   $('selectRecord'),
+      fieldId:        $('fieldId'),
+      fieldDisplayName: $('fieldDisplayName'),
+      fieldRootPath:  $('fieldRootPath'),
+      fieldNamecode:  $('fieldNamecode'),
+      fieldTyp3:      $('fieldTyp3'),
+      fieldVat9:      $('fieldVat9'),
+      fieldActive:    $('fieldActive'),
+      fieldFolder:    $('fieldFolder'),
+      fieldNotes:     $('fieldNotes'),
+      searchInput:    $('searchInput'),
+      filterActive:   $('filterActive'),
+      filterTyp3:     $('filterTyp3'),
+      countBadge:     $('countBadge'),
+      tableBody:      $('tableBody')
+    };
+
+    // ── Utilities ──────────────────────────────────────────────────────────────
+    function setStatus(msg, cls = 'info') { els.statusBadge.className = `pill ${cls}`; els.statusBadge.textContent = msg; }
+    function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function debounce(fn, wait = 160) { let t = null; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+    function searchText(v) { return String(v || '').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+    function normalizeNamecode(v, fb = '') { return String(v || fb || '').replace(/[^A-Za-z]/g,'').toUpperCase().slice(0,6); }
+    function padVat(v) { return String(v || '').replace(/\D/g,'').padStart(9,'0').slice(0,9); }
+    function buildFolder(nc, typ3, vat9) { return `${normalizeNamecode(nc)}-${String(typ3||'').toUpperCase()}-${padVat(vat9)}`; }
+    function nextId(items, prefix, key) {
+      let max = 0;
+      (items || []).forEach(item => { const m = String(item?.[key]||'').toUpperCase().match(new RegExp(`^${prefix}-(\\d+)$`)); if (m) max = Math.max(max, Number(m[1])); });
+      return `${prefix}-${String(max+1).padStart(4,'0')}`;
+    }
+    function normalizeRootPath(v) {
+      const raw = String(v || '').trim();
+      if (!raw) return '';
+      const unc = raw.startsWith('\\\\') || raw.startsWith('//');
+      const n = raw.replace(/\\/g,'/').replace(/\/+/g,'/').replace(/\/$/,'');
+      const u = unc ? `//${n.replace(/^\/+/, '')}` : n;
+      return u.startsWith('//') ? `\\\\${u.slice(2).replace(/\//g,'\\')}` : u.replace(/\//g,'\\');
+    }
+
+    // ── Reference dropdowns ────────────────────────────────────────────────────
+    function refreshTyp3Select() {
+      const prev = els.fieldTyp3.value;
+      els.fieldTyp3.innerHTML = (state.legalTypes.legal_types || []).map(r =>
+        `<option value="${esc(r.typ3)}">${esc(r.typ3)} — ${esc(r.label)}</option>`
+      ).join('');
+      if (prev && [...els.fieldTyp3.options].some(o => o.value === prev)) els.fieldTyp3.value = prev;
+    }
+    function refreshTyp3Filter() {
+      const prev = els.filterTyp3.value;
+      const types = [...new Set((state.companies.companies||[]).map(c => c.typ3).filter(Boolean))].sort();
+      els.filterTyp3.innerHTML = '<option value="">All types</option>' + types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+      if (prev && [...els.filterTyp3.options].some(o => o.value === prev)) els.filterTyp3.value = prev;
+    }
+    function refreshRecordSelect(preferredIndex = state.currentIndex) {
+      const rows = state.companies.companies || [];
+      els.selectRecord.innerHTML = rows.length
+        ? rows.map((r, i) => `<option value="${i}">${esc(r.company_id)} — ${esc(r.display_name)}</option>`).join('')
+        : '<option value="">No companies</option>';
+      if (!rows.length) return null;
+      const sel = rows[preferredIndex] ? preferredIndex : 0;
+      els.selectRecord.value = String(sel);
+      return sel;
+    }
+
+    // ── Derived fields ─────────────────────────────────────────────────────────
+    function computeDerived() {
+      els.fieldId.value = els.fieldId.value.trim() || nextId(state.companies.companies, 'CMP', 'company_id');
+      els.fieldNamecode.value = normalizeNamecode(els.fieldNamecode.value, els.fieldDisplayName.value);
+      els.fieldVat9.value = padVat(els.fieldVat9.value);
+      els.fieldRootPath.value = normalizeRootPath(els.fieldRootPath.value);
+      els.fieldFolder.value = buildFolder(els.fieldNamecode.value, els.fieldTyp3.value, els.fieldVat9.value);
+    }
+
+    // ── Form load / clear ──────────────────────────────────────────────────────
+    function loadForm(index) {
+      state.currentIndex = index;
+      const row = (state.companies.companies || [])[index];
+      if (!row) return;
+      els.selectRecord.value = String(index);
+      els.fieldId.value        = row.company_id || '';
+      els.fieldDisplayName.value = row.display_name || '';
+      els.fieldRootPath.value  = normalizeRootPath(row.absolute_company_root_path || row.company_root_path || '');
+      els.fieldNamecode.value  = normalizeNamecode(row.namecode || row.display_name || '');
+      els.fieldTyp3.value      = row.typ3 || (state.legalTypes.legal_types?.[0]?.typ3 || '');
+      els.fieldVat9.value      = row.vat9 || '';
+      els.fieldActive.value    = String(row.is_active !== false);
+      els.fieldNotes.value     = row.notes || '';
+      computeDerived();
+    }
+    function newRecord() {
+      state.currentIndex = -1;
+      els.fieldId.value        = nextId(state.companies.companies, 'CMP', 'company_id');
+      els.fieldDisplayName.value = '';
+      els.fieldRootPath.value  = '';
+      els.fieldNamecode.value  = '';
+      els.fieldTyp3.value      = state.legalTypes.legal_types?.[0]?.typ3 || '';
+      els.fieldVat9.value      = '';
+      els.fieldActive.value    = 'true';
+      els.fieldNotes.value     = '';
+      computeDerived();
+    }
+
+    // ── Save / Delete ──────────────────────────────────────────────────────────
+    function saveRecord() {
+      computeDerived();
+      if (!els.fieldRootPath.value.trim()) { setStatus('Absolute company root path is required.', 'bad'); return false; }
+      if (!els.fieldDisplayName.value.trim()) { setStatus('Display name is required.', 'bad'); return false; }
+      const dup = (state.companies.companies||[]).some((r,i) => i !== state.currentIndex && r.company_id === els.fieldId.value);
+      if (dup) { setStatus('company_id must be unique.', 'bad'); return false; }
+      const row = {
+        company_id: els.fieldId.value,
+        display_name: els.fieldDisplayName.value.trim(),
+        absolute_company_root_path: els.fieldRootPath.value,
+        namecode: els.fieldNamecode.value,
+        typ3: els.fieldTyp3.value,
+        vat9: els.fieldVat9.value,
+        company_folder: els.fieldFolder.value,
+        is_active: els.fieldActive.value === 'true',
+        notes: els.fieldNotes.value.trim()
+      };
+      if (state.currentIndex >= 0) {
+        state.companies.companies[state.currentIndex] = row;
+      } else {
+        state.companies.companies.push(row);
+        state.currentIndex = state.companies.companies.length - 1;
+      }
+      state.companies.schema.generated_at = new Date().toISOString();
+      refreshRecordSelect(state.currentIndex);
+      refreshTyp3Filter();
+      renderTable();
+      setStatus('Company saved.', 'ok');
+      return true;
+    }
+    function deleteRecord() {
+      if (state.currentIndex < 0) return;
+      const row = state.companies.companies[state.currentIndex];
+      if (!row) return;
+      if (!window.confirm(`Delete company ${row.company_id} — ${row.display_name}?\n\nThis removes the company record only; linked assets in assets_master.json are not affected.`)) return;
+      state.companies.companies.splice(state.currentIndex, 1);
+      state.companies.schema.generated_at = new Date().toISOString();
+      const sel = refreshRecordSelect(0);
+      refreshTyp3Filter();
+      renderTable();
+      if (sel !== null) loadForm(sel); else newRecord();
+      setStatus('Company deleted.', 'ok');
+    }
+
+    // ── Filter + sort ──────────────────────────────────────────────────────────
+    function getRows() {
+      const q    = els.searchInput.value.trim().toLowerCase();
+      const actF = els.filterActive.value;
+      const typF = els.filterTyp3.value;
+      let rows = (state.companies.companies || []).map((row, index) => ({ ...row, _index: index }));
+      if (actF) rows = rows.filter(r => String(r.is_active !== false) === actF);
+      if (typF) rows = rows.filter(r => r.typ3 === typF);
+      if (q) rows = rows.filter(r =>
+        [r.company_id, r.display_name, r.namecode, r.typ3, r.vat9,
+         r.company_folder, r.absolute_company_root_path, r.company_root_path, r.notes
+        ].map(v => searchText(v)).join(' ').includes(searchText(q))
+      );
+      const col = state.sortCol;
+      const dir = state.sortDir === 'asc' ? 1 : -1;
+      rows.sort((a, b) =>
+        String(a[col] ?? '').localeCompare(String(b[col] ?? ''), undefined, { sensitivity:'base' }) * dir
+      );
+      return rows;
+    }
+
+    function renderTable() {
+      refreshTyp3Filter();
+      const rows  = getRows();
+      const total = (state.companies.companies || []).length;
+      els.countBadge.innerHTML = `Showing <strong>${rows.length}</strong> of <strong>${total}</strong> companies`;
+      if (!rows.length) {
+        els.tableBody.innerHTML = '<tr><td colspan="7" class="no-results">No companies match the current filters.</td></tr>';
+        return;
+      }
+      els.tableBody.innerHTML = rows.map(r => {
+        const isExp   = state.expandedId === r.company_id;
+        const inact   = r.is_active === false ? ' inactive-row' : '';
+        const rootPath = r.absolute_company_root_path || r.company_root_path || '';
+        let detail = '';
+        if (isExp) {
+          const fields = [
+            ['Company ID',  r.company_id],
+            ['Display name',r.display_name],
+            ['Namecode',    r.namecode],
+            ['TYP3',        r.typ3],
+            ['VAT9',        r.vat9],
+            ['Folder',      r.company_folder],
+            ['Root path',   rootPath || '—'],
+            ['Active',      r.is_active === false ? 'No' : 'Yes'],
+            ['Notes',       r.notes || '—']
+          ];
+          detail = `<tr class="detail-row"><td colspan="7"><div class="detail-panel">
+            <div class="detail-grid">
+              ${fields.map(([l,v]) => `<div><div class="df-label">${esc(l)}</div><div class="df-value mono">${esc(String(v??'—'))}</div></div>`).join('')}
+            </div>
+            <div class="detail-actions">
+              <button class="sm secondary copy-btn" data-val="${esc(r.company_id)}">Copy ID</button>
+              <button class="sm secondary copy-btn" data-val="${esc(r.company_folder)}">Copy folder</button>
+              <button class="sm secondary edit-btn" data-idx="${r._index}">Edit</button>
+            </div>
+          </div></td></tr>`;
+        }
+        return `<tr class="data-row${inact}${isExp ? ' expanded' : ''}" data-id="${esc(r.company_id)}">
+          <td class="mono">${esc(r.company_id)}</td>
+          <td>${esc(r.display_name)}</td>
+          <td class="mono">${esc(r.company_folder || '—')}</td>
+          <td>${esc(r.namecode || '—')}</td>
+          <td>${esc(r.typ3 || '—')}</td>
+          <td class="mono">${esc(rootPath || '—')}</td>
+          <td><span class="status-badge ${r.is_active === false ? 's-no' : 's-yes'}">${r.is_active === false ? 'No' : 'Yes'}</span></td>
+        </tr>${detail}`;
+      }).join('');
+
+      els.tableBody.querySelectorAll('tr.data-row').forEach(tr => {
+        tr.addEventListener('click', () => {
+          const id = tr.dataset.id;
+          state.expandedId = state.expandedId === id ? null : id;
+          renderTable();
+        });
+      });
+      els.tableBody.querySelectorAll('button.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          e.stopPropagation();
+          try { await navigator.clipboard.writeText(btn.dataset.val || ''); setStatus(`Copied: ${btn.dataset.val}`, 'ok'); }
+          catch (_) { setStatus('Could not copy.', 'bad'); }
+        });
+      });
+      els.tableBody.querySelectorAll('button.edit-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const idx = Number(btn.dataset.idx);
+          loadForm(idx);
+          refreshRecordSelect(idx);
+          state.expandedId = null;
+          renderTable();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }
+
+    function updateSortHeaders() {
+      document.querySelectorAll('thead th[data-col]').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.col === state.sortCol) th.classList.add(`sort-${state.sortDir}`);
+      });
+    }
+
+    // ── IndexedDB handle persistence ───────────────────────────────────────────
+    const HANDLE_DB = 'sch-folder-handles', HANDLE_STORE = 'settings', HANDLE_KEY = 'company-register-folder';
+    let dbPromise = null;
+    function openDb() {
+      if (!window.indexedDB) return Promise.resolve(null);
+      if (dbPromise) return dbPromise;
+      dbPromise = new Promise((res, rej) => {
+        const req = indexedDB.open(HANDLE_DB, 1);
+        req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(HANDLE_STORE)) req.result.createObjectStore(HANDLE_STORE); };
+        req.onsuccess = () => { req.result.onversionchange = () => { req.result.close(); dbPromise = null; }; res(req.result); };
+        req.onerror = () => rej(req.error);
+      });
+      return dbPromise;
+    }
+    async function readHandle() { const db = await openDb(); if (!db) return null; return new Promise((res,rej) => { const t=db.transaction(HANDLE_STORE,'readonly'); const r=t.objectStore(HANDLE_STORE).get(HANDLE_KEY); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error); }); }
+    async function writeHandle(h) { const db = await openDb(); if (!db) return; await new Promise((res,rej) => { const t=db.transaction(HANDLE_STORE,'readwrite'); t.oncomplete=res; t.onerror=()=>rej(t.error); t.objectStore(HANDLE_STORE).put(h,HANDLE_KEY); }); }
+    async function clearHandle() { const db = await openDb(); if (!db) return; await new Promise((res,rej) => { const t=db.transaction(HANDLE_STORE,'readwrite'); t.oncomplete=res; t.onerror=()=>rej(t.error); t.objectStore(HANDLE_STORE).delete(HANDLE_KEY); }); }
+
+    async function readJson(dir, name) {
+      const h = await dir.getFileHandle(name);
+      const text = await (await h.getFile()).text();
+      try { return JSON.parse(text); } catch (e) { throw new Error(`Invalid JSON in ${name}: ${e.message}`); }
+    }
+    async function writeJson(dir, name, data) {
+      const h = await dir.getFileHandle(name, { create: true });
+      const w = await h.createWritable();
+      await w.write(JSON.stringify(data, null, 2) + '\n');
+      await w.close();
+    }
+
+    function applyLoadedData(co, lt) {
+      if (!Array.isArray(co?.companies)) throw new Error('company_master.json must contain a companies array.');
+      if (lt?.legal_types) state.legalTypes = lt;
+      state.companies = { schema: co.schema || { generated_at: new Date().toISOString() }, companies: co.companies };
+      refreshTyp3Select();
+      const sel = refreshRecordSelect(0);
+      refreshTyp3Filter();
+      updateSortHeaders();
+      renderTable();
+      if (sel !== null) loadForm(sel); else newRecord();
+    }
+
+    async function loadFromDir(dir, source = 'manual') {
+      let lt = state.legalTypes;
+      try { lt = await readJson(dir, 'legal_types.json'); } catch (_) {}
+      const co = await readJson(dir, 'company_master.json');
+      state.directoryHandle = dir;
+      applyLoadedData(co, lt);
+      setStatus((source === 'restored' ? 'Restored last folder. ' : 'Loaded. ') + `${state.companies.companies.length} companies.`, 'ok');
+    }
+
+    async function saveToDir() {
+      if (!state.directoryHandle) { setStatus('No folder open — use Download instead.', 'warn'); return; }
+      try { await writeJson(state.directoryHandle, 'company_master.json', state.companies); setStatus('Saved to working folder.', 'ok'); }
+      catch (err) { setStatus(`Save failed: ${err.message}`, 'bad'); }
+    }
+
+    function downloadJson() {
+      const blob = new Blob([JSON.stringify(state.companies, null, 2) + '\n'], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'company_master.json'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ── Event bindings ─────────────────────────────────────────────────────────
+    $('openFolderBtn').addEventListener('click', async () => {
+      if (!window.showDirectoryPicker) { setStatus('Folder access not supported. Use Auto-load or Download.', 'warn'); return; }
+      try {
+        const dir = await window.showDirectoryPicker();
+        await writeHandle(dir).catch(() => null);
+        await loadFromDir(dir, 'manual');
+      } catch (err) { if (err?.name !== 'AbortError') setStatus(`Open failed: ${err.message}`, 'bad'); }
+    });
+
+    $('reloadBtn').addEventListener('click', async () => {
+      if (!state.directoryHandle) { setStatus('No folder open.', 'warn'); return; }
+      try { await loadFromDir(state.directoryHandle, 'manual'); }
+      catch (e) { setStatus(`Reload failed: ${e.message}`, 'bad'); }
+    });
+
+    $('autoloadBtn').addEventListener('click', async () => {
+      if (location.protocol === 'file:') { setStatus('Auto-load blocked under file://. Use Open working folder.', 'warn'); return; }
+      try {
+        const [cr, lr] = await Promise.all([
+          fetch('./company_master.json', { cache: 'no-store' }),
+          fetch('./legal_types.json', { cache: 'no-store' }).catch(() => null)
+        ]);
+        if (!cr.ok) throw new Error('company_master.json not found next to the HTML file.');
+        const co = await cr.json();
+        const lt = (lr && lr.ok) ? await lr.json() : state.legalTypes;
+        applyLoadedData(co, lt);
+        setStatus(`Auto-loaded. ${state.companies.companies.length} companies.`, 'ok');
+      } catch (e) { setStatus(`Auto-load failed: ${e.message}`, 'bad'); }
+    });
+
+    async function createCompanyFolder() {
+      if (!window.showDirectoryPicker) { setStatus('This browser does not support the File System Access API.', 'warn'); return; }
+      const folderName = els.fieldFolder.value.trim();
+      if (!folderName) { setStatus('Save the record first to generate a folder name.', 'warn'); return; }
+      try {
+        const baseHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        // If user picked the company folder itself, create subfolders inside it.
+        // If user picked the parent (server root), create the company folder first.
+        const compDir = (baseHandle.name === folderName)
+          ? baseHandle
+          : await baseHandle.getDirectoryHandle(folderName, { create: true });
+        await compDir.getDirectoryHandle('CORPORATE', { create: true });
+        await compDir.getDirectoryHandle('TEMPLATES', { create: true });
+        await compDir.getDirectoryHandle('ARCHIVE',   { create: true });
+        await compDir.getDirectoryHandle('ASSETS',    { create: true });
+        setStatus(`Folder tree created: ${compDir.name}/[CORPORATE, TEMPLATES, ARCHIVE, ASSETS]`, 'ok');
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+        setStatus(`Could not create folder: ${err.message}`, 'bad');
+      }
+    }
+
+    $('downloadBtn').addEventListener('click', downloadJson);
+    $('newBtn').addEventListener('click', newRecord);
+    $('saveBtn').addEventListener('click', async () => { if (saveRecord()) await saveToDir(); });
+    $('createFolderBtn').addEventListener('click', createCompanyFolder);
+    $('deleteBtn').addEventListener('click', async () => { deleteRecord(); await saveToDir(); });
+    els.selectRecord.addEventListener('change', e => loadForm(Number(e.target.value)));
+    [els.fieldDisplayName, els.fieldNamecode, els.fieldTyp3, els.fieldVat9].forEach(el => el.addEventListener('input', computeDerived));
+    els.fieldRootPath.addEventListener('blur', computeDerived);
+
+    document.querySelectorAll('thead th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        state.sortDir = state.sortCol === th.dataset.col && state.sortDir === 'asc' ? 'desc' : 'asc';
+        state.sortCol = th.dataset.col;
+        updateSortHeaders();
+        renderTable();
+      });
+    });
+
+    els.searchInput.addEventListener('input', debounce(renderTable));
+    els.filterActive.addEventListener('change', renderTable);
+    els.filterTyp3.addEventListener('change', renderTable);
+    $('clearFiltersBtn').addEventListener('click', () => {
+      els.searchInput.value = ''; els.filterActive.value = ''; els.filterTyp3.value = '';
+      state.expandedId = null; renderTable();
+    });
+    $('copyTableBtn').addEventListener('click', async () => {
+      const rows = getRows();
+      if (!rows.length) { setStatus('No rows to copy.', 'warn'); return; }
+      const cols = ['company_id','display_name','company_folder','namecode','typ3','vat9','absolute_company_root_path','is_active','notes'];
+      const q = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+      const tsv = [cols.join('\t'), ...rows.map(r => cols.map(c => q(r[c])).join('\t'))].join('\n');
+      try { await navigator.clipboard.writeText(tsv); setStatus(`Copied ${rows.length} rows — paste into Excel.`, 'ok'); }
+      catch (_) { setStatus('Could not copy.', 'bad'); }
+    });
+
+    async function init() {
+      refreshTyp3Select();
+      refreshRecordSelect();
+      updateSortHeaders();
+      renderTable();
+      newRecord();
+      if (!window.showDirectoryPicker) return;
+      try {
+        const h = await readHandle(); if (!h) return;
+        if ((await h.queryPermission?.({ mode: 'read' })) !== 'granted') return;
+        await loadFromDir(h, 'restored');
+      } catch (_) { await clearHandle().catch(() => null); }
+    }
+
+    init().catch(err => setStatus(`Init failed: ${err.message}`, 'bad'));
+  </script>
+</body>
+</html>
