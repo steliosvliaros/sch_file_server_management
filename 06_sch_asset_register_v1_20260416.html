@@ -200,6 +200,11 @@
         </div>
       </div>
 
+      <div id="extraFieldsSection" style="display:none; margin-top:12px;">
+        <div class="panel small" style="margin-bottom:8px; font-weight:600;">Type-specific fields</div>
+        <div id="extraFieldsGrid" class="form-grid"></div>
+      </div>
+
       <div class="panel small" id="assetRuleSummary" style="margin-top:14px;">Select an asset type to see the metric rule.</div>
 
       <div class="form-actions">
@@ -253,22 +258,16 @@
       <button id="copyTableBtn" class="secondary sm">Copy table (paste to Excel)</button>
     </div>
 
+    <details id="colPickerDetails" style="margin-bottom:8px;">
+      <summary style="cursor:pointer;padding:6px 14px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;font-size:13px;font-weight:600;user-select:none;">Columns</summary>
+      <div id="colPickerGrid" style="display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 14px;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 6px 6px;"></div>
+    </details>
+
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th data-col="typeid">TYPEID</th>
-            <th data-col="project_name">Project</th>
-            <th data-col="location">Location</th>
-            <th data-col="type">Type</th>
-            <th data-col="capacity">Capacity</th>
-            <th data-col="company_display">Company</th>
-            <th data-col="lifecycle_status">Status</th>
-            <th data-col="is_active">Active</th>
-          </tr>
-        </thead>
+        <thead id="tableHead"></thead>
         <tbody id="tableBody">
-          <tr><td colspan="8" class="no-results">Load data to view assets.</td></tr>
+          <tr><td colspan="14" class="no-results">Load data to view assets.</td></tr>
         </tbody>
       </table>
     </div>
@@ -291,7 +290,8 @@
       sortDir: 'asc',
       expandedId: null,
       _atMap: null,
-      _cmMap: null
+      _cmMap: null,
+      cols: []
     };
 
     const $ = id => document.getElementById(id);
@@ -381,6 +381,63 @@
         : '<option value="">No companies loaded</option>';
       if (prev && [...els.fieldCompany.options].some(o => o.value === prev)) els.fieldCompany.value = prev;
     }
+    function renderExtraFields(typeCode) {
+      const typeData = (state.assetTypes.asset_types || []).find(t => t.type_code === typeCode);
+      const fields = typeData?.extra_fields || [];
+      const section = document.getElementById('extraFieldsSection');
+      const grid = document.getElementById('extraFieldsGrid');
+      grid.innerHTML = '';
+      if (!fields.length) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      fields.forEach(f => {
+        const wrap = document.createElement('div');
+        const lbl = document.createElement('label');
+        lbl.htmlFor = `extra_${f.key}`;
+        lbl.textContent = f.label;
+        wrap.appendChild(lbl);
+        let input;
+        if (f.type === 'select') {
+          input = document.createElement('select');
+          (f.options || []).forEach(opt => {
+            const o = document.createElement('option');
+            o.value = opt; o.textContent = opt;
+            input.appendChild(o);
+          });
+        } else {
+          input = document.createElement('input');
+          if (f.type === 'integer') { input.type = 'number'; input.step = '1'; }
+          else if (f.type === 'number') { input.type = 'number'; input.step = 'any'; }
+          else { input.type = 'text'; }
+        }
+        input.id = `extra_${f.key}`;
+        input.dataset.extraKey = f.key;
+        const def = f.default;
+        input.value = (def !== null && def !== undefined) ? def : '';
+        wrap.appendChild(input);
+        grid.appendChild(wrap);
+      });
+    }
+    function loadExtraFields(extra) {
+      document.querySelectorAll('#extraFieldsGrid [data-extra-key]').forEach(el => {
+        const val = (extra || {})[el.dataset.extraKey];
+        el.value = (val !== null && val !== undefined) ? val : '';
+      });
+    }
+    function collectExtraFields() {
+      const typeData = (state.assetTypes.asset_types || []).find(t => t.type_code === els.fieldType.value);
+      const fieldDefs = typeData?.extra_fields || [];
+      const extra = {};
+      document.querySelectorAll('#extraFieldsGrid [data-extra-key]').forEach(el => {
+        const key = el.dataset.extraKey;
+        const def = fieldDefs.find(f => f.key === key);
+        let val = el.value;
+        if (def?.type === 'integer') val = val === '' ? null : parseInt(val, 10);
+        else if (def?.type === 'number') val = val === '' ? null : parseFloat(val);
+        extra[key] = val;
+      });
+      return extra;
+    }
+
     function refreshAssetUnits() {
       const rule = atMap()[els.fieldType.value];
       const units = rule ? rule.allowed_input_units : [];
@@ -391,6 +448,7 @@
       $('assetRuleSummary').innerHTML = rule
         ? `<strong>${esc(rule.label)}</strong> — ${esc(rule.characteristic)} | Units: ${esc(rule.allowed_input_units.join(', '))} | Rule: ${esc(rule.metric_rule)} | Example: <span class="mono">${esc(rule.example)}</span>`
         : 'No asset type selected.';
+      renderExtraFields(els.fieldType.value);
       computeDerived();
     }
     function refreshRecordSelect(preferredIndex = state.currentIndex) {
@@ -440,6 +498,7 @@
       els.fieldActive.value     = String(row.is_active !== false);
       els.fieldNotes.value      = row.notes || '';
       computeDerived();
+      loadExtraFields(row.extra || {});
     }
     function newRecord(options = {}) {
       state.currentIndex = -1;
@@ -482,7 +541,8 @@
         asset_folder:els.fieldFolder.value,
         lifecycle_status: els.fieldLifecycle.value,
         is_active:   els.fieldActive.value === 'true',
-        notes:       els.fieldNotes.value.trim()
+        notes:       els.fieldNotes.value.trim(),
+        extra:       collectExtraFields()
       };
       if (state.currentIndex >= 0) {
         state.assets.assets[state.currentIndex] = row;
@@ -576,16 +636,113 @@
       return rows;
     }
 
+    const ASSET_BASE_COLS = [
+      { key: 'typeid',           label: 'TYPEID',         sortable: true,  selected: true  },
+      { key: 'project_name',     label: 'Project',        sortable: true,  selected: true  },
+      { key: 'location',         label: 'Location',       sortable: true,  selected: true  },
+      { key: 'type',             label: 'Type',           sortable: true,  selected: true  },
+      { key: 'capacity',         label: 'Capacity',       sortable: false, selected: true  },
+      { key: 'company_display',  label: 'Company',        sortable: true,  selected: true  },
+      { key: 'lifecycle_status', label: 'Status',         sortable: true,  selected: true  },
+      { key: 'is_active',        label: 'Active',         sortable: false, selected: true  },
+      { key: 'asset_id',         label: 'Asset ID',       sortable: false, selected: false },
+      { key: 'ss',               label: 'SS',             sortable: false, selected: false },
+      { key: 'metric',           label: 'Metric',         sortable: false, selected: false },
+      { key: 'company_folder',   label: 'Company folder', sortable: false, selected: false },
+      { key: 'asset_folder',     label: 'Asset folder',   sortable: false, selected: false },
+      { key: 'notes',            label: 'Notes',          sortable: false, selected: false },
+    ];
+
+    function initCols() {
+      const prevMap = new Map((state.cols || []).map(c => [c.key, c.selected]));
+      const base = ASSET_BASE_COLS.map(c => ({
+        ...c,
+        selected: prevMap.has(c.key) ? prevMap.get(c.key) : c.selected,
+        isExtra: false,
+      }));
+      const seenKeys = new Set();
+      const extra = [];
+      (state.assetTypes.asset_types || []).forEach(t => {
+        (t.extra_fields || []).forEach(f => {
+          if (!seenKeys.has(f.key)) {
+            seenKeys.add(f.key);
+            extra.push({
+              key: `extra.${f.key}`, label: f.label, sortable: false,
+              selected: prevMap.has(`extra.${f.key}`) ? prevMap.get(`extra.${f.key}`) : false,
+              isExtra: true, isPassword: false, extraKey: f.key,
+            });
+          }
+        });
+      });
+      state.cols = [...base, ...extra];
+    }
+
+    function renderColPicker() {
+      const grid = document.getElementById('colPickerGrid');
+      if (!grid) return;
+      grid.innerHTML = state.cols.map(c =>
+        `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;white-space:nowrap;">
+          <input type="checkbox" data-col-key="${esc(c.key)}"${c.selected ? ' checked' : ''}>
+          ${esc(c.label)}${c.isExtra ? ' <em style="font-size:11px;color:#888">(extra)</em>' : ''}
+        </label>`
+      ).join('');
+      grid.querySelectorAll('input[data-col-key]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const col = state.cols.find(x => x.key === cb.dataset.colKey);
+          if (col) { col.selected = cb.checked; renderTable(); }
+        });
+      });
+    }
+
+    function buildTableHead() {
+      const thead = document.getElementById('tableHead');
+      if (!thead) return;
+      const sel = state.cols.filter(c => c.selected);
+      thead.innerHTML = `<tr>${sel.map(c =>
+        c.sortable
+          ? `<th data-col="${esc(c.key)}"${state.sortCol === c.key ? ` class="sort-${state.sortDir}"` : ''}>${esc(c.label)}</th>`
+          : `<th>${esc(c.label)}</th>`
+      ).join('')}</tr>`;
+      thead.querySelectorAll('th[data-col]').forEach(th => {
+        th.addEventListener('click', () => {
+          state.sortDir = state.sortCol === th.dataset.col && state.sortDir === 'asc' ? 'desc' : 'asc';
+          state.sortCol = th.dataset.col;
+          renderTable();
+        });
+      });
+    }
+
     function renderTable() {
       const rows  = getRows();
       const total = (state.assets.assets||[]).length;
       els.countBadge.innerHTML = `Showing <strong>${rows.length}</strong> of <strong>${total}</strong> assets`;
+      buildTableHead();
+      const selCols = state.cols.filter(c => c.selected);
+      const span = selCols.length || 1;
       if (!rows.length) {
-        els.tableBody.innerHTML = '<tr><td colspan="8" class="no-results">No assets match the current filters.</td></tr>';
+        els.tableBody.innerHTML = `<tr><td colspan="${span}" class="no-results">No assets match the current filters.</td></tr>`;
         return;
       }
       // find actual index in state.assets.assets for each joined row
       const assetIdxMap = new Map((state.assets.assets||[]).map((a, i) => [a.asset_id, i]));
+      function cellFor(col, a) {
+        if (col.isExtra) {
+          const v = (a.extra || {})[col.extraKey];
+          const disp = (v === null || v === undefined || v === '') ? '—' : String(v);
+          return `<td>${esc(disp)}</td>`;
+        }
+        switch (col.key) {
+          case 'typeid':           return `<td class="mono">${esc(a.typeid || '—')}</td>`;
+          case 'project_name':     return `<td>${esc(a.project_name || '—')}</td>`;
+          case 'location':         return `<td>${esc(a.location || '—')}</td>`;
+          case 'type':             return `<td><span class="type-badge">${esc(a.type || '—')}</span></td>`;
+          case 'capacity':         return `<td>${esc(a.capacity || '—')}</td>`;
+          case 'company_display':  return `<td title="${esc(a.company_folder)}">${esc(a.company_display)}</td>`;
+          case 'lifecycle_status': return `<td><span class="status-badge ${statusCls(a.lifecycle_status)}">${esc(a.lifecycle_status || '—')}</span></td>`;
+          case 'is_active':        return `<td>${a.is_active === false ? 'No' : 'Yes'}</td>`;
+          default:                 return `<td>${esc(String(a[col.key] ?? '—'))}</td>`;
+        }
+      }
       els.tableBody.innerHTML = rows.map(a => {
         const isExp  = state.expandedId === a.asset_id;
         const inact  = a.is_active === false ? ' inactive-row' : '';
@@ -608,10 +765,23 @@
             ['Asset folder',  a.asset_folder],
             ['Notes',         a.notes || '—']
           ];
-          detail = `<tr class="detail-row"><td colspan="8"><div class="detail-panel">
+          const extraDefs = (state.assetTypes.asset_types||[]).find(t => t.type_code === a.type)?.extra_fields || [];
+          const extraHtml = extraDefs.length && a.extra
+            ? `<div style="margin-top:12px;">
+                <div class="df-label" style="font-weight:600;margin-bottom:8px;">Type-specific fields</div>
+                <div class="detail-grid">
+                  ${extraDefs.map(f => {
+                    const raw = (a.extra||{})[f.key];
+                    const display = (raw === null || raw === undefined || raw === '') ? '—' : String(raw);
+                    return `<div><div class="df-label">${esc(f.label)}</div><div class="df-value mono">${esc(display)}</div></div>`;
+                  }).join('')}
+                </div>
+              </div>` : '';
+          detail = `<tr class="detail-row"><td colspan="${span}"><div class="detail-panel">
             <div class="detail-grid">
               ${fields.map(([l,v]) => `<div><div class="df-label">${esc(l)}</div><div class="df-value mono">${esc(String(v??'—'))}</div></div>`).join('')}
             </div>
+            ${extraHtml}
             <div class="detail-actions">
               <button class="sm secondary copy-btn" data-val="${esc(a.asset_id)}">Copy asset ID</button>
               <button class="sm secondary copy-btn" data-val="${esc(a.typeid)}">Copy TYPEID</button>
@@ -622,14 +792,7 @@
           </div></td></tr>`;
         }
         return `<tr class="data-row${inact}${isExp ? ' expanded' : ''}" data-id="${esc(a.asset_id)}">
-          <td class="mono">${esc(a.typeid || '—')}</td>
-          <td>${esc(a.project_name || '—')}</td>
-          <td>${esc(a.location || '—')}</td>
-          <td><span class="type-badge">${esc(a.type || '—')}</span></td>
-          <td>${esc(a.capacity || '—')}</td>
-          <td title="${esc(a.company_folder)}">${esc(a.company_display)}</td>
-          <td><span class="status-badge ${statusCls(a.lifecycle_status)}">${esc(a.lifecycle_status || '—')}</span></td>
-          <td>${a.is_active === false ? 'No' : 'Yes'}</td>
+          ${selCols.map(col => cellFor(col, a)).join('')}
         </tr>${detail}`;
       }).join('');
 
@@ -661,12 +824,7 @@
       });
     }
 
-    function updateSortHeaders() {
-      document.querySelectorAll('thead th[data-col]').forEach(th => {
-        th.classList.remove('sort-asc', 'sort-desc');
-        if (th.dataset.col === state.sortCol) th.classList.add(`sort-${state.sortDir}`);
-      });
-    }
+    function updateSortHeaders() { buildTableHead(); }
 
     // ── IndexedDB handle persistence ───────────────────────────────────────────
     const HANDLE_DB = 'sch-folder-handles', HANDLE_STORE = 'settings', HANDLE_KEY = 'asset-register-folder';
@@ -705,6 +863,8 @@
       state.companies = co.companies;
       state.assets = { schema: ao.schema || { generated_at: new Date().toISOString() }, assets: ao.assets };
       invalidateCaches();
+      initCols();
+      renderColPicker();
       refreshTypeSelect();
       refreshCompanySelect();
       const sel = refreshRecordSelect(0);
@@ -890,15 +1050,6 @@
     );
     els.fieldProjectName.addEventListener('blur', () => computeDerived({ applyProjectName: true }));
 
-    document.querySelectorAll('thead th[data-col]').forEach(th => {
-      th.addEventListener('click', () => {
-        state.sortDir = state.sortCol === th.dataset.col && state.sortDir === 'asc' ? 'desc' : 'asc';
-        state.sortCol = th.dataset.col;
-        updateSortHeaders();
-        renderTable();
-      });
-    });
-
     els.searchInput.addEventListener('input', debounce(renderTable));
     els.filterType.addEventListener('change', renderTable);
     els.filterStatus.addEventListener('change', renderTable);
@@ -912,14 +1063,21 @@
     $('copyTableBtn').addEventListener('click', async () => {
       const rows = getRows();
       if (!rows.length) { setStatus('No rows to copy.', 'warn'); return; }
-      const cols = ['asset_id','typeid','project_name','location','type','capacity','company_display','company_folder','asset_folder','lifecycle_status','is_active','notes'];
+      const selCols = state.cols.filter(c => c.selected);
       const q = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
-      const tsv = [cols.join('\t'), ...rows.map(r => cols.map(c => q(r[c])).join('\t'))].join('\n');
+      const header = selCols.map(c => c.label).join('\t');
+      const body = rows.map(a => selCols.map(col => {
+        if (col.isExtra) return q((a.extra || {})[col.extraKey] ?? '');
+        return q(a[col.key]);
+      }).join('\t')).join('\n');
+      const tsv = [header, body].join('\n');
       try { await navigator.clipboard.writeText(tsv); setStatus(`Copied ${rows.length} rows — paste into Excel.`, 'ok'); }
       catch (_) { setStatus('Could not copy.', 'bad'); }
     });
 
     async function init() {
+      initCols();
+      renderColPicker();
       refreshTypeSelect();
       refreshCompanySelect();
       refreshRecordSelect();

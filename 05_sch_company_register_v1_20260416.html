@@ -156,6 +156,14 @@
           <textarea id="fieldNotes"></textarea>
         </div>
       </div>
+
+      <div id="extraFieldsSection" style="margin-top:12px;">
+        <div class="panel small" style="margin-bottom:8px; font-weight:600;">Company credentials
+          <span style="font-weight:normal; color:var(--muted);"> — stored in company_master.json as plain text</span>
+        </div>
+        <div id="extraFieldsGrid" class="form-grid"></div>
+      </div>
+
       <div class="form-actions">
         <button id="newBtn">New company</button>
         <button id="saveBtn" class="secondary">Save company</button>
@@ -194,21 +202,16 @@
       <button id="copyTableBtn" class="secondary sm">Copy table (paste to Excel)</button>
     </div>
 
+    <details id="colPickerDetails" style="margin-bottom:8px;">
+      <summary style="cursor:pointer;padding:6px 14px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;font-size:13px;font-weight:600;user-select:none;">Columns</summary>
+      <div id="colPickerGrid" style="display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 14px;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 6px 6px;"></div>
+    </details>
+
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th data-col="company_id">ID</th>
-            <th data-col="display_name">Display name</th>
-            <th data-col="company_folder">Folder</th>
-            <th data-col="namecode">Namecode</th>
-            <th data-col="typ3">TYP3</th>
-            <th data-col="absolute_company_root_path">Root path</th>
-            <th data-col="is_active">Active</th>
-          </tr>
-        </thead>
+        <thead id="tableHead"></thead>
         <tbody id="tableBody">
-          <tr><td colspan="7" class="no-results">Load data to view companies.</td></tr>
+          <tr><td colspan="9" class="no-results">Load data to view companies.</td></tr>
         </tbody>
       </table>
     </div>
@@ -229,7 +232,8 @@
       currentIndex: -1,
       sortCol: 'display_name',
       sortDir: 'asc',
-      expandedId: null
+      expandedId: null,
+      cols: []
     };
 
     const $ = id => document.getElementById(id);
@@ -323,6 +327,7 @@
       els.fieldActive.value    = String(row.is_active !== false);
       els.fieldNotes.value     = row.notes || '';
       computeDerived();
+      loadExtraFields(row.extra || {});
     }
     function newRecord() {
       state.currentIndex = -1;
@@ -335,6 +340,7 @@
       els.fieldActive.value    = 'true';
       els.fieldNotes.value     = '';
       computeDerived();
+      loadExtraFields({});
     }
 
     // ── Save / Delete ──────────────────────────────────────────────────────────
@@ -353,7 +359,8 @@
         vat9: els.fieldVat9.value,
         company_folder: els.fieldFolder.value,
         is_active: els.fieldActive.value === 'true',
-        notes: els.fieldNotes.value.trim()
+        notes: els.fieldNotes.value.trim(),
+        extra: collectExtraFields()
       };
       if (state.currentIndex >= 0) {
         state.companies.companies[state.currentIndex] = row;
@@ -405,12 +412,35 @@
 
     function renderTable() {
       refreshTyp3Filter();
-      const rows  = getRows();
+      const rows = getRows();
       const total = (state.companies.companies || []).length;
       els.countBadge.innerHTML = `Showing <strong>${rows.length}</strong> of <strong>${total}</strong> companies`;
+      buildTableHead();
+      const selCols = state.cols.filter(c => c.selected);
+      const span = selCols.length || 1;
       if (!rows.length) {
-        els.tableBody.innerHTML = '<tr><td colspan="7" class="no-results">No companies match the current filters.</td></tr>';
+        els.tableBody.innerHTML = `<tr><td colspan="${span}" class="no-results">No companies match the current filters.</td></tr>`;
         return;
+      }
+      function cellFor(col, r) {
+        if (col.isExtra) {
+          const v = (r.extra || {})[col.extraKey];
+          const disp = (v === null || v === undefined || v === '') ? '—' : (col.isPassword ? '••••••••' : String(v));
+          return `<td>${esc(disp)}</td>`;
+        }
+        const rootPath = r.absolute_company_root_path || r.company_root_path || '';
+        switch (col.key) {
+          case 'company_id':                 return `<td class="mono">${esc(r.company_id)}</td>`;
+          case 'display_name':               return `<td>${esc(r.display_name)}</td>`;
+          case 'company_folder':             return `<td class="mono">${esc(r.company_folder || '—')}</td>`;
+          case 'namecode':                   return `<td>${esc(r.namecode || '—')}</td>`;
+          case 'typ3':                       return `<td>${esc(r.typ3 || '—')}</td>`;
+          case 'vat9':                       return `<td class="mono">${esc(r.vat9 || '—')}</td>`;
+          case 'absolute_company_root_path': return `<td class="mono">${esc(rootPath || '—')}</td>`;
+          case 'is_active':                  return `<td><span class="status-badge ${r.is_active === false ? 's-no' : 's-yes'}">${r.is_active === false ? 'No' : 'Yes'}</span></td>`;
+          case 'notes':                      return `<td>${esc(r.notes || '—')}</td>`;
+          default:                           return `<td>${esc(String(r[col.key] ?? '—'))}</td>`;
+        }
       }
       els.tableBody.innerHTML = rows.map(r => {
         const isExp   = state.expandedId === r.company_id;
@@ -429,10 +459,23 @@
             ['Active',      r.is_active === false ? 'No' : 'Yes'],
             ['Notes',       r.notes || '—']
           ];
-          detail = `<tr class="detail-row"><td colspan="7"><div class="detail-panel">
+          const extraDefs = state.companies.extra_fields || COMPANY_EXTRA_FIELDS;
+          const extraHtml = extraDefs.length && r.extra
+            ? `<div style="margin-top:12px;">
+                <div class="df-label" style="font-weight:600;margin-bottom:8px;">Credentials</div>
+                <div class="detail-grid">
+                  ${extraDefs.map(f => {
+                    const raw = (r.extra||{})[f.key];
+                    const display = (raw === null || raw === undefined || raw === '') ? '—' : (f.type === 'password' ? '••••••••' : String(raw));
+                    return `<div><div class="df-label">${esc(f.label)}</div><div class="df-value mono">${esc(display)}</div></div>`;
+                  }).join('')}
+                </div>
+              </div>` : '';
+          detail = `<tr class="detail-row"><td colspan="${span}"><div class="detail-panel">
             <div class="detail-grid">
               ${fields.map(([l,v]) => `<div><div class="df-label">${esc(l)}</div><div class="df-value mono">${esc(String(v??'—'))}</div></div>`).join('')}
             </div>
+            ${extraHtml}
             <div class="detail-actions">
               <button class="sm secondary copy-btn" data-val="${esc(r.company_id)}">Copy ID</button>
               <button class="sm secondary copy-btn" data-val="${esc(r.company_folder)}">Copy folder</button>
@@ -441,13 +484,7 @@
           </div></td></tr>`;
         }
         return `<tr class="data-row${inact}${isExp ? ' expanded' : ''}" data-id="${esc(r.company_id)}">
-          <td class="mono">${esc(r.company_id)}</td>
-          <td>${esc(r.display_name)}</td>
-          <td class="mono">${esc(r.company_folder || '—')}</td>
-          <td>${esc(r.namecode || '—')}</td>
-          <td>${esc(r.typ3 || '—')}</td>
-          <td class="mono">${esc(rootPath || '—')}</td>
-          <td><span class="status-badge ${r.is_active === false ? 's-no' : 's-yes'}">${r.is_active === false ? 'No' : 'Yes'}</span></td>
+          ${selCols.map(col => cellFor(col, r)).join('')}
         </tr>${detail}`;
       }).join('');
 
@@ -478,12 +515,7 @@
       });
     }
 
-    function updateSortHeaders() {
-      document.querySelectorAll('thead th[data-col]').forEach(th => {
-        th.classList.remove('sort-asc', 'sort-desc');
-        if (th.dataset.col === state.sortCol) th.classList.add(`sort-${state.sortDir}`);
-      });
-    }
+    function updateSortHeaders() { buildTableHead(); }
 
     // ── IndexedDB handle persistence ───────────────────────────────────────────
     const HANDLE_DB = 'sch-folder-handles', HANDLE_STORE = 'settings', HANDLE_KEY = 'company-register-folder';
@@ -515,10 +547,117 @@
       await w.close();
     }
 
+    const COMPANY_EXTRA_FIELDS = [
+      { key: 'eprm_username',     label: 'EPRM username',     type: 'string',   default: '' },
+      { key: 'eprm_password',     label: 'EPRM password',     type: 'password', default: '' },
+      { key: 'taxisnet_username', label: 'Taxisnet username', type: 'string',   default: '' },
+      { key: 'taxisnet_password', label: 'Taxisnet password', type: 'password', default: '' },
+    ];
+
+    const COMPANY_BASE_COLS = [
+      { key: 'company_id',                 label: 'ID',           sortable: true,  selected: true  },
+      { key: 'display_name',               label: 'Display name', sortable: true,  selected: true  },
+      { key: 'company_folder',             label: 'Folder',       sortable: true,  selected: true  },
+      { key: 'namecode',                   label: 'Namecode',     sortable: true,  selected: true  },
+      { key: 'typ3',                       label: 'TYP3',         sortable: true,  selected: true  },
+      { key: 'vat9',                       label: 'VAT9',         sortable: false, selected: false },
+      { key: 'absolute_company_root_path', label: 'Root path',    sortable: false, selected: true  },
+      { key: 'is_active',                  label: 'Active',       sortable: false, selected: true  },
+      { key: 'notes',                      label: 'Notes',        sortable: false, selected: false },
+    ];
+
+    function initCols() {
+      const prevMap = new Map((state.cols || []).map(c => [c.key, c.selected]));
+      const base = COMPANY_BASE_COLS.map(c => ({
+        ...c,
+        selected: prevMap.has(c.key) ? prevMap.get(c.key) : c.selected,
+        isExtra: false,
+      }));
+      const extraDefs = state.companies.extra_fields || COMPANY_EXTRA_FIELDS;
+      const extra = extraDefs.map(f => ({
+        key: `extra.${f.key}`, label: f.label, sortable: false,
+        selected: prevMap.has(`extra.${f.key}`) ? prevMap.get(`extra.${f.key}`) : false,
+        isExtra: true, isPassword: f.type === 'password', extraKey: f.key,
+      }));
+      state.cols = [...base, ...extra];
+    }
+
+    function renderColPicker() {
+      const grid = document.getElementById('colPickerGrid');
+      if (!grid) return;
+      grid.innerHTML = state.cols.map(c =>
+        `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;white-space:nowrap;">
+          <input type="checkbox" data-col-key="${esc(c.key)}"${c.selected ? ' checked' : ''}>
+          ${esc(c.label)}${c.isExtra ? ' <em style="font-size:11px;color:#888">(cred)</em>' : ''}
+        </label>`
+      ).join('');
+      grid.querySelectorAll('input[data-col-key]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const col = state.cols.find(x => x.key === cb.dataset.colKey);
+          if (col) { col.selected = cb.checked; renderTable(); }
+        });
+      });
+    }
+
+    function buildTableHead() {
+      const thead = document.getElementById('tableHead');
+      if (!thead) return;
+      const sel = state.cols.filter(c => c.selected);
+      thead.innerHTML = `<tr>${sel.map(c =>
+        c.sortable
+          ? `<th data-col="${esc(c.key)}"${state.sortCol === c.key ? ` class="sort-${state.sortDir}"` : ''}>${esc(c.label)}</th>`
+          : `<th>${esc(c.label)}</th>`
+      ).join('')}</tr>`;
+      thead.querySelectorAll('th[data-col]').forEach(th => {
+        th.addEventListener('click', () => {
+          state.sortDir = state.sortCol === th.dataset.col && state.sortDir === 'asc' ? 'desc' : 'asc';
+          state.sortCol = th.dataset.col;
+          renderTable();
+        });
+      });
+    }
+
+    function renderExtraFields() {
+      const fields = state.companies.extra_fields || COMPANY_EXTRA_FIELDS;
+      const grid = document.getElementById('extraFieldsGrid');
+      grid.innerHTML = '';
+      fields.forEach(f => {
+        const wrap = document.createElement('div');
+        const lbl = document.createElement('label');
+        lbl.htmlFor = `extra_${f.key}`;
+        lbl.textContent = f.label;
+        wrap.appendChild(lbl);
+        const input = document.createElement('input');
+        input.id = `extra_${f.key}`;
+        input.type = f.type === 'password' ? 'password' : 'text';
+        input.dataset.extraKey = f.key;
+        input.value = (f.default !== null && f.default !== undefined) ? f.default : '';
+        if (f.type === 'password') input.autocomplete = 'off';
+        wrap.appendChild(input);
+        grid.appendChild(wrap);
+      });
+    }
+    function loadExtraFields(extra) {
+      document.querySelectorAll('#extraFieldsGrid [data-extra-key]').forEach(el => {
+        const val = (extra || {})[el.dataset.extraKey];
+        el.value = (val !== null && val !== undefined) ? val : '';
+      });
+    }
+    function collectExtraFields() {
+      const extra = {};
+      document.querySelectorAll('#extraFieldsGrid [data-extra-key]').forEach(el => {
+        extra[el.dataset.extraKey] = el.value;
+      });
+      return extra;
+    }
+
     function applyLoadedData(co, lt) {
       if (!Array.isArray(co?.companies)) throw new Error('company_master.json must contain a companies array.');
       if (lt?.legal_types) state.legalTypes = lt;
-      state.companies = { schema: co.schema || { generated_at: new Date().toISOString() }, companies: co.companies };
+      state.companies = { schema: co.schema || { generated_at: new Date().toISOString() }, extra_fields: co.extra_fields || COMPANY_EXTRA_FIELDS, companies: co.companies };
+      renderExtraFields();
+      initCols();
+      renderColPicker();
       refreshTyp3Select();
       const sel = refreshRecordSelect(0);
       refreshTyp3Filter();
@@ -611,15 +750,6 @@
     [els.fieldDisplayName, els.fieldNamecode, els.fieldTyp3, els.fieldVat9].forEach(el => el.addEventListener('input', computeDerived));
     els.fieldRootPath.addEventListener('blur', computeDerived);
 
-    document.querySelectorAll('thead th[data-col]').forEach(th => {
-      th.addEventListener('click', () => {
-        state.sortDir = state.sortCol === th.dataset.col && state.sortDir === 'asc' ? 'desc' : 'asc';
-        state.sortCol = th.dataset.col;
-        updateSortHeaders();
-        renderTable();
-      });
-    });
-
     els.searchInput.addEventListener('input', debounce(renderTable));
     els.filterActive.addEventListener('change', renderTable);
     els.filterTyp3.addEventListener('change', renderTable);
@@ -630,14 +760,21 @@
     $('copyTableBtn').addEventListener('click', async () => {
       const rows = getRows();
       if (!rows.length) { setStatus('No rows to copy.', 'warn'); return; }
-      const cols = ['company_id','display_name','company_folder','namecode','typ3','vat9','absolute_company_root_path','is_active','notes'];
+      const selCols = state.cols.filter(c => c.selected);
       const q = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
-      const tsv = [cols.join('\t'), ...rows.map(r => cols.map(c => q(r[c])).join('\t'))].join('\n');
+      const header = selCols.map(c => c.label).join('\t');
+      const body = rows.map(r => selCols.map(col => {
+        if (col.isExtra) return q((r.extra || {})[col.extraKey] ?? '');
+        return q(r[col.key]);
+      }).join('\t')).join('\n');
+      const tsv = [header, body].join('\n');
       try { await navigator.clipboard.writeText(tsv); setStatus(`Copied ${rows.length} rows — paste into Excel.`, 'ok'); }
       catch (_) { setStatus('Could not copy.', 'bad'); }
     });
 
     async function init() {
+      initCols();
+      renderColPicker();
       refreshTyp3Select();
       refreshRecordSelect();
       updateSortHeaders();

@@ -23,7 +23,44 @@
         "kWp": 1
       },
       "metric_rule": "Convert input to integer kW, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "15.473 MW -> 15p473"
+      "example": "15.473 MW -> 15p473",
+      "extra_fields": [
+        {
+          "key": "inverter_brand",
+          "label": "Inverter brand",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "panel_brand",
+          "label": "Panel brand",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "tracker_type",
+          "label": "Tracker type",
+          "type": "select",
+          "options": [
+            "fixed",
+            "single-axis",
+            "dual-axis"
+          ],
+          "default": "fixed"
+        },
+        {
+          "key": "grid_voltage_kv",
+          "label": "Grid voltage (kV)",
+          "type": "number",
+          "default": null
+        },
+        {
+          "key": "cameras",
+          "label": "Cameras",
+          "type": "integer",
+          "default": 0
+        }
+      ]
     },
     {
       "type_code": "WND",
@@ -40,7 +77,39 @@
         "kW": 1
       },
       "metric_rule": "Convert input to integer kW, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "2.000 MW -> 02p000"
+      "example": "2.000 MW -> 02p000",
+      "extra_fields": [
+        {
+          "key": "turbine_brand",
+          "label": "Turbine brand",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "turbine_count",
+          "label": "Turbine count",
+          "type": "integer",
+          "default": null
+        },
+        {
+          "key": "hub_height_m",
+          "label": "Hub height (m)",
+          "type": "number",
+          "default": null
+        },
+        {
+          "key": "grid_voltage_kv",
+          "label": "Grid voltage (kV)",
+          "type": "number",
+          "default": null
+        },
+        {
+          "key": "cameras",
+          "label": "Cameras",
+          "type": "integer",
+          "default": 0
+        }
+      ]
     },
     {
       "type_code": "DTC",
@@ -57,7 +126,45 @@
         "kW": 1
       },
       "metric_rule": "Convert input to integer kW, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "3.200 MW -> 03p200"
+      "example": "3.200 MW -> 03p200",
+      "extra_fields": [
+        {
+          "key": "pue_rating",
+          "label": "PUE rating",
+          "type": "number",
+          "default": null
+        },
+        {
+          "key": "cooling_type",
+          "label": "Cooling type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "redundancy_tier",
+          "label": "Redundancy tier",
+          "type": "select",
+          "options": [
+            "Tier I",
+            "Tier II",
+            "Tier III",
+            "Tier IV"
+          ],
+          "default": "Tier II"
+        },
+        {
+          "key": "ups_brand",
+          "label": "UPS brand",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "cameras",
+          "label": "Cameras",
+          "type": "integer",
+          "default": 0
+        }
+      ]
     },
     {
       "type_code": "HTL",
@@ -72,7 +179,54 @@
         "beds": 1
       },
       "metric_rule": "Convert input to integer beds, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "70 beds -> 00p070"
+      "example": "70 beds -> 00p070",
+      "extra_fields": [
+        {
+          "key": "stars",
+          "label": "Stars",
+          "type": "select",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "default": "3"
+        },
+        {
+          "key": "rooms",
+          "label": "Rooms",
+          "type": "integer",
+          "default": null
+        },
+        {
+          "key": "restaurant",
+          "label": "Restaurant",
+          "type": "select",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "default": "no"
+        },
+        {
+          "key": "pool",
+          "label": "Pool",
+          "type": "select",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "default": "no"
+        },
+        {
+          "key": "parking_spaces",
+          "label": "Parking spaces",
+          "type": "integer",
+          "default": null
+        }
+      ]
     },
     {
       "type_code": "HYP",
@@ -89,7 +243,33 @@
         "ha": 10000
       },
       "metric_rule": "Convert input to integer m2, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "7000 m2 -> 07p000"
+      "example": "7000 m2 -> 07p000",
+      "extra_fields": [
+        {
+          "key": "crop_type",
+          "label": "Crop type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "irrigation_system",
+          "label": "Irrigation system",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "greenhouse_type",
+          "label": "Greenhouse type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "cameras",
+          "label": "Cameras",
+          "type": "integer",
+          "default": 0
+        }
+      ]
     },
     {
       "type_code": "BCH",
@@ -104,7 +284,27 @@
         "tpy": 1
       },
       "metric_rule": "Convert input to integer tpy, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "2500 tpy -> 02p500"
+      "example": "2500 tpy -> 02p500",
+      "extra_fields": [
+        {
+          "key": "feedstock_type",
+          "label": "Feedstock type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "process_type",
+          "label": "Process type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "co2_capture_tpy",
+          "label": "CO2 capture (t/y)",
+          "type": "number",
+          "default": null
+        }
+      ]
     },
     {
       "type_code": "BMS",
@@ -119,7 +319,27 @@
         "tpy": 1
       },
       "metric_rule": "Convert input to integer tpy, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "12500 tpy -> 12p500"
+      "example": "12500 tpy -> 12p500",
+      "extra_fields": [
+        {
+          "key": "feedstock_type",
+          "label": "Feedstock type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "process_type",
+          "label": "Process type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "grid_voltage_kv",
+          "label": "Grid voltage (kV)",
+          "type": "number",
+          "default": null
+        }
+      ]
     },
     {
       "type_code": "HYD",
@@ -134,7 +354,27 @@
         "kg/day": 1
       },
       "metric_rule": "Convert input to integer kg/day, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "3000 kg/day -> 03p000"
+      "example": "3000 kg/day -> 03p000",
+      "extra_fields": [
+        {
+          "key": "production_method",
+          "label": "Production method",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "storage_type",
+          "label": "Storage type",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "compression_bar",
+          "label": "Compression (bar)",
+          "type": "number",
+          "default": null
+        }
+      ]
     },
     {
       "type_code": "BES",
@@ -151,7 +391,33 @@
         "kWh": 1
       },
       "metric_rule": "Convert input to integer kWh, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "12.5 MWh -> 12p500"
+      "example": "12.5 MWh -> 12p500",
+      "extra_fields": [
+        {
+          "key": "battery_technology",
+          "label": "Battery technology",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "inverter_brand",
+          "label": "Inverter brand",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "grid_voltage_kv",
+          "label": "Grid voltage (kV)",
+          "type": "number",
+          "default": null
+        },
+        {
+          "key": "cycles_design_life",
+          "label": "Cycles design life",
+          "type": "integer",
+          "default": null
+        }
+      ]
     },
     {
       "type_code": "OFC",
@@ -168,7 +434,33 @@
         "ha": 10000
       },
       "metric_rule": "Convert input to integer m2, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "7000 m2 -> 07p000"
+      "example": "7000 m2 -> 07p000",
+      "extra_fields": [
+        {
+          "key": "floors",
+          "label": "Floors",
+          "type": "integer",
+          "default": null
+        },
+        {
+          "key": "parking_spaces",
+          "label": "Parking spaces",
+          "type": "integer",
+          "default": null
+        },
+        {
+          "key": "certification",
+          "label": "Certification",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "cameras",
+          "label": "Cameras",
+          "type": "integer",
+          "default": 0
+        }
+      ]
     },
     {
       "type_code": "OTH",
@@ -183,7 +475,15 @@
         "unit": 1
       },
       "metric_rule": "Convert input to integer unit, then metric = total//1000 as XX and total%1000 as YYY.",
-      "example": "42 -> 00p042"
+      "example": "42 -> 00p042",
+      "extra_fields": [
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "string",
+          "default": ""
+        }
+      ]
     }
   ]
 }

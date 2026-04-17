@@ -25,7 +25,8 @@
       "asset_folder": "DTC12p000-01_alexandroupoli_ALEXANDROUPOLI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0002",
@@ -41,7 +42,8 @@
       "asset_folder": "DTC12p000-01_ioannina_IOANNINA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0003",
@@ -57,7 +59,8 @@
       "asset_folder": "DTC15p000-01_meligalas_PELOPONISOS",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0004",
@@ -73,7 +76,8 @@
       "asset_folder": "DTC05p000-01_megalopoli_PELOPONISOS",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0005",
@@ -89,7 +93,8 @@
       "asset_folder": "DTC13p000-01_soltech_PATRA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0006",
@@ -105,7 +110,8 @@
       "asset_folder": "DTC08p000-01_admotech_THEVA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0007",
@@ -121,7 +127,8 @@
       "asset_folder": "HTL00p049-01_oitilo-kokkala_MANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -137,7 +144,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0008"
+      "asset_id": "AST-0008",
+      "extra": {}
     },
     {
       "asset_id": "AST-0009",
@@ -153,7 +161,8 @@
       "asset_folder": "PVS03p020-01_1n11-3p02-pouria_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0010",
@@ -169,7 +178,8 @@
       "asset_folder": "PVS06p150-01_1n13-6p15-ampelia-1_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0011",
@@ -185,7 +195,8 @@
       "asset_folder": "PVS06p830-01_1n5-6p83-praterio_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0012",
@@ -201,7 +212,8 @@
       "asset_folder": "PVS07p860-01_1n12-7p86-aletheia_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0013",
@@ -217,7 +229,8 @@
       "asset_folder": "PVS07p860-02_1n17-7p86-paliopurgo_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0033",
@@ -233,7 +246,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0014"
+      "asset_id": "AST-0014",
+      "extra": {}
     },
     {
       "asset_id": "AST-0015",
@@ -249,7 +263,8 @@
       "asset_folder": "PVS08p040-02_1n3-8p04-lakatpheria_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0016",
@@ -265,7 +280,8 @@
       "asset_folder": "PVS09p230-01_1n14-9p23-ampelia-2_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0017",
@@ -281,7 +297,8 @@
       "asset_folder": "PVS10p050-01_1n4-10p05-belanidia_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0018",
@@ -297,7 +314,8 @@
       "asset_folder": "PVS10p050-02_1n6-10p05-triantaphullia_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0019",
@@ -313,7 +331,8 @@
       "asset_folder": "PVS10p050-03_1n10-10p05-mourtitsa_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0020",
@@ -329,7 +348,8 @@
       "asset_folder": "PVS10p260-01_11n-10p26-kleisouras-rema-2_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -345,7 +365,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0021"
+      "asset_id": "AST-0021",
+      "extra": {}
     },
     {
       "asset_id": "AST-0022",
@@ -361,7 +382,8 @@
       "asset_folder": "PVS10p520-01_15n-10p52-periblepto_MAGNESIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0023",
@@ -377,7 +399,8 @@
       "asset_folder": "PVS10p520-02_8n-10p52-kokka_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0024",
@@ -393,7 +416,8 @@
       "asset_folder": "PVS11p120-01_1n15-11p12-kurtone-ap1_FTHIOTIDA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0025",
@@ -409,7 +433,8 @@
       "asset_folder": "PVS11p180-01_7n-11p18-kleisoura-rema-1_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0026",
@@ -425,7 +450,8 @@
       "asset_folder": "PVS11p990-01_14n-11p99-thronos-1-2_LARISA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0027",
@@ -441,7 +467,8 @@
       "asset_folder": "PVS13p000-01_5n-13p00-phlamouria-2_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0028",
@@ -457,7 +484,8 @@
       "asset_folder": "PVS14p000-01_10n-14p00-sokrate_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0029",
@@ -473,7 +501,8 @@
       "asset_folder": "PVS15p010-01_18n2-15p01-astakos-soupi-1_AITOLOAKARNANIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -489,7 +518,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0030"
+      "asset_id": "AST-0030",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -505,7 +535,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0031"
+      "asset_id": "AST-0031",
+      "extra": {}
     },
     {
       "asset_id": "AST-0032",
@@ -521,7 +552,8 @@
       "asset_folder": "PVS20p900-01_4n-20p90-papagianne_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0033",
@@ -537,7 +569,8 @@
       "asset_folder": "PVS21p980-01_12n-21p98-khani-kampoure_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0034",
@@ -553,7 +586,8 @@
       "asset_folder": "PVS22p290-01_13n-22p29-kastania_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -569,7 +603,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0035"
+      "asset_id": "AST-0035",
+      "extra": {}
     },
     {
       "asset_id": "AST-0036",
@@ -585,7 +620,8 @@
       "asset_folder": "PVS29p010-01_3n-29p01-periblepto-2_MAGNESIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -601,7 +637,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0037"
+      "asset_id": "AST-0037",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -617,7 +654,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0038"
+      "asset_id": "AST-0038",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -633,7 +671,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0039"
+      "asset_id": "AST-0039",
+      "extra": {}
     },
     {
       "company_id": "CMP-0034",
@@ -649,7 +688,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0040"
+      "asset_id": "AST-0040",
+      "extra": {}
     },
     {
       "asset_id": "AST-0041",
@@ -665,7 +705,8 @@
       "asset_folder": "PVS37p050-01_18n1-37p05-astakos-soupi-2_AITOLOAKARNANIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0042",
@@ -681,7 +722,8 @@
       "asset_folder": "PVS80p060-01_9n-80p06-kodonotrupa_KOZANI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0043",
@@ -697,7 +739,8 @@
       "asset_folder": "PVS01p527-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -713,7 +756,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0044"
+      "asset_id": "AST-0044",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -729,7 +773,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0045"
+      "asset_id": "AST-0045",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -745,7 +790,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0046"
+      "asset_id": "AST-0046",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -761,7 +807,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0047"
+      "asset_id": "AST-0047",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -777,7 +824,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0048"
+      "asset_id": "AST-0048",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -793,7 +841,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0049"
+      "asset_id": "AST-0049",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -809,7 +858,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0050"
+      "asset_id": "AST-0050",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -825,7 +875,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0051"
+      "asset_id": "AST-0051",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -841,7 +892,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0052"
+      "asset_id": "AST-0052",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -857,7 +909,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0053"
+      "asset_id": "AST-0053",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -873,7 +926,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0054"
+      "asset_id": "AST-0054",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -889,7 +943,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0055"
+      "asset_id": "AST-0055",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -905,7 +960,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0056"
+      "asset_id": "AST-0056",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -921,7 +977,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0057"
+      "asset_id": "AST-0057",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -937,7 +994,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0058"
+      "asset_id": "AST-0058",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -953,7 +1011,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0059"
+      "asset_id": "AST-0059",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -969,7 +1028,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0060"
+      "asset_id": "AST-0060",
+      "extra": {}
     },
     {
       "company_id": "CMP-0073",
@@ -985,7 +1045,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0061"
+      "asset_id": "AST-0061",
+      "extra": {}
     },
     {
       "asset_id": "AST-0062",
@@ -1001,7 +1062,8 @@
       "asset_folder": "PVS04p103-01_andravida_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0063",
@@ -1017,7 +1079,8 @@
       "asset_folder": "PVS00p320-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0064",
@@ -1033,7 +1096,8 @@
       "asset_folder": "PVS00p592-01_morokampos_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0065",
@@ -1049,7 +1113,8 @@
       "asset_folder": "PVS00p296-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0066",
@@ -1065,7 +1130,8 @@
       "asset_folder": "PVS00p276-01_likovouni_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0067",
@@ -1081,7 +1147,8 @@
       "asset_folder": "PVS00p805-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0068",
@@ -1097,7 +1164,8 @@
       "asset_folder": "PVS04p950-01_spentza-kyllini_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0069",
@@ -1113,7 +1181,8 @@
       "asset_folder": "PVS00p176-01_lukobouni_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0070",
@@ -1129,7 +1198,8 @@
       "asset_folder": "PVS01p527-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0071",
@@ -1145,7 +1215,8 @@
       "asset_folder": "PVS01p990-01_spentza-rachi_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0072",
@@ -1161,7 +1232,8 @@
       "asset_folder": "PVS00p805-02_konizos_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0073",
@@ -1177,7 +1249,8 @@
       "asset_folder": "PVS00p201-01_konizos_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0074",
@@ -1193,7 +1266,8 @@
       "asset_folder": "PVS00p499-01_kavasila_PINEIOS",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0075",
@@ -1209,7 +1283,8 @@
       "asset_folder": "PVS00p449-01_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0076",
@@ -1225,7 +1300,8 @@
       "asset_folder": "PVS00p592-02_ntarani_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0077",
@@ -1241,7 +1317,8 @@
       "asset_folder": "PVS02p913-01_lianovourli_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0078",
@@ -1257,7 +1334,8 @@
       "asset_folder": "PVS00p864-01_ntarali_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0079",
@@ -1273,7 +1351,8 @@
       "asset_folder": "PVS00p497-01_sali-pigadi_ANDRAVIDA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0080",
@@ -1289,7 +1368,8 @@
       "asset_folder": "PVS00p436-01_bipe-patron-31_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0081",
@@ -1305,7 +1385,8 @@
       "asset_folder": "PVS00p317-01_bipe-patron-31_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0082",
@@ -1321,7 +1402,8 @@
       "asset_folder": "PVS00p213-01_admotec_THIVA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0083",
@@ -1337,7 +1419,8 @@
       "asset_folder": "PVS00p994-01_gianopouleika_LECHAINA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0084",
@@ -1353,7 +1436,8 @@
       "asset_folder": "PVS04p403-01_palaionaziro_GORTYNIA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0059",
@@ -1369,7 +1453,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0085"
+      "asset_id": "AST-0085",
+      "extra": {}
     },
     {
       "company_id": "CMP-0021",
@@ -1385,7 +1470,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0086"
+      "asset_id": "AST-0086",
+      "extra": {}
     },
     {
       "company_id": "CMP-0060",
@@ -1401,7 +1487,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0087"
+      "asset_id": "AST-0087",
+      "extra": {}
     },
     {
       "company_id": "CMP-0060",
@@ -1417,7 +1504,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0088"
+      "asset_id": "AST-0088",
+      "extra": {}
     },
     {
       "company_id": "CMP-0060",
@@ -1433,7 +1521,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0089"
+      "asset_id": "AST-0089",
+      "extra": {}
     },
     {
       "company_id": "CMP-0060",
@@ -1449,7 +1538,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0090"
+      "asset_id": "AST-0090",
+      "extra": {}
     },
     {
       "asset_id": "AST-0091",
@@ -1465,7 +1555,8 @@
       "asset_folder": "PVS00p500-01_paliomulos_CHALKIDA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0092",
@@ -1481,7 +1572,8 @@
       "asset_folder": "PVS00p499-01_agros-146-147_FARKADONA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0093",
@@ -1497,7 +1589,8 @@
       "asset_folder": "PVS00p500-01_agros-290_FARKADONA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0094",
@@ -1513,7 +1606,8 @@
       "asset_folder": "PVS00p500-01_agros-385_FARKADONA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0030",
@@ -1529,7 +1623,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0095"
+      "asset_id": "AST-0095",
+      "extra": {}
     },
     {
       "company_id": "CMP-0030",
@@ -1545,7 +1640,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0096"
+      "asset_id": "AST-0096",
+      "extra": {}
     },
     {
       "company_id": "CMP-0030",
@@ -1561,7 +1657,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0097"
+      "asset_id": "AST-0097",
+      "extra": {}
     },
     {
       "asset_id": "AST-0098",
@@ -1577,7 +1674,8 @@
       "asset_folder": "PVS00p500-01_agros-74_FARKADONA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0099",
@@ -1593,7 +1691,8 @@
       "asset_folder": "PVS00p499-01_agros-34_FARKADONA",
       "lifecycle_status": "operational",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "company_id": "CMP-0028",
@@ -1609,7 +1708,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0100"
+      "asset_id": "AST-0100",
+      "extra": {}
     },
     {
       "company_id": "CMP-0028",
@@ -1625,7 +1725,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0101"
+      "asset_id": "AST-0101",
+      "extra": {}
     },
     {
       "company_id": "CMP-0053",
@@ -1641,7 +1742,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0102"
+      "asset_id": "AST-0102",
+      "extra": {}
     },
     {
       "company_id": "CMP-0053",
@@ -1657,7 +1759,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0103"
+      "asset_id": "AST-0103",
+      "extra": {}
     },
     {
       "company_id": "CMP-0009",
@@ -1673,7 +1776,8 @@
       "lifecycle_status": "operational",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0104"
+      "asset_id": "AST-0104",
+      "extra": {}
     },
     {
       "company_id": "CMP-0003",
@@ -1689,7 +1793,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0105"
+      "asset_id": "AST-0105",
+      "extra": {}
     },
     {
       "company_id": "CMP-0003",
@@ -1705,7 +1810,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0106"
+      "asset_id": "AST-0106",
+      "extra": {}
     },
     {
       "company_id": "CMP-0065",
@@ -1721,7 +1827,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0107"
+      "asset_id": "AST-0107",
+      "extra": {}
     },
     {
       "company_id": "CMP-0066",
@@ -1737,7 +1844,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0108"
+      "asset_id": "AST-0108",
+      "extra": {}
     },
     {
       "company_id": "CMP-0064",
@@ -1753,7 +1861,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0109"
+      "asset_id": "AST-0109",
+      "extra": {}
     },
     {
       "company_id": "CMP-0005",
@@ -1769,7 +1878,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0110"
+      "asset_id": "AST-0110",
+      "extra": {}
     },
     {
       "company_id": "CMP-0057",
@@ -1785,7 +1895,8 @@
       "lifecycle_status": "development",
       "is_active": true,
       "notes": "",
-      "asset_id": "AST-0111"
+      "asset_id": "AST-0111",
+      "extra": {}
     },
     {
       "asset_id": "AST-0112",
@@ -1801,7 +1912,8 @@
       "asset_folder": "HYP03p638-01_mpoumpounokampos_ARKADIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0113",
@@ -1817,7 +1929,8 @@
       "asset_folder": "HYP05p580-01_mpoumpounokampos_ARKADIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0114",
@@ -1833,7 +1946,8 @@
       "asset_folder": "HYP07p810-01_mpoumpounokampos_ARKADIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0115",
@@ -1849,7 +1963,8 @@
       "asset_folder": "HYP05p902-01_mpoumpounokampos_ARKADIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0116",
@@ -1865,7 +1980,8 @@
       "asset_folder": "HYP06p762-01_mpoumpounokampos_ARKADIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0117",
@@ -1881,7 +1997,8 @@
       "asset_folder": "HYP02p502-01_mpoumpounokampos_ARKADIA",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0118",
@@ -1897,7 +2014,8 @@
       "asset_folder": "PVS00p474-01_sali-pigadi_KYLLINI",
       "lifecycle_status": "o-and-m",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0119",
@@ -1913,7 +2031,8 @@
       "asset_folder": "PVS00p499-01_konizos_THIVA",
       "lifecycle_status": "o-and-m",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0120",
@@ -1929,7 +2048,8 @@
       "asset_folder": "PVS00p100-01_romeika_MEGALOPOLI",
       "lifecycle_status": "o-and-m",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0121",
@@ -1945,7 +2065,8 @@
       "asset_folder": "PVS00p100-01_romeika_MEGALOPOLI",
       "lifecycle_status": "o-and-m",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0122",
@@ -1961,7 +2082,8 @@
       "asset_folder": "PVS00p703-01_vipe_OICHALIA",
       "lifecycle_status": "o-and-m",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0123",
@@ -1977,7 +2099,8 @@
       "asset_folder": "PVS01p968-01_vipe_OICHALIA",
       "lifecycle_status": "o-and-m",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0124",
@@ -1993,7 +2116,8 @@
       "asset_folder": "PVS00p500-01_diaplasi_KALAMATA",
       "lifecycle_status": "o-and-m",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     },
     {
       "asset_id": "AST-0125",
@@ -2009,7 +2133,8 @@
       "asset_folder": "OFC01p533-01_kifisia-178_MAROUSI",
       "lifecycle_status": "development",
       "is_active": true,
-      "notes": ""
+      "notes": "",
+      "extra": {}
     }
   ]
 }
