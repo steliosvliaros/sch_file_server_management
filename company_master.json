@@ -1,7 +1,7 @@
 {
   "schema": {
     "version": "1.1",
-    "generated_at": "2026-04-17T08:09:51.598Z",
+    "generated_at": "2026-04-17T11:49:12.882Z",
     "source_files": [
       "00_company_master.xlsx",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx"
@@ -39,13 +39,18 @@
       "company_id": "CMP-0001",
       "display_name": "4Ε ΕΝΕΡΓΕΙΑΚΗ ΕΤΑΙΡΕΙΑ ΑΕ",
       "absolute_company_root_path": "\\\\192.168.200.4\\Files",
-      "namecode": "EENER",
+      "namecode": "4EENER",
       "typ3": "AEE",
       "vat9": "998808360",
-      "company_folder": "EENER-AEE-998808360",
+      "company_folder": "4EENER-AEE-998808360",
       "is_active": true,
       "notes": "absolute_company_root_path set to shared root \\\\192.168.200.4\\Files",
-      "extra": {}
+      "extra": {
+        "eprm_username": "",
+        "eprm_password": "",
+        "taxisnet_username": "",
+        "taxisnet_password": ""
+      }
     },
     {
       "company_id": "CMP-0002",

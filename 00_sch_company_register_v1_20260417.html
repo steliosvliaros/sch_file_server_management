@@ -261,7 +261,7 @@
     function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function debounce(fn, wait = 160) { let t = null; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
     function searchText(v) { return String(v || '').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
-    function normalizeNamecode(v, fb = '') { return String(v || fb || '').replace(/[^A-Za-z]/g,'').toUpperCase().slice(0,6); }
+    function normalizeNamecode(v, fb = '') { return String(v || fb || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,6); }
     function padVat(v) { return String(v || '').replace(/\D/g,'').padStart(9,'0').slice(0,9); }
     function buildFolder(nc, typ3, vat9) { return `${normalizeNamecode(nc)}-${String(typ3||'').toUpperCase()}-${padVat(vat9)}`; }
     function nextId(items, prefix, key) {
