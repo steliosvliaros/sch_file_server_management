@@ -61,6 +61,21 @@
     button.secondary { background: var(--card); color: var(--text); border: 1px solid var(--line); }
     button.sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
     .hidden { display: none; }
+    #permOverlay {
+      position:fixed; inset:0; z-index:999;
+      background:rgba(15,23,42,0.82);
+      display:flex; align-items:center; justify-content:center;
+    }
+    #permOverlay.hidden { display:none; }
+    #permOverlay .perm-card {
+      background:var(--card); border:1px solid var(--line); border-radius:24px;
+      padding:40px 48px; max-width:400px; width:90%; text-align:center;
+      box-shadow:0 24px 64px rgba(0,0,0,0.3);
+    }
+    #permOverlay .perm-card h2 { margin:0 0 10px; font-size:22px; }
+    #permOverlay .perm-card p  { margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.6; }
+    #permOverlay .perm-card button { width:100%; padding:14px; font-size:16px; border-radius:14px; }
+    #permOverlay .perm-once { margin:12px 0 0; font-size:11px; color:var(--muted); }
     input[type="search"], input[type="text"], select {
       width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px;
       font-size: 13px; background: var(--card); color: var(--text);
@@ -127,22 +142,35 @@
   </style>
 </head>
 <body>
+  <!-- Permission overlay -->
+  <div id="permOverlay">
+    <div class="perm-card">
+      <h2 id="permTitle">&#128274;&nbsp; Folder access needed</h2>
+      <p id="permDesc">Loading&hellip;</p>
+      <button id="permGrantBtn">Allow Access</button>
+      <p class="perm-once">&#10003;&nbsp;One-time only &mdash; access is remembered for future visits.</p>
+    </div>
+  </div>
+
   <div class="wrap">
     <div class="hero">
       <h1>SCH Portfolio Register</h1>
       <p>Cross-company asset register. Load <span class="mono">company_master.json</span> and <span class="mono">assets_master.json</span> to filter, sort, and browse all assets across the portfolio.</p>
     </div>
 
-    <div class="toolbar">
+    <div class="toolbar" style="align-items:flex-end;">
+      <div style="flex:1; min-width:260px;">
+        <label for="workingFolderPath" style="font-size:12px;font-weight:700;margin-bottom:5px;display:block;">Working folder</label>
+        <input id="workingFolderPath" type="text" value="\\\\192.168.200.4\\Files\\_sch_file_manager_" readonly title="Default working folder." />
+      </div>
       <button id="openFolderBtn">Open working folder</button>
-      <button id="autoloadBtn" class="secondary">Auto-load same folder</button>
       <button id="loadCompaniesBtn" class="secondary">Load company_master.json</button>
       <button id="loadAssetsBtn" class="secondary">Load assets_master.json</button>
       <input id="companiesFileInput" class="hidden" type="file" accept="application/json,.json" />
       <input id="assetsFileInput"  class="hidden" type="file" accept="application/json,.json" />
     </div>
 
-    <div id="statusBadge" class="pill info">Load a working folder or the JSON files.</div>
+    <div id="statusBadge" class="pill info">Loading&hellip;</div>
 
     <div class="card">
       <div class="filters">
@@ -219,7 +247,6 @@
     const els = {
       statusBadge:       document.getElementById('statusBadge'),
       openFolderBtn:     document.getElementById('openFolderBtn'),
-      autoloadBtn:       document.getElementById('autoloadBtn'),
       loadCompaniesBtn:  document.getElementById('loadCompaniesBtn'),
       loadAssetsBtn:     document.getElementById('loadAssetsBtn'),
       companiesFileInput:document.getElementById('companiesFileInput'),
@@ -501,7 +528,7 @@
 
     const HANDLE_DB   = 'sch-folder-handles';
     const HANDLE_STORE = 'settings';
-    const HANDLE_KEY  = 'portfolio-register-working-folder';
+    const HANDLE_KEY  = 'company-register-folder';
     let dbPromise = null;
 
     function openDb() {
@@ -544,6 +571,9 @@
       loadCompaniesObject(co);
       loadAssetsObject(ao);
       afterLoad();
+      const wp = document.getElementById('workingFolderPath');
+      if (wp) wp.value = dir.name || '\\\\192.168.200.4\\Files\\_sch_file_manager_';
+      hidePermOverlay();
       setStatus(
         (source === 'restored' ? 'Restored last working folder. ' : 'Loaded from folder. ') +
         `${state.assets.length} assets across ${state.companies.length} companies.`,
@@ -551,32 +581,72 @@
       );
     }
 
+    // ── Overlay helpers ────────────────────────────────────────────────────────
+    function showPermOverlay() { document.getElementById('permOverlay').classList.remove('hidden'); }
+    function hidePermOverlay() { document.getElementById('permOverlay').classList.add('hidden'); }
+
+    // ── XHR auto-load (works under file:// with UNC paths) ─────────────────────
+    const HARDCODED_BASE = 'file:////192.168.200.4/Files/_sch_file_manager_/';
+    function baseUrl() { const h = location.href; return h.substring(0, h.lastIndexOf('/') + 1); }
+    function xhrJson(url) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onload = () => {
+          if (xhr.status === 200 || xhr.status === 0) {
+            if (!xhr.responseText) { reject(new Error(`Empty: ${url}`)); return; }
+            try { resolve(JSON.parse(xhr.responseText)); } catch (e) { reject(new Error(`Bad JSON: ${url}`)); }
+          } else { reject(new Error(`HTTP ${xhr.status}: ${url}`)); }
+        };
+        xhr.onerror = () => reject(new Error(`Cannot reach: ${url}`));
+        xhr.send();
+      });
+    }
+    async function tryXhrLoad(base) {
+      const [co, ao] = await Promise.all([
+        xhrJson(base + 'company_master.json'),
+        xhrJson(base + 'assets_master.json')
+      ]);
+      loadCompaniesObject(co);
+      loadAssetsObject(ao);
+      afterLoad();
+    }
+    async function autoLoadSameFolder() {
+      for (const base of [HARDCODED_BASE, baseUrl()]) {
+        try {
+          await tryXhrLoad(base);
+          const wp = document.getElementById('workingFolderPath');
+          if (wp) wp.value = '\\\\192.168.200.4\\Files\\_sch_file_manager_';
+          hidePermOverlay();
+          setStatus(`Auto-loaded. ${state.assets.length} assets across ${state.companies.length} companies.`, 'ok');
+          return true;
+        } catch (_) {}
+      }
+      return false;
+    }
+
+    // ── Pending handle (for requestPermission on repeat visits) ────────────────
+    let pendingHandle = null;
+
     els.openFolderBtn.addEventListener('click', async () => {
-      if (!window.showDirectoryPicker) { setStatus('This browser does not support folder access. Use the manual load buttons.', 'warn'); return; }
+      if (!window.showDirectoryPicker) { setStatus('Folder access not supported in this browser.', 'warn'); hidePermOverlay(); return; }
       try {
-        const dir = await window.showDirectoryPicker();
+        const dir = await window.showDirectoryPicker({ mode: 'read' });
         await writeHandle(dir).catch(() => null);
         await loadFromDir(dir, 'manual');
-      } catch (err) {
-        if (err?.name !== 'AbortError') setStatus(`Load failed: ${err.message}`, 'bad');
-      }
+      } catch (err) { if (err?.name !== 'AbortError') setStatus(`Load failed: ${err.message}`, 'bad'); showPermOverlay(); }
     });
 
-    els.autoloadBtn.addEventListener('click', async () => {
-      if (location.protocol === 'file:') { setStatus('Auto-load is blocked under file://. Use Open working folder.', 'warn'); return; }
-      try {
-        const [cr, ar] = await Promise.all([
-          fetch('./company_master.json', { cache: 'no-store' }),
-          fetch('./assets_master.json',  { cache: 'no-store' })
-        ]);
-        if (!cr.ok || !ar.ok) throw new Error('company_master.json or assets_master.json not found next to the HTML file.');
-        loadCompaniesObject(await cr.json());
-        loadAssetsObject(await ar.json());
-        afterLoad();
-        setStatus(`Auto-loaded. ${state.assets.length} assets across ${state.companies.length} companies.`, 'ok');
-      } catch (err) {
-        setStatus(`Auto-load failed: ${err.message}`, 'bad');
+    document.getElementById('permGrantBtn').addEventListener('click', async () => {
+      if (pendingHandle) {
+        try {
+          const perm = await pendingHandle.requestPermission({ mode: 'read' });
+          if (perm === 'granted') { await loadFromDir(pendingHandle, 'restored'); pendingHandle = null; return; }
+        } catch (_) {}
+        await clearHandle().catch(() => null);
+        pendingHandle = null;
       }
+      els.openFolderBtn.click();
     });
 
     function bindFile(btn, input, loader, label) {
@@ -594,12 +664,36 @@
 
     async function init() {
       updateSortHeaders();
-      if (!window.showDirectoryPicker) return;
-      try {
-        const h = await readHandle(); if (!h) return;
-        if ((await h.queryPermission?.({ mode: 'read' })) !== 'granted') return;
-        await loadFromDir(h, 'restored');
-      } catch (_) { await clearHandle().catch(() => null); }
+
+      // 1. Try XHR from hardcoded share or same folder
+      const xhrOk = await autoLoadSameFolder();
+      if (xhrOk) return;
+
+      // 2. Check stored handle permission silently
+      if (window.showDirectoryPicker) {
+        try {
+          const h = await readHandle();
+          if (h) {
+            const perm = await h.queryPermission({ mode: 'read' });
+            if (perm === 'granted') { await loadFromDir(h, 'restored'); return; }
+            if (perm === 'prompt') {
+              pendingHandle = h;
+              document.getElementById('permTitle').textContent = '\u{1F513}\u00A0 Allow access';
+              document.getElementById('permDesc').textContent = 'Click Allow Access to reconnect to the working folder.';
+              document.getElementById('permGrantBtn').textContent = 'Allow Access';
+              showPermOverlay();
+              return;
+            }
+            await clearHandle().catch(() => null);
+          }
+        } catch (_) { await clearHandle().catch(() => null); }
+      }
+
+      // 3. No handle — first-time picker
+      document.getElementById('permTitle').innerHTML = '&#128274;\u00A0 Select working folder';
+      document.getElementById('permDesc').innerHTML = 'Select the folder <strong>_sch_file_manager_</strong> on the file server. Required once only.';
+      document.getElementById('permGrantBtn').textContent = 'Select Folder\u2026';
+      showPermOverlay();
     }
 
     init().catch(err => setStatus(`Initialization failed: ${err.message}`, 'bad'));
