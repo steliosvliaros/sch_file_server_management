@@ -3,7 +3,7 @@
     "schema_id": "sch.fileserver.assets_master",
     "schema_version": "1.2.0",
     "generated_from": "master_policy.yaml",
-    "generated_at": "2026-04-17T06:12:47.122Z",
+    "generated_at": "2026-04-21T10:00:34.570Z",
     "source_files": [
       "master_policy.yaml",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx",
@@ -2135,6 +2135,29 @@
       "is_active": true,
       "notes": "",
       "extra": {}
+    },
+    {
+      "asset_id": "AST-0126",
+      "company_id": "CMP-0053",
+      "type": "WND",
+      "input_value": 16,
+      "input_unit": "MW",
+      "metric": "16p000",
+      "ss": "01",
+      "typeid": "WND16p000-01",
+      "project_name": "ss-aitoliko-2",
+      "location": "MESSOLONGHI",
+      "asset_folder": "WND16p000-01_ss-aitoliko-2_MESSOLONGHI",
+      "lifecycle_status": "operational",
+      "is_active": true,
+      "notes": "",
+      "extra": {
+        "turbine_brand": "",
+        "turbine_count": null,
+        "hub_height_m": null,
+        "grid_voltage_kv": null,
+        "cameras": 0
+      }
     }
   ]
 }
