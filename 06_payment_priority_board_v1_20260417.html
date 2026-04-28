@@ -449,6 +449,7 @@ const DEFAULT_CONFIG = {
   approvals: {
     notification_mode: 'mailto',
     email_subject_prefix: 'SCH Payment Priority',
+    failsafe_password: '',
     tech: { label: 'Tech approval', keyword: 'change-me-tech', email: '', cc: '' },
     econ: { label: 'Econ approval', keyword: 'change-me-econ', email: '', cc: '' },
     director: { label: 'Director approval', keyword: 'change-me-director', email: '', cc: '' },
@@ -1034,7 +1035,7 @@ function renderTables(){
           <button class="secondary slim" data-action="approve-director" data-id="${job.id}">Director ${job.approvals?.director?.approved ? '✓' : ''}</button>
         </div>
         <div class="action-grid">
-          <button class="warn slim" data-action="pay" data-id="${job.id}" ${approvalsComplete(job) ? '' : 'disabled'}>Mark paid</button>
+          <button class="warn slim" data-action="pay" data-id="${job.id}">Mark paid</button>
           <button class="danger slim" data-action="delete" data-id="${job.id}">Delete</button>
         </div>
       </td>
@@ -1343,6 +1344,25 @@ function approvalKeywordMatches(entered, expected){
   const caseSensitive = !!state.config?.approvals?.code_case_sensitive;
   if (caseSensitive) return String(entered ?? '') === String(expected ?? '');
   return String(entered ?? '').trim().toLowerCase() === String(expected ?? '').trim().toLowerCase();
+}
+function getFailsafePassword(){
+  return String(state.config?.approvals?.failsafe_password || '').trim();
+}
+function authorizeUnapprovedAction(job, actionLabel){
+  if (approvalsComplete(job)) return true;
+  const password = getFailsafePassword();
+  if (!password) {
+    setStatus(`All approvals are required before ${actionLabel}. No failsafe password is configured in payment_priority_config.json.`, 'alert');
+    return false;
+  }
+  const entered = window.prompt(`Approvals are incomplete for ${job.title}. Enter failsafe password to ${actionLabel}.`);
+  if (entered == null) return false;
+  if (!approvalKeywordMatches(entered, password)) {
+    setStatus(`Wrong failsafe password. ${actionLabel} was cancelled.`, 'alert');
+    return false;
+  }
+  setStatus(`Failsafe override accepted. Proceeding to ${actionLabel}.`, 'note');
+  return true;
 }
 function nextApprovalRole(role){
   const chain = ['tech', 'econ', 'director'];
@@ -1679,7 +1699,7 @@ function handleTableClick(ev){
     } else if (action === 'approve-director') {
       requestApproval(job, 'director');
     } else if (action === 'pay') {
-      if (!approvalsComplete(job)) { setStatus('All three approvals are required before marking a request as paid.', 'alert'); return; }
+      if (!authorizeUnapprovedAction(job, 'marking this request as paid')) return;
       job.status = 'paid';
       job.paid_at = nowIso();
       state.selectedJobId = null;
@@ -1693,6 +1713,7 @@ function handleTableClick(ev){
       renderAll();
       autosaveJobs();
     } else if (action === 'delete') {
+      if (!authorizeUnapprovedAction(job, 'deleting this request')) return;
       state.jobs = state.jobs.filter(j => j.id !== id);
       if (state.selectedJobId === id) state.selectedJobId = null;
       setStatus(`Deleted ${job.title}.`, 'note');

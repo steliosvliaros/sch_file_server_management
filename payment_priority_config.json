@@ -155,6 +155,7 @@
   "approvals": {
     "enabled": true,
     "code_case_sensitive": false,
+    "failsafe_password": "change-me-failsafe",
     "notification_mode": "mailto",
     "email_subject_prefix": "SCH Payment Priority",
     "keywords": {

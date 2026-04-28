@@ -2,7 +2,7 @@
   "schema": {
     "id": "sch.payment-priority.jobs",
     "version": "2.0.0",
-    "generated_at": "2026-04-17T11:57:46.850Z",
+    "generated_at": "2026-04-27T06:00:04.957Z",
     "notes": "Live payment-priority queue using stable absolute scoring. Open items are ranked. Paid items remain in archive."
   },
   "jobs": [
@@ -156,7 +156,7 @@
       "id": "WB-0003",
       "status": "open",
       "created_at": "2026-02-22T00:00:00",
-      "updated_at": "2026-03-18T07:06:16.492848Z",
+      "updated_at": "2026-04-27T05:30:51.757Z",
       "paid_at": null,
       "title": "Agora keraias gia enisxisi simatos 4G",
       "description": "problima simetoxis sto xrimatistirio energias",
@@ -202,9 +202,9 @@
       },
       "approvals": {
         "tech": {
-          "approved": false,
-          "approved_at": null,
-          "last_approved_at": null
+          "approved": true,
+          "approved_at": "2026-04-27T05:30:51.757Z",
+          "last_approved_at": "2026-04-27T05:30:51.757Z"
         },
         "econ": {
           "approved": false,
@@ -229,7 +229,7 @@
       "id": "WB-0006",
       "status": "open",
       "created_at": "2026-02-26T00:00:00",
-      "updated_at": "2026-03-18T07:06:16.492848Z",
+      "updated_at": "2026-04-27T05:58:40.427Z",
       "paid_at": null,
       "title": "ΓΕΝΙΚΗ ΠΡΟΣΦΟΡΑ ΔΕΜΑΤΙΚΩΝ ΘΗΒΑΣ",
       "description": "Problima na kopoun ta ektethimena kalodia",
@@ -275,9 +275,9 @@
       },
       "approvals": {
         "tech": {
-          "approved": false,
-          "approved_at": null,
-          "last_approved_at": null
+          "approved": true,
+          "approved_at": "2026-04-27T05:58:40.427Z",
+          "last_approved_at": "2026-04-27T05:58:40.427Z"
         },
         "econ": {
           "approved": false,
@@ -375,7 +375,7 @@
       "id": "WB-0007",
       "status": "open",
       "created_at": "2026-02-23T00:00:00",
-      "updated_at": "2026-03-18T07:06:16.492848Z",
+      "updated_at": "2026-04-27T05:59:31.203Z",
       "paid_at": null,
       "title": "Aντικατάσταση του UPS του H/N ADMOTECH",
       "description": "antikatastasi tou UPS",
@@ -421,9 +421,9 @@
       },
       "approvals": {
         "tech": {
-          "approved": false,
-          "approved_at": null,
-          "last_approved_at": null
+          "approved": true,
+          "approved_at": "2026-04-27T05:59:31.203Z",
+          "last_approved_at": "2026-04-27T05:59:31.203Z"
         },
         "econ": {
           "approved": false,
@@ -521,7 +521,7 @@
       "id": "WB-0008",
       "status": "open",
       "created_at": "2025-12-22T00:00:00",
-      "updated_at": "2026-03-18T07:06:16.492848Z",
+      "updated_at": "2026-04-27T06:00:04.939Z",
       "paid_at": null,
       "title": "ΠΡΟΜΗΘΕΙΑ & ΕΓΚΑΤΑΣΤΑΣΗ ΝΕΟΥ ΗΛΕΚΤΡΟΝΟΜΟΥ - ΛΥΚΟΒΟΥΝΙ 276",
       "description": "antikatastasi H/N",
@@ -567,9 +567,9 @@
       },
       "approvals": {
         "tech": {
-          "approved": false,
-          "approved_at": null,
-          "last_approved_at": null
+          "approved": true,
+          "approved_at": "2026-04-27T06:00:04.939Z",
+          "last_approved_at": "2026-04-27T06:00:04.939Z"
         },
         "econ": {
           "approved": false,
@@ -1397,7 +1397,7 @@
       "id": "WB-0011",
       "status": "open",
       "created_at": "2026-02-22T00:00:00",
-      "updated_at": "2026-03-18T07:06:16.492848Z",
+      "updated_at": "2026-04-27T05:32:14.070Z",
       "paid_at": null,
       "title": "Pliromi router EMSYS",
       "description": "",
@@ -1443,9 +1443,9 @@
       },
       "approvals": {
         "tech": {
-          "approved": false,
-          "approved_at": null,
-          "last_approved_at": null
+          "approved": true,
+          "approved_at": "2026-04-27T05:32:14.070Z",
+          "last_approved_at": "2026-04-27T05:32:14.070Z"
         },
         "econ": {
           "approved": false,
