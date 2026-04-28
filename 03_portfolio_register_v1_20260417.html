@@ -215,21 +215,16 @@
       <button id="copyTableBtn" class="secondary sm">Copy filtered table (paste to Excel)</button>
     </div>
 
+    <details id="colPickerDetails" style="margin-bottom:8px;">
+      <summary style="cursor:pointer;padding:6px 14px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;font-size:13px;font-weight:600;user-select:none;">Columns</summary>
+      <div id="colPickerGrid" style="display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 14px;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 6px 6px;"></div>
+    </details>
+
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th data-col="typeid">TYPEID</th>
-            <th data-col="project_name">Project</th>
-            <th data-col="location">Location</th>
-            <th data-col="type">Type</th>
-            <th data-col="capacity">Capacity</th>
-            <th data-col="company_display">Company</th>
-            <th data-col="lifecycle_status">Status</th>
-          </tr>
-        </thead>
+        <thead id="tableHead"></thead>
         <tbody id="tableBody">
-          <tr><td colspan="7" class="no-results">Load data to view assets.</td></tr>
+          <tr><td colspan="14" class="no-results">Load data to view assets.</td></tr>
         </tbody>
       </table>
     </div>
@@ -239,9 +234,11 @@
     const state = {
       companies: [],
       assets: [],
+      assetTypes: { asset_types: [] },
       sortCol: 'type',
       sortDir: 'asc',
-      expandedId: null
+      expandedId: null,
+      cols: []
     };
 
     const els = {
@@ -360,6 +357,105 @@
       return rows;
     }
 
+    // ── Column selector ───────────────────────────────────────────────────────
+
+    const PORTFOLIO_BASE_COLS = [
+      { key: 'typeid',           label: 'TYPEID',         sortable: true,  selected: true  },
+      { key: 'project_name',     label: 'Project',        sortable: true,  selected: true  },
+      { key: 'location',         label: 'Location',       sortable: true,  selected: true  },
+      { key: 'type',             label: 'Type',           sortable: true,  selected: true  },
+      { key: 'capacity',         label: 'Capacity',       sortable: true,  selected: true  },
+      { key: 'company_display',  label: 'Company',        sortable: true,  selected: true  },
+      { key: 'lifecycle_status', label: 'Status',         sortable: true,  selected: true  },
+      { key: 'is_active',        label: 'Active',         sortable: false, selected: false },
+      { key: 'asset_id',         label: 'Asset ID',       sortable: false, selected: false },
+      { key: 'ss',               label: 'SS',             sortable: false, selected: false },
+      { key: 'metric',           label: 'Metric',         sortable: false, selected: false },
+      { key: 'company_folder',   label: 'Company folder', sortable: false, selected: false },
+      { key: 'asset_folder',     label: 'Asset folder',   sortable: false, selected: false },
+      { key: 'notes',            label: 'Notes',          sortable: false, selected: false },
+    ];
+
+    function initCols() {
+      const prevMap = new Map((state.cols || []).map(c => [c.key, c.selected]));
+      const base = PORTFOLIO_BASE_COLS.map(c => ({
+        ...c,
+        selected: prevMap.has(c.key) ? prevMap.get(c.key) : c.selected,
+        isExtra: false,
+      }));
+      const seenKeys = new Set();
+      const extra = [];
+      const typeFilter = (typeof els !== 'undefined' && els.filterType) ? els.filterType.value : '';
+      if ((state.assetTypes.asset_types || []).length) {
+        const typesToScan = typeFilter
+          ? (state.assetTypes.asset_types || []).filter(t => t.type_code === typeFilter)
+          : (state.assetTypes.asset_types || []);
+        typesToScan.forEach(t => {
+          (t.extra_fields || []).forEach(f => {
+            if (!seenKeys.has(f.key)) {
+              seenKeys.add(f.key);
+              extra.push({
+                key: `extra.${f.key}`, label: f.label, sortable: false,
+                selected: prevMap.has(`extra.${f.key}`) ? prevMap.get(`extra.${f.key}`) : false,
+                isExtra: true, extraKey: f.key,
+              });
+            }
+          });
+        });
+      } else {
+        (state.assets || []).forEach(a => {
+          if (typeFilter && a.type !== typeFilter) return;
+          Object.keys(a.extra || {}).forEach(k => {
+            if (!seenKeys.has(k)) {
+              seenKeys.add(k);
+              extra.push({
+                key: `extra.${k}`, label: k.replace(/_/g, ' '), sortable: false,
+                selected: prevMap.has(`extra.${k}`) ? prevMap.get(`extra.${k}`) : false,
+                isExtra: true, extraKey: k,
+              });
+            }
+          });
+        });
+      }
+      state.cols = [...base, ...extra];
+    }
+
+    function renderColPicker() {
+      const grid = document.getElementById('colPickerGrid');
+      if (!grid) return;
+      grid.innerHTML = state.cols.map(c =>
+        `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;white-space:nowrap;">
+          <input type="checkbox" data-col-key="${esc(c.key)}"${c.selected ? ' checked' : ''}>
+          ${esc(c.label)}${c.isExtra ? ' <em style="font-size:11px;color:#888">(extra)</em>' : ''}
+        </label>`
+      ).join('');
+      grid.querySelectorAll('input[data-col-key]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const col = state.cols.find(x => x.key === cb.dataset.colKey);
+          if (col) { col.selected = cb.checked; renderTable(); }
+        });
+      });
+    }
+
+    function buildTableHead() {
+      const thead = document.getElementById('tableHead');
+      if (!thead) return;
+      const sel = state.cols.filter(c => c.selected);
+      thead.innerHTML = `<tr>${sel.map(c =>
+        c.sortable
+          ? `<th data-col="${esc(c.key)}"${state.sortCol === c.key ? ` class="sort-${state.sortDir}"` : ''}>${esc(c.label)}</th>`
+          : `<th>${esc(c.label)}</th>`
+      ).join('')}</tr>`;
+      thead.querySelectorAll('th[data-col]').forEach(th => {
+        th.addEventListener('click', () => {
+          const col = th.dataset.col;
+          state.sortDir = state.sortCol === col && state.sortDir === 'asc' ? 'desc' : 'asc';
+          state.sortCol = col;
+          renderTable();
+        });
+      });
+    }
+
     // ── Rendering ─────────────────────────────────────────────────────────────
 
     function statusCls(s) {
@@ -375,10 +471,32 @@
       const total = buildJoined().length;
       const shown = rows.length;
       els.countBadge.innerHTML = `Showing <strong>${shown}</strong> of <strong>${total}</strong> assets`;
+      buildTableHead();
+      const selCols = state.cols.filter(c => c.selected);
+      const span = selCols.length || 1;
 
       if (!rows.length) {
-        els.tableBody.innerHTML = '<tr><td colspan="7" class="no-results">No assets match the current filters.</td></tr>';
+        els.tableBody.innerHTML = `<tr><td colspan="${span}" class="no-results">No assets match the current filters.</td></tr>`;
         return;
+      }
+
+      function cellFor(col, a) {
+        if (col.isExtra) {
+          const v = (a.extra || {})[col.extraKey];
+          const disp = (v === null || v === undefined || v === '') ? '—' : String(v);
+          return `<td>${esc(disp)}</td>`;
+        }
+        switch (col.key) {
+          case 'typeid':           return `<td class="mono">${esc(a.typeid || '—')}</td>`;
+          case 'project_name':     return `<td>${esc(a.project_name || '—')}</td>`;
+          case 'location':         return `<td>${esc(a.location || '—')}</td>`;
+          case 'type':             return `<td><span class="type-badge">${esc(a.type || '—')}</span></td>`;
+          case 'capacity':         return `<td>${esc(a.capacity || '—')}</td>`;
+          case 'company_display':  return `<td title="${esc(a.company_folder)}">${esc(a.company_display)}</td>`;
+          case 'lifecycle_status': return `<td><span class="status-badge ${statusCls(a.lifecycle_status)}">${esc(a.lifecycle_status || '—')}</span></td>`;
+          case 'is_active':        return `<td>${a.is_active === false ? 'No' : 'Yes'}</td>`;
+          default:                 return `<td>${esc(String(a[col.key] ?? '—'))}</td>`;
+        }
       }
 
       const html = rows.map(a => {
@@ -404,13 +522,26 @@
             ['Asset folder',   a.asset_folder],
             ['Notes',          a.notes || '—'],
           ];
-          detailHtml = `<tr class="detail-row"><td colspan="7"><div class="detail-panel">
+          const extraDefs = (state.assetTypes.asset_types || []).find(t => t.type_code === a.type)?.extra_fields || [];
+          const extraHtml = extraDefs.length && a.extra
+            ? `<div style="margin-top:12px;">
+                <div class="df-label" style="font-weight:600;margin-bottom:8px;">Type-specific fields</div>
+                <div class="detail-grid">
+                  ${extraDefs.map(f => {
+                    const raw = (a.extra||{})[f.key];
+                    const display = (raw === null || raw === undefined || raw === '') ? '—' : String(raw);
+                    return `<div><div class="df-label">${esc(f.label)}</div><div class="df-value mono">${esc(display)}</div></div>`;
+                  }).join('')}
+                </div>
+              </div>` : '';
+          detailHtml = `<tr class="detail-row"><td colspan="${span}"><div class="detail-panel">
             <div class="detail-grid">
               ${fields.map(([l, v]) => `<div>
                 <div class="df-label">${esc(l)}</div>
                 <div class="df-value mono">${esc(String(v ?? '—'))}</div>
               </div>`).join('')}
             </div>
+            ${extraHtml}
             <div class="detail-actions">
               <button class="sm secondary copy-btn" data-val="${esc(a.asset_id)}">Copy asset ID</button>
               <button class="sm secondary copy-btn" data-val="${esc(a.typeid)}">Copy TYPEID</button>
@@ -421,13 +552,7 @@
         }
 
         return `<tr class="asset-row${inactCls}${expCls}" data-id="${esc(a.asset_id)}">
-          <td class="mono">${esc(a.typeid || '—')}</td>
-          <td>${esc(a.project_name || '—')}</td>
-          <td>${esc(a.location || '—')}</td>
-          <td><span class="type-badge">${esc(a.type || '—')}</span></td>
-          <td>${esc(a.capacity || '—')}</td>
-          <td title="${esc(a.company_folder)}">${esc(a.company_display)}</td>
-          <td><span class="status-badge ${statusCls(a.lifecycle_status)}">${esc(a.lifecycle_status || '—')}</span></td>
+          ${selCols.map(col => cellFor(col, a)).join('')}
         </tr>${detailHtml}`;
       }).join('');
 
@@ -454,29 +579,14 @@
       });
     }
 
-    function updateSortHeaders() {
-      document.querySelectorAll('thead th[data-col]').forEach(th => {
-        th.classList.remove('sort-asc', 'sort-desc');
-        if (th.dataset.col === state.sortCol) th.classList.add(`sort-${state.sortDir}`);
-      });
-    }
+    function updateSortHeaders() { buildTableHead(); }
 
     // ── Events ────────────────────────────────────────────────────────────────
-
-    document.querySelectorAll('thead th[data-col]').forEach(th => {
-      th.addEventListener('click', () => {
-        const col = th.dataset.col;
-        state.sortDir = state.sortCol === col && state.sortDir === 'asc' ? 'desc' : 'asc';
-        state.sortCol = col;
-        updateSortHeaders();
-        renderTable();
-      });
-    });
 
     function onFilter() { state.expandedId = null; renderTable(); }
 
     els.searchInput.addEventListener('input', onFilter);
-    els.filterType.addEventListener('change', onFilter);
+    els.filterType.addEventListener('change', () => { initCols(); renderColPicker(); onFilter(); });
     els.filterStatus.addEventListener('change', onFilter);
     els.filterCompany.addEventListener('change', onFilter);
     els.filterLocation.addEventListener('change', onFilter);
@@ -494,9 +604,14 @@
     els.copyTableBtn.addEventListener('click', async () => {
       const rows = getRows();
       if (!rows.length) { setStatus('No rows to copy.', 'warn'); return; }
-      const cols = ['asset_id','typeid','project_name','location','type','capacity','company_display','company_folder','asset_folder','lifecycle_status','is_active','notes'];
+      const selCols = state.cols.filter(c => c.selected);
       const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-      const tsv = [cols.join('\t'), ...rows.map(r => cols.map(c => q(r[c])).join('\t'))].join('\n');
+      const header = selCols.map(c => c.label).join('\t');
+      const body = rows.map(a => selCols.map(col => {
+        if (col.isExtra) return q((a.extra || {})[col.extraKey] ?? '');
+        return q(a[col.key]);
+      }).join('\t')).join('\n');
+      const tsv = [header, body].join('\n');
       try {
         await navigator.clipboard.writeText(tsv);
         setStatus(`Copied ${rows.length} rows — paste directly into Excel.`, 'ok');
@@ -520,6 +635,8 @@
     function afterLoad() {
       const joined = buildJoined();
       populateDropdowns(joined);
+      initCols();
+      renderColPicker();
       updateSortHeaders();
       renderTable();
     }
@@ -564,12 +681,15 @@
     }
 
     async function loadFromDir(dir, source = 'manual') {
+      let at = state.assetTypes;
+      try { const atRaw = await readJsonFromHandle(dir, 'asset_types.json'); if (atRaw?.asset_types) at = atRaw; } catch (_) {}
       const [co, ao] = await Promise.all([
         readJsonFromHandle(dir, 'company_master.json'),
         readJsonFromHandle(dir, 'assets_master.json')
       ]);
       loadCompaniesObject(co);
       loadAssetsObject(ao);
+      state.assetTypes = at;
       afterLoad();
       const wp = document.getElementById('workingFolderPath');
       if (wp) wp.value = dir.name || '\\\\192.168.200.4\\Files\\_sch_file_manager_';
@@ -607,8 +727,11 @@
         xhrJson(base + 'company_master.json'),
         xhrJson(base + 'assets_master.json')
       ]);
+      let at = null;
+      try { const atRaw = await xhrJson(base + 'asset_types.json'); if (atRaw?.asset_types) at = atRaw; } catch (_) {}
       loadCompaniesObject(co);
       loadAssetsObject(ao);
+      if (at) state.assetTypes = at;
       afterLoad();
     }
     async function autoLoadSameFolder() {
@@ -663,6 +786,8 @@
     bindFile(els.loadAssetsBtn,    els.assetsFileInput,    loadAssetsObject,    'assets_master.json');
 
     async function init() {
+      initCols();
+      renderColPicker();
       updateSortHeaders();
 
       // 1. Try XHR from hardcoded share or same folder
