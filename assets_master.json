@@ -3,7 +3,7 @@
     "schema_id": "sch.fileserver.assets_master",
     "schema_version": "1.2.0",
     "generated_from": "master_policy.yaml",
-    "generated_at": "2026-04-21T10:00:34.570Z",
+    "generated_at": "2026-04-28T07:54:42.184Z",
     "source_files": [
       "master_policy.yaml",
       "2026-03-26T05_44_20.180Z Schellas - 50 SCH OPERATIONS - 00 COMMON - 20 ASSET MASTER.xlsx",
@@ -2155,6 +2155,29 @@
         "turbine_brand": "",
         "turbine_count": null,
         "hub_height_m": null,
+        "grid_voltage_kv": null,
+        "cameras": 0
+      }
+    },
+    {
+      "asset_id": "AST-0127",
+      "company_id": "CMP-0055",
+      "type": "PVS",
+      "input_value": 399.96,
+      "input_unit": "kW",
+      "metric": "00p400",
+      "ss": "01",
+      "typeid": "PVS00p400-01",
+      "project_name": "anaziri",
+      "location": "GORTINIA",
+      "asset_folder": "PVS00p400-01_anaziri_GORTINIA",
+      "lifecycle_status": "construction",
+      "is_active": true,
+      "notes": "",
+      "extra": {
+        "inverter_brand": "",
+        "panel_brand": "",
+        "tracker_type": "fixed",
         "grid_voltage_kv": null,
         "cameras": 0
       }
