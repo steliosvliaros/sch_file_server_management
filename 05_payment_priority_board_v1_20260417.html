@@ -176,9 +176,15 @@ tbody td { padding:10px; border-bottom:1px solid var(--row-border); font-size:14
 tbody tr[data-row-id] { cursor:pointer; transition:box-shadow .15s ease; }
 tbody tr[data-row-id]:hover { box-shadow:inset 0 0 0 2px var(--row-hover-outline); }
 tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px var(--row-selected-outline); }
+tbody tr.detail-row td { background:var(--row-selected); }
 .chart-box { border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--chart-bg); }
 .approval-grid { display:grid; grid-template-columns:repeat(3,minmax(68px,1fr)); gap:6px; margin-bottom:8px; }
 .action-grid { display:flex; flex-wrap:wrap; gap:8px; }
+.detail-panel { border:1px solid var(--border); border-radius:16px; padding:14px; background:var(--asset-card-bg); }
+.detail-grid { display:grid; gap:10px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+.df-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.df-value { margin-top:4px; font-size:13px; word-break:break-word; }
+.detail-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
 .chart-shell { position:relative; width:100%; height:280px; }
 .chart { width:100% !important; height:100% !important; display:block; }
 .legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted); }
@@ -336,6 +342,10 @@ tbody tr.selected { background:var(--row-selected); box-shadow:inset 0 0 0 1px v
           <input id="productionEffect" type="number" min="0" max="100" step="0.1" placeholder="0 - 100">
         </div>
         <div class="field">
+          <label for="contractorSelect">Contractor</label>
+          <select id="contractorSelect"></select>
+        </div>
+        <div class="field">
           <label for="businessCritical">Critical business obligation</label>
           <div style="display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--field-bg);">
             <input id="businessCritical" type="checkbox" style="width:18px;height:18px;">
@@ -484,7 +494,8 @@ const charts = {
 };
 let _companyMapCache = null;
 let _assetTypeMapCache = null;
-function invalidateLookupCaches(){ _companyMapCache = null; _assetTypeMapCache = null; }
+let _contractorMapCache = null;
+function invalidateLookupCaches(){ _companyMapCache = null; _assetTypeMapCache = null; _contractorMapCache = null; }
 let _idb = null;
 function getIdb(){
   if (_idb) return Promise.resolve(_idb);
@@ -538,8 +549,84 @@ function approvalStatusLine(job){
   if (!approved.length) return `Pending: ${pending.join(', ')}`;
   return `Approved: ${approved.join(', ')} | Pending: ${pending.join(', ')}`;
 }
+function selectedJob(){
+  return state.selectedJobId ? state.jobs.find(j => j.id === state.selectedJobId) || null : null;
+}
+function resolveJobParties(job){
+  const company = companyMap().get(job?.company_id || '') || null;
+  const contractor = contractorMap().get(job?.contractor_id || '') || null;
+  return {
+    companyVat9: job?.company_vat9 || company?.vat9 || '-',
+    contractorName: job?.contractor_name || contractor?.display_name || '-',
+    contractorVat9: job?.contractor_vat9 || contractor?.vat9 || '-',
+  };
+}
+function formatApprovalExport(job, role){
+  const cfg = getApprovalConfig(role);
+  const approval = job?.approvals?.[role];
+  if (!approval?.approved) return `${cfg.label}: pending`;
+  const at = approval.approved_at ? approval.approved_at.replace('T', ' ').slice(0, 16) : 'recorded';
+  return `${cfg.label}: approved at ${at}`;
+}
+function buildSelectedRequestText(job){
+  const parties = resolveJobParties(job);
+  const lines = [
+    `Request: ${job.title || '-'}`,
+    `Status: ${job.status || '-'}`,
+    `Rank: ${job.status === 'paid' ? '-' : (job.rank ?? '-')}`,
+    `Company: ${job.company_name || '-'}`,
+    `Company VAT: ${parties.companyVat9}`,
+    `Asset: ${job.asset_folder || '-'}`,
+    `Contractor: ${parties.contractorName}`,
+    `Contractor VAT: ${parties.contractorVat9}`,
+    `Asset type: ${job.asset_type_label || job.asset_type || '-'}`,
+    `Amount: ${formatCurrency(job.request_amount)}`,
+    `Production effect: ${formatNum(job.production_effect_pct, 1)}%`,
+    `Lost kWh/day: ${formatNum(job.lost_kwh_day, 2)}`,
+    `Lost revenue/day: ${formatCurrency(job.lost_revenue_day)}`,
+    `Total exposure/day: ${formatCurrency(job.total_exposure_day)}`,
+    `Security risk: ${formatNum(job.security_risk, 0)}`,
+    `HSE risk: ${formatNum(job.hse_risk, 0)}`,
+    `Priority class: ${job.priority_class || '-'}`,
+    `Priority reason: ${job.priority_reason || '-'}`,
+    `Score (0-100): ${formatNum(job.priority_score, 2)}`,
+    `Payback: ${formatDays(job.payback_days)}`,
+    `30d ratio: ${formatRatioX(job.efficiency_ratio_30d)}`,
+    `Business critical: ${job.business_critical ? 'Yes' : 'No'}`,
+    formatApprovalExport(job, 'tech'),
+    formatApprovalExport(job, 'econ'),
+    formatApprovalExport(job, 'director'),
+    `Created at: ${job.created_at ? job.created_at.replace('T', ' ').slice(0, 16) : '-'}`,
+    `Updated at: ${job.updated_at ? job.updated_at.replace('T', ' ').slice(0, 16) : '-'}`,
+    `Paid at: ${job.paid_at ? job.paid_at.replace('T', ' ').slice(0, 16) : '-'}`,
+    '',
+    'Description:',
+    job.description || '-',
+    '',
+    'Calculation note:',
+    job.calc_note || '-',
+  ];
+  return lines.join('\n');
+}
+async function copySelectedRequestDetails(){
+  const job = selectedJob();
+  if (!job) {
+    setStatus('Select a request first.', 'alert');
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(buildSelectedRequestText(job));
+    setStatus(`Copied request details for ${job.title}.`, 'good');
+  } catch (_) {
+    setStatus('Could not copy to clipboard.', 'alert');
+  }
+}
+function syncSelectedRequestUi(){
+  const job = selectedJob();
+  dom.selectedRequestLabel.textContent = job ? (job.title || 'selected') : 'none';
+}
 function approvalChanged(existing, nextData){
-  const keys = ['asset_id','title','description','request_amount','production_effect_pct','security_likelihood','security_impact','hse_likelihood','hse_impact','business_critical'];
+  const keys = ['asset_id','contractor_id','title','description','request_amount','production_effect_pct','security_likelihood','security_impact','hse_likelihood','hse_impact','business_critical'];
   return keys.some(key => JSON.stringify(existing?.[key] ?? null) !== JSON.stringify(nextData?.[key] ?? null));
 }
 function downloadText(filename, text, mime='application/json'){
@@ -556,6 +643,7 @@ function downloadText(filename, text, mime='application/json'){
 async function readJsonFile(file){ const txt = await file.text(); try { return JSON.parse(txt); } catch(e){ throw new Error(`Invalid JSON in ${file.name || 'file'}: ${e.message}`); } }
 function companyMap(){ return _companyMapCache || (_companyMapCache = new Map((state.companies || []).map(x => [x.company_id, x]))); }
 function assetTypeMap(){ return _assetTypeMapCache || (_assetTypeMapCache = new Map((state.assetTypes || []).map(x => [x.type_code, x]))); }
+function contractorMap(){ return _contractorMapCache || (_contractorMapCache = new Map((state.contractors || []).map(x => [x.contractor_id, x]))); }
 function mergedAssets(){ return [...(state.assets || []), ...(state.virtualAssets || [])]; }
 function configReady(){ return state.loaded.assets && state.loaded.companies && state.loaded.assetTypes && state.loaded.config; }
 function deepMerge(base, extra){
@@ -619,6 +707,10 @@ function normalizeJobs(data){
     asset_folder: j.asset_folder || '',
     company_id: j.company_id || '',
     company_name: j.company_name || '',
+    company_vat9: j.company_vat9 || '',
+    contractor_id: j.contractor_id || '',
+    contractor_name: j.contractor_name || '',
+    contractor_vat9: j.contractor_vat9 || '',
     asset_type: j.asset_type || '',
     asset_type_label: j.asset_type_label || '',
     capacity_display: j.capacity_display || '-',
@@ -661,7 +753,13 @@ function normalizeJobs(data){
 }
 function normalizeContractors(data){
   const items = Array.isArray(data?.contractors) ? data.contractors : Array.isArray(data) ? data : [];
-  return items.filter(Boolean);
+  return items.filter(Boolean).map(c => ({
+    contractor_id: c.contractor_id || '',
+    display_name: c.display_name || c.canonical_name || c.contractor_id || '',
+    vat9: c.vat9 || '',
+    is_active: c.is_active !== false,
+    ...c,
+  }));
 }
 function normalizeLegalTypes(data){
   const items = Array.isArray(data?.legal_types) ? data.legal_types : Array.isArray(data) ? data : [];
@@ -802,6 +900,7 @@ function scoreJob(job){
 function computeRequestMetrics(partial){
   const asset = mergedAssets().find(a => a.asset_id === partial.asset_id) || null;
   const company = asset ? companyMap().get(asset.company_id) || {} : {};
+  const contractor = contractorMap().get(partial.contractor_id || '') || null;
   const capacity = deriveCapacity(asset);
   const econ = economicsForAsset(asset);
   const productionPct = clamp(safeNumber(partial.production_effect_pct) / 100, 0, 1);
@@ -837,6 +936,10 @@ function computeRequestMetrics(partial){
     asset_folder: asset?.asset_folder || '',
     company_id: asset?.company_id || '',
     company_name: company?.display_name || asset?.company_folder || '',
+    company_vat9: company?.vat9 || '',
+    contractor_id: contractor?.contractor_id || partial.contractor_id || '',
+    contractor_name: contractor?.display_name || '',
+    contractor_vat9: contractor?.vat9 || '',
     asset_type: asset?.type || '',
     asset_type_label: assetTypeMap().get(asset?.type)?.label || asset?.type || '',
     capacity_display: capacity.display,
@@ -943,9 +1046,19 @@ function populateAssetSelect(){
   updateMetaPanel();
   renderLivePreview();
 }
+function populateContractorSelect(){
+  const selected = dom.contractorSelect.value;
+  const contractors = (state.contractors || []).filter(c => c && c.is_active !== false).sort((a,b) => String(a.display_name || '').localeCompare(String(b.display_name || '')));
+  const options = ['<option value="">No contractor selected</option>']
+    .concat(contractors.map(c => `<option value="${escapeHtml(c.contractor_id)}">${escapeHtml(c.display_name || c.contractor_id)}${c.vat9 ? ' | VAT ' + escapeHtml(c.vat9) : ''}</option>`));
+  dom.contractorSelect.innerHTML = options.join('');
+  if (selected && contractors.some(c => c.contractor_id === selected)) dom.contractorSelect.value = selected;
+  else if (!dom.contractorSelect.value) dom.contractorSelect.value = '';
+}
 function getFormData(){
   return {
     asset_id: dom.assetSelect.value,
+    contractor_id: dom.contractorSelect.value,
     title: (dom.requestTitle.value || '').trim(),
     description: (dom.requestDescription.value || '').trim(),
     request_amount: safeNumber(dom.requestAmount.value),
@@ -1009,6 +1122,47 @@ function rowTags(job){
   if (job.business_critical) html += ` <span class="tag info">Critical obligation</span>`;
   return html;
 }
+function renderJobDetailRow(job, colspan){
+  const parties = resolveJobParties(job);
+  const fields = [
+    ['Request', job.title || '-'],
+    ['Status', job.status || '-'],
+    ['Rank', job.status === 'paid' ? '-' : (job.rank ?? '-')],
+    ['Company', job.company_name || '-'],
+    ['Company VAT', parties.companyVat9],
+    ['Asset', job.asset_folder || '-'],
+    ['Contractor', parties.contractorName],
+    ['Contractor VAT', parties.contractorVat9],
+    ['Asset type', job.asset_type_label || job.asset_type || '-'],
+    ['Amount', formatCurrency(job.request_amount)],
+    ['Production effect', `${formatNum(job.production_effect_pct,1)}%`],
+    ['Lost kWh/day', formatNum(job.lost_kwh_day,2)],
+    ['Lost revenue/day', formatCurrency(job.lost_revenue_day)],
+    ['Total exposure/day', formatCurrency(job.total_exposure_day)],
+    ['Security risk', formatNum(job.security_risk,0)],
+    ['HSE risk', formatNum(job.hse_risk,0)],
+    ['Payback', formatDays(job.payback_days)],
+    ['30d ratio', formatRatioX(job.efficiency_ratio_30d)],
+    ['Score (0-100)', formatNum(job.priority_score,2)],
+    ['Priority class', job.priority_class || '-'],
+    ['Priority reason', job.priority_reason || '-'],
+    ['Business critical', job.business_critical ? 'Yes' : 'No'],
+    ['Approvals', approvalStatusLine(job)],
+    ['Created at', job.created_at ? job.created_at.replace('T', ' ').slice(0, 16) : '-'],
+    ['Updated at', job.updated_at ? job.updated_at.replace('T', ' ').slice(0, 16) : '-'],
+    ['Paid at', job.paid_at ? job.paid_at.replace('T', ' ').slice(0, 16) : '-'],
+    ['Calculation note', job.calc_note || '-'],
+  ];
+  return `<tr class="detail-row"><td colspan="${colspan}"><div class="detail-panel">
+    <div class="detail-grid">
+      ${fields.map(([label, value]) => `<div><div class="df-label">${escapeHtml(label)}</div><div class="df-value mono">${escapeHtml(String(value ?? '-'))}</div></div>`).join('')}
+      <div style="grid-column:1 / -1;"><div class="df-label">Description</div><div class="df-value">${escapeHtml(job.description || '-')}</div></div>
+    </div>
+    <div class="detail-actions">
+      <button class="secondary slim" data-action="copy-request" data-id="${job.id}">Copy request details</button>
+    </div>
+  </div></td></tr>`;
+}
 function renderTables(){
   const open = state.jobs.filter(j => j.status !== 'paid').sort((a,b) => safeNumber(a.rank,9999) - safeNumber(b.rank,9999));
   const paid = state.jobs.filter(j => j.status === 'paid').sort((a,b) => String(b.paid_at || '').localeCompare(String(a.paid_at || '')));
@@ -1039,7 +1193,7 @@ function renderTables(){
           <button class="danger slim" data-action="delete" data-id="${job.id}">Delete</button>
         </div>
       </td>
-    </tr>`).join('') : '<tr><td colspan="14" class="small">No open requests.</td></tr>';
+    </tr>${job.id === state.selectedJobId ? renderJobDetailRow(job, 14) : ''}`).join('') : '<tr><td colspan="14" class="small">No open requests.</td></tr>';
   dom.paidTableBody.innerHTML = paid.length ? paid.map(job => `
     <tr data-row-id="${job.id}" class="${job.id === state.selectedJobId ? 'selected' : ''}">
       <td>${escapeHtml((job.paid_at || '').replace('T',' ').slice(0,16))}</td>
@@ -1056,8 +1210,8 @@ function renderTables(){
           <button class="danger slim" data-action="delete" data-id="${job.id}">Delete</button>
         </div>
       </td>
-    </tr>`).join('') : '<tr><td colspan="9" class="small">No paid requests yet.</td></tr>';
-  dom.selectedRequestLabel.textContent = state.selectedJobId ? (state.jobs.find(j => j.id === state.selectedJobId)?.title || 'selected') : 'none';
+    </tr>${job.id === state.selectedJobId ? renderJobDetailRow(job, 9) : ''}`).join('') : '<tr><td colspan="9" class="small">No paid requests yet.</td></tr>';
+  syncSelectedRequestUi();
 }
 function chartColorMap(){
   const css = getComputedStyle(document.documentElement);
@@ -1231,6 +1385,7 @@ function renderAll(){
   invalidateLookupCaches();
   updateStatusChips();
   populateAssetSelect();
+  populateContractorSelect();
   refreshRiskDropdowns();
   renderKpis();
   renderTables();
@@ -1242,12 +1397,14 @@ function renderAllNoCharts(){
   invalidateLookupCaches();
   updateStatusChips();
   populateAssetSelect();
+  populateContractorSelect();
   refreshRiskDropdowns();
   renderKpis();
   renderTables();
 }
 function fillFormFromJob(job){
   dom.assetSelect.value = job.asset_id || '';
+  dom.contractorSelect.value = job.contractor_id || '';
   dom.requestTitle.value = job.title || '';
   dom.requestDescription.value = job.description || '';
   dom.requestAmount.value = job.request_amount ?? '';
@@ -1265,6 +1422,7 @@ function clearForm(){
   dom.requestDescription.value = '';
   dom.requestAmount.value = '';
   dom.productionEffect.value = '';
+  dom.contractorSelect.value = '';
   dom.businessCritical.checked = false;
   const likelihood = getScale('likelihood');
   const impact = getScale('impact');
@@ -1692,7 +1850,10 @@ function handleTableClick(ev){
     const action = btn.dataset.action;
     const job = state.jobs.find(j => j.id === id);
     if (!job) return;
-    if (action === 'approve-tech') {
+    if (action === 'copy-request') {
+      state.selectedJobId = job.id;
+      copySelectedRequestDetails();
+    } else if (action === 'approve-tech') {
       requestApproval(job, 'tech');
     } else if (action === 'approve-econ') {
       requestApproval(job, 'econ');
@@ -1727,6 +1888,11 @@ function handleTableClick(ev){
   const id = row.dataset.rowId;
   const job = state.jobs.find(j => j.id === id);
   if (!job) return;
+  if (state.selectedJobId === id) {
+    clearForm();
+    setStatus('Selection cleared.', 'note');
+    return;
+  }
   fillFormFromJob(job);
   setStatus(`Selected ${job.title}.`, 'note');
 }
@@ -1774,6 +1940,7 @@ function bindEvents(){
   dom.resetSelectionBtn.addEventListener('click', () => { state.selectedJobId = null; clearForm(); setStatus('Selection cleared.', 'note'); });
   dom.assetSearch.addEventListener('input', populateAssetSelect);
   dom.assetSelect.addEventListener('change', () => { updateMetaPanel(); renderLivePreview(); });
+  dom.contractorSelect.addEventListener('change', renderLivePreview);
   ['requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical'].forEach(id => q(id).addEventListener('input', renderLivePreview));
   dom.addRequestBtn.addEventListener('click', () => addOrUpdateRequest('add'));
   dom.updateRequestBtn.addEventListener('click', () => addOrUpdateRequest('update'));
@@ -1784,10 +1951,11 @@ function bindEvents(){
   dom.jobsLoader.addEventListener('change', () => loadSingleFromFileInput(dom.jobsLoader, normalizeJobs, value => state.jobs = value, 'jobs', 'jobs file'));
 }
 function setDomRefs(){
-  ['openFolderBtn','saveJobsBtn','loadJobsBtn','exportCsvBtn','newJobsBtn','resetSelectionBtn','jobsLoader','statusMessage','statusFolder','statusMasters','statusJobsFile','statusAssetsCount','kpiCards','assetSearch','assetSelect','metaAsset','metaCompany','metaType','metaCapacity','metaCf','metaValueKwh','metaCalcNote','requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical','addRequestBtn','updateRequestBtn','clearFormBtn','liveMetrics','selectedRequestLabel','openTableBody','paidTableBody','chartPriority','chartAmountByAsset','chartBuckets'].forEach(id => dom[id] = q(id));
+  ['openFolderBtn','saveJobsBtn','loadJobsBtn','exportCsvBtn','newJobsBtn','resetSelectionBtn','jobsLoader','statusMessage','statusFolder','statusMasters','statusJobsFile','statusAssetsCount','kpiCards','assetSearch','assetSelect','contractorSelect','metaAsset','metaCompany','metaType','metaCapacity','metaCf','metaValueKwh','metaCalcNote','requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical','addRequestBtn','updateRequestBtn','clearFormBtn','liveMetrics','selectedRequestLabel','openTableBody','paidTableBody','chartPriority','chartAmountByAsset','chartBuckets'].forEach(id => dom[id] = q(id));
 }
 function initDefaults(){
   dom.assetSelect.innerHTML = '<option value="">Load data first</option>';
+  dom.contractorSelect.innerHTML = '<option value="">Load contractors first (optional)</option>';
   dom.liveMetrics.innerHTML = '<div class="card"><div class="small">Waiting for data</div><div class="metric">-</div></div>';
   ['secLikelihood','secImpact','hseLikelihood','hseImpact'].forEach(id => dom[id].innerHTML = '<option value="">Load config first</option>');
 }

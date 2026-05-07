@@ -162,6 +162,10 @@
           <div class="small">Separate aliases with semicolons. Stored as uppercase canonical names.</div>
         </div>
         <div>
+          <label for="fieldVat">VAT number (vat9)</label>
+          <input id="fieldVat" placeholder="9 digits" />
+        </div>
+        <div>
           <label for="fieldActive">Active</label>
           <select id="fieldActive">
             <option value="true">Yes</option>
@@ -242,6 +246,7 @@
       fieldDisplayName: $('fieldDisplayName'),
       fieldCanonicalName: $('fieldCanonicalName'),
       fieldAliases:     $('fieldAliases'),
+      fieldVat:         $('fieldVat'),
       fieldActive:      $('fieldActive'),
       fieldNotes:       $('fieldNotes'),
       searchInput:      $('searchInput'),
@@ -257,6 +262,7 @@
     function searchText(v) { return String(v || '').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
     function slug(v) { return String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9\s\-]/g,'').trim().replace(/[\s]+/g,'-').replace(/-+/g,'-').replace(/^[-]+|[-]+$/g,''); }
     function normalizeCanonical(v, fb = '') { return slug(v || fb).toUpperCase(); }
+    function normalizeVat9(v) { return String(v || '').replace(/\D/g, '').slice(0, 9); }
     function splitAliases(v) { return String(v||'').split(';').map(x => x.trim()).filter(Boolean); }
     function nextId(items, prefix, key) {
       let max = 0;
@@ -292,6 +298,7 @@
       els.fieldDisplayName.value   = row.display_name || '';
       els.fieldCanonicalName.value = normalizeCanonical(row.canonical_name || row.display_name || '');
       els.fieldAliases.value       = (row.aliases || []).join('; ');
+      els.fieldVat.value           = row.vat9 || '';
       els.fieldActive.value        = String(row.is_active !== false);
       els.fieldNotes.value         = row.notes || '';
       computeDerived();
@@ -302,6 +309,7 @@
       els.fieldDisplayName.value   = '';
       els.fieldCanonicalName.value = '';
       els.fieldAliases.value       = '';
+      els.fieldVat.value           = '';
       els.fieldActive.value        = 'true';
       els.fieldNotes.value         = '';
       computeDerived();
@@ -318,6 +326,7 @@
         display_name:   els.fieldDisplayName.value.trim() || els.fieldCanonicalName.value,
         canonical_name: els.fieldCanonicalName.value,
         aliases:        splitAliases(els.fieldAliases.value).map(x => normalizeCanonical(x)).filter(Boolean),
+        vat9:           normalizeVat9(els.fieldVat.value),
         is_active:      els.fieldActive.value === 'true',
         notes:          els.fieldNotes.value.trim()
       };
@@ -357,7 +366,7 @@
       }));
       if (actF) rows = rows.filter(r => String(r.is_active !== false) === actF);
       if (q) rows = rows.filter(r =>
-        [r.contractor_id, r.display_name, r.canonical_name, ...(r.aliases||[]), r.notes]
+        [r.contractor_id, r.display_name, r.canonical_name, r.vat9, ...(r.aliases||[]), r.notes]
           .map(v => searchText(v)).join(' ').includes(searchText(q))
       );
       const col = state.sortCol;
@@ -385,6 +394,7 @@
             ['Contractor ID',  r.contractor_id],
             ['Display name',   r.display_name],
             ['Canonical name', r.canonical_name],
+            ['VAT number',     r.vat9 || '—'],
             ['Aliases',        r.aliases_display || '—'],
             ['Active',         r.is_active === false ? 'No' : 'Yes'],
             ['Notes',          r.notes || '—']
@@ -601,7 +611,7 @@
     $('copyTableBtn').addEventListener('click', async () => {
       const rows = getRows();
       if (!rows.length) { setStatus('No rows to copy.', 'warn'); return; }
-      const cols = ['contractor_id','display_name','canonical_name','aliases_display','is_active','notes'];
+      const cols = ['contractor_id','display_name','canonical_name','vat9','aliases_display','is_active','notes'];
       const q = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
       const tsv = [cols.join('\t'), ...rows.map(r => cols.map(c => q(r[c])).join('\t'))].join('\n');
       try { await navigator.clipboard.writeText(tsv); setStatus(`Copied ${rows.length} rows — paste into Excel.`, 'ok'); }
