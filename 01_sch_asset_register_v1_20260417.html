@@ -381,6 +381,14 @@
     }
     function companyById(id) { return cmMap().get(id) || null; }
     function invalidateCaches() { state._atMap = null; state._cmMap = null; }
+    function extraFieldDefs(typeCode) {
+      const typeData = (state.assetTypes.asset_types || []).find(t => t.type_code === typeCode);
+      const fields = [...(typeData?.extra_fields || [])];
+      if (!fields.some(f => f.key === 'cost_center')) {
+        fields.unshift({ key:'cost_center', label:'Cost Center', type:'string', default:'' });
+      }
+      return fields;
+    }
 
     // ── Metric / TYPEID computation ────────────────────────────────────────────
     function computeMetric(typeCode, inputValue, inputUnit) {
@@ -411,8 +419,7 @@
       if (prev && [...els.fieldCompany.options].some(o => o.value === prev)) els.fieldCompany.value = prev;
     }
     function renderExtraFields(typeCode) {
-      const typeData = (state.assetTypes.asset_types || []).find(t => t.type_code === typeCode);
-      const fields = typeData?.extra_fields || [];
+      const fields = extraFieldDefs(typeCode);
       const section = document.getElementById('extraFieldsSection');
       const grid = document.getElementById('extraFieldsGrid');
       grid.innerHTML = '';
@@ -453,8 +460,7 @@
       });
     }
     function collectExtraFields() {
-      const typeData = (state.assetTypes.asset_types || []).find(t => t.type_code === els.fieldType.value);
-      const fieldDefs = typeData?.extra_fields || [];
+      const fieldDefs = extraFieldDefs(els.fieldType.value);
       const extra = {};
       document.querySelectorAll('#extraFieldsGrid [data-extra-key]').forEach(el => {
         const key = el.dataset.extraKey;
@@ -798,7 +804,7 @@
             ['Asset folder',  a.asset_folder],
             ['Notes',         a.notes || '—']
           ];
-          const extraDefs = (state.assetTypes.asset_types||[]).find(t => t.type_code === a.type)?.extra_fields || [];
+          const extraDefs = extraFieldDefs(a.type);
           const extraHtml = extraDefs.length && a.extra
             ? `<div style="margin-top:12px;">
                 <div class="df-label" style="font-weight:600;margin-bottom:8px;">Type-specific fields</div>
