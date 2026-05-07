@@ -1,7 +1,7 @@
 {
   "schema": {
     "version": "1.0",
-    "generated_at": "2026-03-16T06:15:33.900900Z",
+    "generated_at": "2026-05-07T06:52:38.279Z",
     "source_files": [
       "03_contractor_master.xlsx"
     ],
@@ -403,6 +403,17 @@
       "source_numeric_code": "5011101",
       "source_filesystem_stem": "MNP-KATASKEVES-EE",
       "source_row": 23
+    },
+    {
+      "contractor_id": "CTR-0023",
+      "display_name": "ΠΑΡΑΛΟΣ ΕΝΕΡΓΕΙΑΚΗ ΙΚΕ",
+      "canonical_name": "PARALOS",
+      "aliases": [
+        "TAFF"
+      ],
+      "vat9": "800679380",
+      "is_active": true,
+      "notes": "ΚΑΤΑΣΚΕΥΗ & ΣΥΝΤΗΡΗΣΗ ΕΝΕΡΓΕΙΑΚΩΝ ΕΡΓΩΝ \nΛεωφόρος Κηφισίας 26 & Παραδείσου 2, 151 25 Μαρούσι, Αττική \nΓΕΜΗ:135735507000 \nΤ 210 6836100 | F 210 6833091 \nΑ.Φ.Μ 800679380 | Δ.Ο.Υ. Αμαρουσίου \nE info@paralosenergy.gr | W www.paralosenergy.gr"
     }
   ]
 }
