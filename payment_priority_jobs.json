@@ -2,29 +2,90 @@
   "schema": {
     "id": "sch.payment-priority.jobs",
     "version": "2.0.0",
-    "generated_at": "2026-04-27T06:00:04.957Z",
+    "generated_at": "2026-05-07T06:16:33.921Z",
     "notes": "Live payment-priority queue using stable absolute scoring. Open items are ranked. Paid items remain in archive."
   },
   "jobs": [
     {
       "id": "WB-0002",
-      "status": "paid",
+      "status": "open",
       "created_at": "2026-02-22T00:00:00",
-      "updated_at": "2026-03-22T09:07:10.449Z",
-      "paid_at": "2026-03-22T11:38:45.152Z",
+      "updated_at": "2026-05-07T06:16:33.907Z",
+      "paid_at": null,
       "title": "Pliromi router EMSYS",
       "description": "problima simetoxis sto xrimatistirio energias",
       "asset_id": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
-      "asset_folder": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
-      "company_id": "CMP-0053",
-      "company_name": "TAFF PRIME AE",
+      "asset_ids": [
+        "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+        "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ"
+      ],
+      "asset_folder": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ +2 more",
+      "asset_folders": [
+        "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+        "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ"
+      ],
+      "selected_assets": [
+        {
+          "asset_id": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+          "asset_folder": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+          "company_id": "CMP-0053",
+          "company_name": "TAFF PRIME AE",
+          "asset_type": "WND",
+          "asset_type_label": "Wind_farm",
+          "capacity_display": "16.000 MW",
+          "capacity_mw": 16,
+          "calc_mode": "mw_capacity",
+          "typical_cf": 0.254,
+          "value_per_kwh": 0.098,
+          "cost_center": "-",
+          "calc_note": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ: 16.000 MW, CF 0.254, € 0.10/kWh."
+        },
+        {
+          "asset_id": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+          "asset_folder": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+          "company_id": "CMP-0028",
+          "company_name": "PAP ENERGY AE",
+          "asset_type": "WND",
+          "asset_type_label": "Wind_farm",
+          "capacity_display": "18.000 MW",
+          "capacity_mw": 18,
+          "calc_mode": "mw_capacity",
+          "typical_cf": 0.254,
+          "value_per_kwh": 0.098,
+          "cost_center": "-",
+          "calc_note": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ: 18.000 MW, CF 0.254, € 0.10/kWh."
+        },
+        {
+          "asset_id": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ",
+          "asset_folder": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ",
+          "company_id": "CMP-0053",
+          "company_name": "TAFF PRIME AE",
+          "asset_type": "WND",
+          "asset_type_label": "Wind_farm",
+          "capacity_display": "18.000 MW",
+          "capacity_mw": 18,
+          "calc_mode": "mw_capacity",
+          "typical_cf": 0.254,
+          "value_per_kwh": 0.098,
+          "cost_center": "-",
+          "calc_note": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ: 18.000 MW, CF 0.254, € 0.10/kWh."
+        }
+      ],
+      "company_id": "",
+      "company_name": "TAFF PRIME AE +1 more",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "WND",
-      "asset_type_label": "Wind farm",
-      "capacity_display": "16.000 MW",
-      "capacity_mw": 16,
+      "asset_type_label": "Wind_farm",
+      "capacity_display": "52.000 MW total",
+      "capacity_mw": 52,
       "calc_mode": "mw_capacity",
-      "typical_cf": 0.254,
-      "value_per_kwh": 0.098,
+      "typical_cf": 0,
+      "value_per_kwh": 0,
       "request_amount": 2790,
       "production_effect_pct": 13,
       "security_likelihood": 5,
@@ -34,21 +95,21 @@
       "security_risk": 15,
       "hse_risk": 1,
       "business_critical": false,
-      "lost_kwh_day": 12679.68,
-      "lost_revenue_day": 1242.61,
+      "lost_kwh_day": 41208.96,
+      "lost_revenue_day": 4038.48,
       "add_cost_eur_day": 0,
       "add_cost_eur_oneoff": 0,
       "add_cost_equiv_day": 0,
-      "total_exposure_day": 1242.61,
-      "payback_days": 2.2,
-      "efficiency_ratio_30d": 13.361,
+      "total_exposure_day": 4038.48,
+      "payback_days": 0.7,
+      "efficiency_ratio_30d": 43.425,
       "priority_class": "Pay soon",
       "priority_reason": "Pay-soon risk band (15/25)",
-      "priority_score": 48.5,
-      "rank": null,
-      "calc_note": "Imported from workbook row 3.",
+      "priority_score": 73.67,
+      "rank": 1,
+      "calc_note": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ: 16.000 MW, CF 0.254, € 0.10/kWh. | PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ: 18.000 MW, CF 0.254, € 0.10/kWh. | TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ: 18.000 MW, CF 0.254, € 0.10/kWh.",
       "score_components": {
-        "exposure_score": 0.2485,
+        "exposure_score": 0.8077,
         "security_score": 0.6,
         "hse_score": 0.04,
         "efficiency_score": 1,
@@ -83,21 +144,82 @@
       "id": "WB-0001",
       "status": "open",
       "created_at": "2026-02-22T00:00:00",
-      "updated_at": "2026-04-07T11:57:30.793Z",
+      "updated_at": "2026-05-07T06:13:52.586Z",
       "paid_at": null,
       "title": "Aitima gia tip blade",
       "description": "Exei ginei claim stin asfalistiki",
       "asset_id": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
-      "asset_folder": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
-      "company_id": "CMP-0053",
-      "company_name": "TAFF PRIME AE",
+      "asset_ids": [
+        "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+        "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ"
+      ],
+      "asset_folder": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ +2 more",
+      "asset_folders": [
+        "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+        "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ"
+      ],
+      "selected_assets": [
+        {
+          "asset_id": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+          "asset_folder": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ",
+          "company_id": "CMP-0053",
+          "company_name": "TAFF PRIME AE",
+          "asset_type": "WND",
+          "asset_type_label": "Wind_farm",
+          "capacity_display": "16.000 MW",
+          "capacity_mw": 16,
+          "calc_mode": "mw_capacity",
+          "typical_cf": 0.254,
+          "value_per_kwh": 0.098,
+          "cost_center": "-",
+          "calc_note": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ: 16.000 MW, CF 0.254, € 0.10/kWh."
+        },
+        {
+          "asset_id": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+          "asset_folder": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+          "company_id": "CMP-0028",
+          "company_name": "PAP ENERGY AE",
+          "asset_type": "WND",
+          "asset_type_label": "Wind_farm",
+          "capacity_display": "18.000 MW",
+          "capacity_mw": 18,
+          "calc_mode": "mw_capacity",
+          "typical_cf": 0.254,
+          "value_per_kwh": 0.098,
+          "cost_center": "-",
+          "calc_note": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ: 18.000 MW, CF 0.254, € 0.10/kWh."
+        },
+        {
+          "asset_id": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ",
+          "asset_folder": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ",
+          "company_id": "CMP-0053",
+          "company_name": "TAFF PRIME AE",
+          "asset_type": "WND",
+          "asset_type_label": "Wind_farm",
+          "capacity_display": "18.000 MW",
+          "capacity_mw": 18,
+          "calc_mode": "mw_capacity",
+          "typical_cf": 0.254,
+          "value_per_kwh": 0.098,
+          "cost_center": "-",
+          "calc_note": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ: 18.000 MW, CF 0.254, € 0.10/kWh."
+        }
+      ],
+      "company_id": "",
+      "company_name": "TAFF PRIME AE +1 more",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "WND",
-      "asset_type_label": "Wind farm",
-      "capacity_display": "16.000 MW",
-      "capacity_mw": 16,
+      "asset_type_label": "Wind_farm",
+      "capacity_display": "52.000 MW total",
+      "capacity_mw": 52,
       "calc_mode": "mw_capacity",
-      "typical_cf": 0.254,
-      "value_per_kwh": 0.098,
+      "typical_cf": 0,
+      "value_per_kwh": 0,
       "request_amount": 16500,
       "production_effect_pct": 12.5,
       "security_likelihood": 3,
@@ -107,21 +229,21 @@
       "security_risk": 15,
       "hse_risk": 1,
       "business_critical": false,
-      "lost_kwh_day": 12192,
-      "lost_revenue_day": 1194.82,
+      "lost_kwh_day": 39624,
+      "lost_revenue_day": 3883.15,
       "add_cost_eur_day": 0,
       "add_cost_eur_oneoff": 0,
       "add_cost_equiv_day": 0,
-      "total_exposure_day": 1194.82,
-      "payback_days": 13.8,
-      "efficiency_ratio_30d": 2.172,
+      "total_exposure_day": 3883.15,
+      "payback_days": 4.2,
+      "efficiency_ratio_30d": 7.06,
       "priority_class": "Pay soon",
       "priority_reason": "Pay-soon risk band (15/25)",
-      "priority_score": 46.7,
-      "rank": 1,
-      "calc_note": "Imported from workbook row 2.",
+      "priority_score": 70.9,
+      "rank": 2,
+      "calc_note": "TAFFPR-AE-800466035_WND16p000_ΚΑΛΗΧΙΤΣΑ_ΑΣΤΑΚΟΣ: 16.000 MW, CF 0.254, € 0.10/kWh. | PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ: 18.000 MW, CF 0.254, € 0.10/kWh. | TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ: 18.000 MW, CF 0.254, € 0.10/kWh.",
       "score_components": {
-        "exposure_score": 0.239,
+        "exposure_score": 0.7766,
         "security_score": 0.6,
         "hse_score": 0.04,
         "efficiency_score": 1,
@@ -161,9 +283,20 @@
       "title": "Agora keraias gia enisxisi simatos 4G",
       "description": "problima simetoxis sto xrimatistirio energias",
       "asset_id": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+      "asset_ids": [
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ"
+      ],
       "asset_folder": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+      "asset_folders": [
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0028",
       "company_name": "PAP ENERGY AE",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "WND",
       "asset_type_label": "Wind farm",
       "capacity_display": "18.000 MW",
@@ -191,7 +324,7 @@
       "priority_class": "Pay soon",
       "priority_reason": "Pay-soon risk band (12/25)",
       "priority_score": 43.94,
-      "rank": 2,
+      "rank": 3,
       "calc_note": "Imported from workbook row 4.",
       "score_components": {
         "exposure_score": 0.2151,
@@ -234,9 +367,20 @@
       "title": "ΓΕΝΙΚΗ ΠΡΟΣΦΟΡΑ ΔΕΜΑΤΙΚΩΝ ΘΗΒΑΣ",
       "description": "Problima na kopoun ta ektethimena kalodia",
       "asset_id": "GENERAL_PV",
+      "asset_ids": [
+        "GENERAL_PV"
+      ],
       "asset_folder": "GENERAL_PV",
+      "asset_folders": [
+        "GENERAL_PV"
+      ],
+      "selected_assets": [],
       "company_id": "",
       "company_name": "GENERAL PV",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "-",
@@ -264,7 +408,7 @@
       "priority_class": "Pay soon",
       "priority_reason": "Pay-soon risk band (12/25)",
       "priority_score": 14.27,
-      "rank": 3,
+      "rank": 4,
       "calc_note": "Imported from workbook row 7.",
       "score_components": {
         "exposure_score": 0,
@@ -307,9 +451,20 @@
       "title": "Μετρήσεις VOC και ISC για 2522 πάνελ - SOLAR CELLS HELLAS",
       "description": "antikatastasi panel sto 4,49 MW",
       "asset_id": "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ",
+      "asset_ids": [
+        "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ"
+      ],
       "asset_folder": "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ",
+      "asset_folders": [
+        "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0001",
       "company_name": "4Ε ΕΝΕΡΓΕΙΑΚΗ ΕΤΑΙΡΕΙΑ ΑΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "4.499 MW",
@@ -337,7 +492,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 7.69,
-      "rank": 4,
+      "rank": 5,
       "calc_note": "Imported from workbook row 5.",
       "score_components": {
         "exposure_score": 0.0065,
@@ -380,9 +535,20 @@
       "title": "Aντικατάσταση του UPS του H/N ADMOTECH",
       "description": "antikatastasi tou UPS",
       "asset_id": "ADMOTE-AE-094459299_PV00p213-00_ADMOTEC_ΘΗΒΑ",
+      "asset_ids": [
+        "ADMOTE-AE-094459299_PV00p213-00_ADMOTEC_ΘΗΒΑ"
+      ],
       "asset_folder": "ADMOTE-AE-094459299_PV00p213-00_ADMOTEC_ΘΗΒΑ",
+      "asset_folders": [
+        "ADMOTE-AE-094459299_PV00p213-00_ADMOTEC_ΘΗΒΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0002",
       "company_name": "ADMOTEC AE",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.213 MW",
@@ -410,7 +576,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 6.57,
-      "rank": 5,
+      "rank": 6,
       "calc_note": "Imported from workbook row 8.",
       "score_components": {
         "exposure_score": 0,
@@ -453,9 +619,20 @@
       "title": "Μεταφορά 2522 πάνελ στον σταθμό ΛΕΧΑΙΝΑ 4,47",
       "description": "metafora panel apo solarcells se LEXAINA 4,49",
       "asset_id": "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ",
+      "asset_ids": [
+        "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ"
+      ],
       "asset_folder": "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ",
+      "asset_folders": [
+        "4EENER-AE-998808360_PV04p499-00_ΣΠΕΝΤΖΑ_ΚΥΛΛΗΝΗ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0001",
       "company_name": "4Ε ΕΝΕΡΓΕΙΑΚΗ ΕΤΑΙΡΕΙΑ ΑΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "4.499 MW",
@@ -483,7 +660,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 6.31,
-      "rank": 6,
+      "rank": 7,
       "calc_note": "Imported from workbook row 11.",
       "score_components": {
         "exposure_score": 0,
@@ -526,9 +703,20 @@
       "title": "ΠΡΟΜΗΘΕΙΑ & ΕΓΚΑΤΑΣΤΑΣΗ ΝΕΟΥ ΗΛΕΚΤΡΟΝΟΜΟΥ - ΛΥΚΟΒΟΥΝΙ 276",
       "description": "antikatastasi H/N",
       "asset_id": "4EENER-AE-998808360_PV00p276-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ",
+      "asset_ids": [
+        "4EENER-AE-998808360_PV00p276-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ"
+      ],
       "asset_folder": "4EENER-AE-998808360_PV00p276-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ",
+      "asset_folders": [
+        "4EENER-AE-998808360_PV00p276-00_ΛΥΚΟΒΟΥΝΙ_ΘΗΒΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0001",
       "company_name": "4Ε ΕΝΕΡΓΕΙΑΚΗ ΕΤΑΙΡΕΙΑ ΑΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.276 MW",
@@ -556,7 +744,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 6.2,
-      "rank": 7,
+      "rank": 8,
       "calc_note": "Imported from workbook row 9.",
       "score_components": {
         "exposure_score": 0,
@@ -599,9 +787,20 @@
       "title": "ΠΡΟΜΗΘΕΙΑ & ΕΓΚΑΤΑΣΤΑΣΗ ΝΕΟΥ ΗΛΕΚΤΡΟΝΟΜΟΥ - ΛΥΚΟΒΟΥΝΙ 176",
       "description": "antikatastasi H/N",
       "asset_id": "SAISL2-AE-801224474_PV1762-01_22N8-17p62_ΠΟΝΤΟΗΡΑΚΛΕΙΑ-2_ΚΙΛΚΙΣ",
+      "asset_ids": [
+        "SAISL2-AE-801224474_PV1762-01_22N8-17p62_ΠΟΝΤΟΗΡΑΚΛΕΙΑ-2_ΚΙΛΚΙΣ"
+      ],
       "asset_folder": "SAISL2-AE-801224474_PV1762-01_22N8-17p62_ΠΟΝΤΟΗΡΑΚΛΕΙΑ-2_ΚΙΛΚΙΣ",
+      "asset_folders": [
+        "SAISL2-AE-801224474_PV1762-01_22N8-17p62_ΠΟΝΤΟΗΡΑΚΛΕΙΑ-2_ΚΙΛΚΙΣ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0034",
       "company_name": "SAISON SOLAIRE ΔΥΟ (2) ΜΟΝΟΠΡΟΣΩΠΗ ΑΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "17.620 MW",
@@ -629,7 +828,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 6.2,
-      "rank": 8,
+      "rank": 9,
       "calc_note": "Imported from workbook row 10.",
       "score_components": {
         "exposure_score": 0,
@@ -672,9 +871,20 @@
       "title": "Επισκευή Module 4 12077298 – NYCONTEC",
       "description": "episkevi module 4",
       "asset_id": "HABITA-AE-800341539_PV00p436-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ",
+      "asset_ids": [
+        "HABITA-AE-800341539_PV00p436-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ"
+      ],
       "asset_folder": "HABITA-AE-800341539_PV00p436-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ",
+      "asset_folders": [
+        "HABITA-AE-800341539_PV00p436-00_ΒΙΠΕ-ΠΑΤΡΩΝ-31_ΑΧΑΙΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0013",
       "company_name": "HABITATIO ΑΕ (ΠΡΩΗΝ SOLAR FM)",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.436 MW",
@@ -702,7 +912,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 4.02,
-      "rank": 9,
+      "rank": 10,
       "calc_note": "Imported from workbook row 6.",
       "score_components": {
         "exposure_score": 0.0013,
@@ -745,9 +955,20 @@
       "title": "Agora keraias gia enisxisi simatos 4G",
       "description": "",
       "asset_id": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ",
+      "asset_ids": [
+        "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ"
+      ],
       "asset_folder": "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ",
+      "asset_folders": [
+        "TAFFPR-AE-800466035_WND18p000_ΦΛΑΜΟΥΡΙΑ_ΣΕΡΒΙΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0053",
       "company_name": "TAFF PRIME AE",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "WND",
       "asset_type_label": "Wind farm",
       "capacity_display": "18.000 MW",
@@ -775,7 +996,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 2.17,
-      "rank": 10,
+      "rank": 11,
       "calc_note": "Imported from workbook row 13.",
       "score_components": {
         "exposure_score": 0,
@@ -818,9 +1039,20 @@
       "title": "ΜΠΡΟΥΦΕΣ ΕΠΙΣΚΕΥΗ ΦΘΑΡΜΕΝΩΝ ΣΠΥΡΑΛ",
       "description": "antikatastasi fuarmenon spiral",
       "asset_id": "HLEKTR-IK-997945805_PV00p020-00_ΜΠΡΟΥΦΕΣ_ΘΕΣΣΑΛΙΩΤΙΔΑ",
+      "asset_ids": [
+        "HLEKTR-IK-997945805_PV00p020-00_ΜΠΡΟΥΦΕΣ_ΘΕΣΣΑΛΙΩΤΙΔΑ"
+      ],
       "asset_folder": "HLEKTR-IK-997945805_PV00p020-00_ΜΠΡΟΥΦΕΣ_ΘΕΣΣΑΛΙΩΤΙΔΑ",
+      "asset_folders": [
+        "HLEKTR-IK-997945805_PV00p020-00_ΜΠΡΟΥΦΕΣ_ΘΕΣΣΑΛΙΩΤΙΔΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0060",
       "company_name": "ΗΛΕΚΤΡΟΔΥΝΑΜΙΚΗ ΙΚΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.020 MW",
@@ -848,7 +1080,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 2.16,
-      "rank": 11,
+      "rank": 12,
       "calc_note": "Imported from workbook row 15.",
       "score_components": {
         "exposure_score": 0,
@@ -891,9 +1123,20 @@
       "title": "ΓΟΡΓΟΠΟΤΑΜΟΣ ΕΠΙΣΚΕΥΗ ΦΘΑΡΜΕΝΩΝ ΣΠΥΡΑΛ",
       "description": "antikatastasi fuarmenon spiral",
       "asset_id": "HLEKTR-IK-997945805_PV00p020-00_ΜΥΛΟΣ_ΓΟΡΓΟΠΟΤΑΜΟΣ",
+      "asset_ids": [
+        "HLEKTR-IK-997945805_PV00p020-00_ΜΥΛΟΣ_ΓΟΡΓΟΠΟΤΑΜΟΣ"
+      ],
       "asset_folder": "HLEKTR-IK-997945805_PV00p020-00_ΜΥΛΟΣ_ΓΟΡΓΟΠΟΤΑΜΟΣ",
+      "asset_folders": [
+        "HLEKTR-IK-997945805_PV00p020-00_ΜΥΛΟΣ_ΓΟΡΓΟΠΟΤΑΜΟΣ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0060",
       "company_name": "ΗΛΕΚΤΡΟΔΥΝΑΜΙΚΗ ΙΚΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.020 MW",
@@ -921,7 +1164,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 2.16,
-      "rank": 12,
+      "rank": 13,
       "calc_note": "Imported from workbook row 16.",
       "score_components": {
         "exposure_score": 0,
@@ -964,9 +1207,20 @@
       "title": "ΕΠΙΣΚΕΥΗ PLATINUM INVERTER - ΜΕΛΙΓΑΛΑΣ 703",
       "description": "Episkevi efedrikou metatropea",
       "asset_id": "OIXVVD-AE-998646502_PV00p703-00_ΒΙΠΕ_ΟΙΧΑΛΙΑΣ",
+      "asset_ids": [
+        "OIXVVD-AE-998646502_PV00p703-00_ΒΙΠΕ_ΟΙΧΑΛΙΑΣ"
+      ],
       "asset_folder": "OIXVVD-AE-998646502_PV00p703-00_ΒΙΠΕ_ΟΙΧΑΛΙΑΣ",
+      "asset_folders": [
+        "OIXVVD-AE-998646502_PV00p703-00_ΒΙΠΕ_ΟΙΧΑΛΙΑΣ"
+      ],
+      "selected_assets": [],
       "company_id": "",
       "company_name": "OIXANTG  AE",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.703 MW",
@@ -994,7 +1248,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 2.13,
-      "rank": 13,
+      "rank": 14,
       "calc_note": "Imported from workbook row 17.",
       "score_components": {
         "exposure_score": 0,
@@ -1037,9 +1291,20 @@
       "title": "ΠΡΟΣΦΟΡΑ ΜΕΤΑΦΟΡΑΣ ΠΑΝΕΛ ΑΠΟ ΦΑΡΚΑΔΟΝΑ ΣΕ ΘΗΒΑ",
       "description": "metafora panel apo ergotaxio metaforea se thiva",
       "asset_id": "GENERAL_PV",
+      "asset_ids": [
+        "GENERAL_PV"
+      ],
       "asset_folder": "GENERAL_PV",
+      "asset_folders": [
+        "GENERAL_PV"
+      ],
+      "selected_assets": [],
       "company_id": "",
       "company_name": "GENERAL PV",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "-",
@@ -1067,7 +1332,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 2.04,
-      "rank": 14,
+      "rank": 15,
       "calc_note": "Imported from workbook row 21.",
       "score_components": {
         "exposure_score": 0,
@@ -1110,9 +1375,20 @@
       "title": "Ενημέρωση ΔΕΔΔΗΕ για αλλαγή εξοπλισμού στεγών",
       "description": "kostos YDE gia Admotech , Soltech , Solar Cells",
       "asset_id": "GENERAL_PV",
+      "asset_ids": [
+        "GENERAL_PV"
+      ],
       "asset_folder": "GENERAL_PV",
+      "asset_folders": [
+        "GENERAL_PV"
+      ],
+      "selected_assets": [],
       "company_id": "",
       "company_name": "GENERAL PV",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "-",
@@ -1140,7 +1416,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 2.01,
-      "rank": 15,
+      "rank": 16,
       "calc_note": "Imported from workbook row 18.",
       "score_components": {
         "exposure_score": 0,
@@ -1183,9 +1459,20 @@
       "title": "ΡΑΧΩΒΙΤΣΑ ΑΝΑΣΤΑΣΙΑ & ΑΝΤΙΓΟΝΗ-ΠΡΟΣΦΟΡΑ ΚΑΜΕΡΩΝ",
       "description": "Εgkatastasi neon kameron",
       "asset_id": "ROMEIK-AT-106780106_PV00p100-00_ΡΩΜΕΙΚΑ_ΜΕΓΑΛΟΠΟΛΗ",
+      "asset_ids": [
+        "ROMEIK-AT-106780106_PV00p100-00_ΡΩΜΕΙΚΑ_ΜΕΓΑΛΟΠΟΛΗ"
+      ],
       "asset_folder": "ROMEIK-AT-106780106_PV00p100-00_ΡΩΜΕΙΚΑ_ΜΕΓΑΛΟΠΟΛΗ",
+      "asset_folders": [
+        "ROMEIK-AT-106780106_PV00p100-00_ΡΩΜΕΙΚΑ_ΜΕΓΑΛΟΠΟΛΗ"
+      ],
+      "selected_assets": [],
       "company_id": "",
       "company_name": "ROMEIKA ATOMIKI",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.100 MW",
@@ -1213,7 +1500,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 1.99,
-      "rank": 16,
+      "rank": 17,
       "calc_note": "Imported from workbook row 22.",
       "score_components": {
         "exposure_score": 0,
@@ -1256,9 +1543,20 @@
       "title": "ΠΡΟΣΦΟΡΑ ΓΙΑ ΤΗΝ ΕΠΙΣΚΕΥΗ ΤΡΙΩΝ INVERTER SMA SMC 11000TL",
       "description": "afora episkevi 3 efedrikon metatropeon",
       "asset_id": "GENERAL_PV",
+      "asset_ids": [
+        "GENERAL_PV"
+      ],
       "asset_folder": "GENERAL_PV",
+      "asset_folders": [
+        "GENERAL_PV"
+      ],
+      "selected_assets": [],
       "company_id": "",
       "company_name": "GENERAL PV",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "-",
@@ -1286,7 +1584,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 1.98,
-      "rank": 17,
+      "rank": 18,
       "calc_note": "Imported from workbook row 19.",
       "score_components": {
         "exposure_score": 0,
@@ -1329,9 +1627,20 @@
       "title": "ΠΡΟΜΗΘΕΙΑ HUAWEI INVERTER 20kW - ΓΚΕΡΕΝΙΑ",
       "description": "Egkatastasi neou metatropea",
       "asset_id": "HLEKTR-IK-997945805_PV00p020-00_ΓΚΕΡΕΝΙΑ_ΘΕΣΣΑΛΙΩΤΙΔΑ",
+      "asset_ids": [
+        "HLEKTR-IK-997945805_PV00p020-00_ΓΚΕΡΕΝΙΑ_ΘΕΣΣΑΛΙΩΤΙΔΑ"
+      ],
       "asset_folder": "HLEKTR-IK-997945805_PV00p020-00_ΓΚΕΡΕΝΙΑ_ΘΕΣΣΑΛΙΩΤΙΔΑ",
+      "asset_folders": [
+        "HLEKTR-IK-997945805_PV00p020-00_ΓΚΕΡΕΝΙΑ_ΘΕΣΣΑΛΙΩΤΙΔΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0060",
       "company_name": "ΗΛΕΚΤΡΟΔΥΝΑΜΙΚΗ ΙΚΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "0.020 MW",
@@ -1359,7 +1668,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 1.98,
-      "rank": 18,
+      "rank": 19,
       "calc_note": "Imported from workbook row 23.",
       "score_components": {
         "exposure_score": 0,
@@ -1402,9 +1711,20 @@
       "title": "Pliromi router EMSYS",
       "description": "",
       "asset_id": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+      "asset_ids": [
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ"
+      ],
       "asset_folder": "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ",
+      "asset_folders": [
+        "PAPENE-AE-800372393_WND18p000_ΚΕΦΑΛΑΡΙΑ_ΦΩΚΙΔΑ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0028",
       "company_name": "PAP ENERGY AE",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "WND",
       "asset_type_label": "Wind farm",
       "capacity_display": "18.000 MW",
@@ -1432,7 +1752,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 1.92,
-      "rank": 19,
+      "rank": 20,
       "calc_note": "Imported from workbook row 12.",
       "score_components": {
         "exposure_score": 0,
@@ -1475,9 +1795,20 @@
       "title": "ΠΡΟΣΦΟΡΑ ΜΕΤΑΦΟΡΑΣ ΠΑΝΕΛ ΦΑΡΚΑΔΩΝΑ ΣΕ ΕΡΓΟΤΑΞΙΟ ΜΕΤΑΦΟΡΕΑ",
       "description": "metafora panel apo parka se ergotaxio metaforea",
       "asset_id": "GENERAL_PV",
+      "asset_ids": [
+        "GENERAL_PV"
+      ],
       "asset_folder": "GENERAL_PV",
+      "asset_folders": [
+        "GENERAL_PV"
+      ],
+      "selected_assets": [],
       "company_id": "",
       "company_name": "GENERAL PV",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV plant",
       "capacity_display": "-",
@@ -1505,7 +1836,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 1.9,
-      "rank": 20,
+      "rank": 21,
       "calc_note": "Imported from workbook row 20.",
       "score_components": {
         "exposure_score": 0,
@@ -1548,9 +1879,20 @@
       "title": "ΠΡΟΣΦΟΡΑ ΣΥΝΤΗΡΗΣΗΣ MGD 1 MW ΛΑΡΙΣΑ",
       "description": "i den exei oloklirothei I diadikasia gia DEDDHE. Den exoume prosvasi akoma",
       "asset_id": "SAISL2-AE-801224474_PV0000-01_AG1-0p00_ΑΓ-ΑΝΤΩΝΙΟΣ_ΛΑΡΙΣΑΣ",
+      "asset_ids": [
+        "SAISL2-AE-801224474_PV0000-01_AG1-0p00_ΑΓ-ΑΝΤΩΝΙΟΣ_ΛΑΡΙΣΑΣ"
+      ],
       "asset_folder": "SAISL2-AE-801224474_PV0000-01_AG1-0p00_ΑΓ-ΑΝΤΩΝΙΟΣ_ΛΑΡΙΣΑΣ",
+      "asset_folders": [
+        "SAISL2-AE-801224474_PV0000-01_AG1-0p00_ΑΓ-ΑΝΤΩΝΙΟΣ_ΛΑΡΙΣΑΣ"
+      ],
+      "selected_assets": [],
       "company_id": "CMP-0034",
       "company_name": "SAISON SOLAIRE ΔΥΟ (2) ΜΟΝΟΠΡΟΣΩΠΗ ΑΕ",
+      "company_vat9": "",
+      "contractor_id": "",
+      "contractor_name": "",
+      "contractor_vat9": "",
       "asset_type": "PVS",
       "asset_type_label": "PV_plant",
       "capacity_display": "-",
@@ -1578,7 +1920,7 @@
       "priority_class": "Normal",
       "priority_reason": "Normal queue",
       "priority_score": 1.78,
-      "rank": 21,
+      "rank": 22,
       "calc_note": "Calculation mode mw_capacity is not implemented in this board yet.",
       "score_components": {
         "exposure_score": 0,

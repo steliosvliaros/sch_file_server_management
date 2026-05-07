@@ -124,6 +124,15 @@ input,select,textarea { padding:10px 12px; }
 textarea { min-height:96px; resize:vertical; }
 .field { display:flex; flex-direction:column; gap:6px; }
 .field label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.tick-list { border:1px solid var(--border); border-radius:14px; background:var(--asset-card-bg); max-height:220px; overflow:auto; padding:8px; }
+.tick-item { display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:10px; }
+.tick-item:hover { background:var(--soft); }
+.tick-item input { margin-top:2px; }
+.tick-item-text { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.tick-item-title { font-size:13px; color:var(--text); word-break:break-word; }
+.tick-item-subtitle { font-size:11px; color:var(--muted); word-break:break-word; }
+.tick-list-empty { padding:10px; color:var(--muted); font-size:13px; }
+.tick-summary { font-size:12px; color:var(--muted); }
 .form-grid { display:grid; gap:12px; grid-template-columns:1fr 1fr; }
 .full { grid-column:1 / -1; }
 .asset-meta,.metrics-grid { display:grid; gap:10px; grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -308,8 +317,9 @@ tbody tr.detail-row td { background:var(--row-selected); }
         <input id="assetSearch" placeholder="Type part of asset, company, location, project, or type">
       </div>
       <div class="field" style="margin-top:10px;">
-        <label for="assetSelect">Asset</label>
-        <select id="assetSelect"></select>
+        <label for="assetSelect">Assets</label>
+        <div id="assetSelect" class="tick-list" role="group" aria-label="Assets"></div>
+        <div id="assetTickSummary" class="tick-summary" style="margin-top:6px;">No assets selected.</div>
       </div>
 
       <div class="asset-meta" style="margin-top:14px;">
@@ -467,6 +477,7 @@ const DEFAULT_CONFIG = {
 const state = {
   folderHandle: null,
   selectedJobId: null,
+  selectedAssetIds: [],
   assets: [],
   companies: [],
   assetTypes: [],
@@ -548,8 +559,35 @@ function resolveJobParties(job){
     contractorVat9: job?.contractor_vat9 || contractor?.vat9 || '-',
   };
 }
+function costCenterForAsset(asset){
+  return asset?.extra?.cost_center || '-';
+}
+function resolveSelectedAssets(job){
+  if (Array.isArray(job?.selected_assets) && job.selected_assets.length) return job.selected_assets;
+  const asset = mergedAssets().find(a => a.asset_id === job?.asset_id) || null;
+  return [{
+    asset_id: job?.asset_id || asset?.asset_id || '',
+    asset_folder: job?.asset_folder || asset?.asset_folder || '-',
+    company_name: job?.company_name || companyMap().get(job?.company_id || '')?.display_name || '-',
+    cost_center: asset ? costCenterForAsset(asset) : '-',
+  }];
+}
+function buildAssetListText(job, bullet='- '){
+  return resolveSelectedAssets(job).map(asset => `${bullet}${asset.asset_folder || asset.asset_id || '-'} | Cost Center: ${asset.cost_center || '-'}`).join('\n');
+}
 function buildAssetTitleText(job){
-  return `${job.asset_folder || '-'}-${job.title || '-'}`;
+  const assets = resolveSelectedAssets(job);
+  const requestTitle = job.title || '-';
+  if (!assets || assets.length === 0) return `VARIOUS: ${requestTitle}`;
+  if (assets.length === 1) return `${assets[0].asset_folder || assets[0].asset_id || 'ASSET'}: ${requestTitle}`;
+  const uniqueCompanyNames = [...new Set(assets.map(asset => asset.company_name || '').filter(Boolean))];
+  const uniqueAssetTypes = [...new Set(assets.map(asset => {
+    const typeCode = assets[0].asset_type || '';
+    return mergedAssets().find(a => a.asset_id === asset.asset_id)?.type || typeCode;
+  }).filter(Boolean))];
+  if (uniqueCompanyNames.length === 1) return `${uniqueCompanyNames[0]}: ${requestTitle}`;
+  if (uniqueAssetTypes.length === 1) return `${uniqueAssetTypes[0]}: ${requestTitle}`;
+  return `VARIOUS: ${requestTitle}`;
 }
 function buildClickupMarkdown(job){
   const parties = resolveJobParties(job);
@@ -568,11 +606,14 @@ function buildClickupMarkdown(job){
     `- **Contractor VAT:** ${parties.contractorVat9}`,
     '',
     '### Request',
-    `- **Asset:** ${job.asset_folder || '-'}`,
+    `- **Assets:** ${job.asset_folder || '-'}`,
     `- **Asset type:** ${job.asset_type_label || job.asset_type || '-'}`,
     `- **Amount:** ${formatCurrency(job.request_amount)}`,
     `- **Production effect:** ${formatNum(job.production_effect_pct, 1)}%`,
     `- **Business critical:** ${job.business_critical ? 'Yes' : 'No'}`,
+    '',
+    '### Asset List',
+    buildAssetListText(job),
     '',
     '### Impact & Score',
     `- **Lost kWh/day:** ${formatNum(job.lost_kwh_day, 2)}`,
@@ -700,7 +741,10 @@ function normalizeJobs(data){
     title: j.title || '',
     description: j.description || '',
     asset_id: j.asset_id || '',
+    asset_ids: Array.isArray(j.asset_ids) ? j.asset_ids.filter(Boolean) : (j.asset_id ? [j.asset_id] : []),
     asset_folder: j.asset_folder || '',
+    asset_folders: Array.isArray(j.asset_folders) ? j.asset_folders.filter(Boolean) : (j.asset_folder ? [j.asset_folder] : []),
+    selected_assets: Array.isArray(j.selected_assets) ? j.selected_assets : [],
     company_id: j.company_id || '',
     company_name: j.company_name || '',
     company_vat9: j.company_vat9 || '',
@@ -822,35 +866,67 @@ function refreshVirtualAssetsFromJobs(){
   const existing = new Map();
   (state.jobs || []).forEach(job => {
     if (!job) return;
-    const shouldVirtual = !job.asset_id || (!actualIds.has(job.asset_id) && !actualFolders.has(job.asset_folder));
-    if (!shouldVirtual) return;
-    const id = job.asset_id || job.asset_folder || ('JOB-' + job.id);
-    if (existing.has(id)) return;
-    existing.set(id, {
-      asset_id: id,
-      company_id: job.company_id || '',
-      company_folder: job.company_name || '',
-      type: job.asset_type || 'OTH',
-      input_value: Number.isFinite(job.capacity_mw) && job.capacity_mw > 0 ? job.capacity_mw : '',
-      input_unit: Number.isFinite(job.capacity_mw) && job.capacity_mw > 0 ? 'MW' : '',
-      metric: '',
-      ss: '',
-      typeid: '',
-      project_name: '',
-      location: '',
-      asset_folder: job.asset_folder || id,
-      lifecycle_status: 'imported',
-      is_active: true,
-      is_virtual: true,
-      capacity_mw: Number.isFinite(job.capacity_mw) ? job.capacity_mw : null,
-      notes: 'Imported from jobs file.',
+    const selectedAssets = Array.isArray(job.selected_assets) && job.selected_assets.length
+      ? job.selected_assets
+      : [{ asset_id: job.asset_id, asset_folder: job.asset_folder, company_id: job.company_id, company_name: job.company_name }];
+    selectedAssets.forEach(selected => {
+      if (!selected) return;
+      const shouldVirtual = !selected.asset_id || (!actualIds.has(selected.asset_id) && !actualFolders.has(selected.asset_folder));
+      if (!shouldVirtual) return;
+      const id = selected.asset_id || selected.asset_folder || ('JOB-' + job.id);
+      if (existing.has(id)) return;
+      existing.set(id, {
+        asset_id: id,
+        company_id: selected.company_id || job.company_id || '',
+        company_folder: selected.company_name || job.company_name || '',
+        type: selected.asset_type || job.asset_type || 'OTH',
+        input_value: Number.isFinite(selected.capacity_mw) && selected.capacity_mw > 0 ? selected.capacity_mw : (Number.isFinite(job.capacity_mw) && job.capacity_mw > 0 ? job.capacity_mw : ''),
+        input_unit: (Number.isFinite(selected.capacity_mw) && selected.capacity_mw > 0) || (Number.isFinite(job.capacity_mw) && job.capacity_mw > 0) ? 'MW' : '',
+        metric: '',
+        ss: '',
+        typeid: '',
+        project_name: '',
+        location: '',
+        asset_folder: selected.asset_folder || job.asset_folder || id,
+        lifecycle_status: 'imported',
+        is_active: true,
+        is_virtual: true,
+        capacity_mw: Number.isFinite(selected.capacity_mw) ? selected.capacity_mw : (Number.isFinite(job.capacity_mw) ? job.capacity_mw : null),
+        extra: { cost_center: selected.cost_center || '' },
+        notes: 'Imported from jobs file.',
+      });
     });
   });
   state.virtualAssets = [...existing.values()];
 }
+function getSelectedAssetIds(){
+  return [...new Set((state.selectedAssetIds || []).filter(Boolean))];
+}
+function setSelectedAssetIds(ids){
+  state.selectedAssetIds = [...new Set((ids || []).filter(Boolean))];
+  Array.from(dom.assetSelect.querySelectorAll('input[type="checkbox"][data-asset-id]') || []).forEach(input => {
+    input.checked = state.selectedAssetIds.includes(input.dataset.assetId || '');
+  });
+  updateAssetTickSummary();
+}
+function currentAssets(){
+  const ids = getSelectedAssetIds();
+  return mergedAssets().filter(asset => ids.includes(asset.asset_id));
+}
+function updateAssetTickSummary(visibleAssets=[]){
+  const selectedCount = getSelectedAssetIds().length;
+  if (!selectedCount) {
+    dom.assetTickSummary.textContent = 'No assets selected.';
+    return;
+  }
+  const visibleCount = Array.isArray(visibleAssets) && visibleAssets.length
+    ? visibleAssets.filter(asset => getSelectedAssetIds().includes(asset.asset_id)).length
+    : 0;
+  const hiddenCount = Math.max(0, selectedCount - visibleCount);
+  dom.assetTickSummary.textContent = `${selectedCount} asset${selectedCount === 1 ? '' : 's'} selected${hiddenCount ? ` (${hiddenCount} hidden by search)` : ''}.`;
+}
 function currentAsset(){
-  const id = dom.assetSelect.value;
-  return mergedAssets().find(a => a.asset_id === id) || null;
+  return currentAssets()[0] || null;
 }
 function economicsForAsset(asset){
   if (!asset || !state.config) return null;
@@ -894,11 +970,11 @@ function scoreJob(job){
   };
 }
 function computeRequestMetrics(partial){
-  const asset = mergedAssets().find(a => a.asset_id === partial.asset_id) || null;
-  const company = asset ? companyMap().get(asset.company_id) || {} : {};
+  const assetIds = Array.isArray(partial.asset_ids) ? partial.asset_ids.filter(Boolean) : [partial.asset_id].filter(Boolean);
+  const assets = mergedAssets().filter(asset => assetIds.includes(asset.asset_id));
+  const firstAsset = assets[0] || null;
+  const company = firstAsset ? companyMap().get(firstAsset.company_id) || {} : {};
   const contractor = contractorMap().get(partial.contractor_id || '') || null;
-  const capacity = deriveCapacity(asset);
-  const econ = economicsForAsset(asset);
   const productionPct = clamp(safeNumber(partial.production_effect_pct) / 100, 0, 1);
   const amount = Math.max(0, safeNumber(partial.request_amount));
   const secLikelihood = safeNumber(partial.security_likelihood);
@@ -908,38 +984,82 @@ function computeRequestMetrics(partial){
   const businessCritical = !!partial.business_critical;
   const secRisk = secLikelihood * secImpact;
   const hseRisk = hseLikelihood * hseImpact;
-  const calcMode = econ?.calc_mode || 'disabled';
-  const cf = safeNumber(econ?.typical_cf, 0);
-  const valuePerKwh = safeNumber(econ?.value_per_kwh, 0);
   let lostKwhDay = 0;
   let lostRevenueDay = 0;
-  let calcNote = 'Economic model not available.';
-  if (calcMode === 'mw_capacity' && Number.isFinite(capacity.mw) && capacity.mw > 0) {
-    lostKwhDay = capacity.mw * 1000 * 24 * cf * productionPct;
-    lostRevenueDay = lostKwhDay * valuePerKwh;
-    calcNote = `Calculated from ${formatNum(capacity.mw,3)} MW, CF ${formatNum(cf,3)}, and ${formatCurrency(valuePerKwh).replace('€','€ ')}/kWh.`;
-  } else if (calcMode !== 'disabled') {
-    calcNote = `Calculation mode ${calcMode} is not implemented in this board yet.`;
-  } else if (econ?.notes) {
-    calcNote = econ.notes;
-  }
+  let calcMode = 'disabled';
+  let cf = 0;
+  let valuePerKwh = 0;
+  const selectedAssets = assets.map(asset => {
+    const companyData = companyMap().get(asset.company_id) || {};
+    const capacity = deriveCapacity(asset);
+    const econ = economicsForAsset(asset);
+    const localCalcMode = econ?.calc_mode || 'disabled';
+    const localCf = safeNumber(econ?.typical_cf, 0);
+    const localValuePerKwh = safeNumber(econ?.value_per_kwh, 0);
+    let localLostKwhDay = 0;
+    let localLostRevenueDay = 0;
+    let localNote = econ?.notes || 'Economic model not available.';
+    if (localCalcMode === 'mw_capacity' && Number.isFinite(capacity.mw) && capacity.mw > 0) {
+      localLostKwhDay = capacity.mw * 1000 * 24 * localCf * productionPct;
+      localLostRevenueDay = localLostKwhDay * localValuePerKwh;
+      localNote = `${asset.asset_folder || asset.asset_id}: ${formatNum(capacity.mw,3)} MW, CF ${formatNum(localCf,3)}, ${formatCurrency(localValuePerKwh).replace('€','€ ')}/kWh.`;
+    } else if (localCalcMode !== 'disabled') {
+      localNote = `${asset.asset_folder || asset.asset_id}: calculation mode ${localCalcMode} is not implemented in this board yet.`;
+    }
+    lostKwhDay += localLostKwhDay;
+    lostRevenueDay += localLostRevenueDay;
+    return {
+      asset_id: asset.asset_id || '',
+      asset_folder: asset.asset_folder || asset.asset_id || '',
+      company_id: asset.company_id || '',
+      company_name: companyData.display_name || asset.company_folder || '',
+      asset_type: asset.type || '',
+      asset_type_label: assetTypeMap().get(asset.type)?.label || asset.type || '',
+      capacity_display: capacity.display,
+      capacity_mw: capacity.mw,
+      calc_mode: localCalcMode,
+      typical_cf: localCf,
+      value_per_kwh: localValuePerKwh,
+      cost_center: costCenterForAsset(asset),
+      calc_note: localNote,
+    };
+  });
+  const uniqueCompanyIds = [...new Set(selectedAssets.map(asset => asset.company_id).filter(Boolean))];
+  const uniqueCompanyNames = [...new Set(selectedAssets.map(asset => asset.company_name).filter(Boolean))];
+  const uniqueCompanyVats = [...new Set(selectedAssets.map(asset => companyMap().get(asset.company_id)?.vat9 || '').filter(Boolean))];
+  const uniqueTypes = [...new Set(selectedAssets.map(asset => asset.asset_type).filter(Boolean))];
+  const totalCapacityMw = selectedAssets.reduce((sum, asset) => sum + (Number.isFinite(asset.capacity_mw) ? asset.capacity_mw : 0), 0);
+  const calcNotes = selectedAssets.map(asset => asset.calc_note).filter(Boolean);
+  calcMode = [...new Set(selectedAssets.map(asset => asset.calc_mode).filter(Boolean))].join(', ');
+  cf = selectedAssets.length === 1 ? safeNumber(selectedAssets[0].typical_cf, 0) : 0;
+  valuePerKwh = selectedAssets.length === 1 ? safeNumber(selectedAssets[0].value_per_kwh, 0) : 0;
+  const calcNote = calcNotes.length ? calcNotes.join(' | ') : 'Economic model not available.';
   const totalExposureDay = lostRevenueDay;
   const paybackDays = lostRevenueDay > 0 ? amount / lostRevenueDay : null;
   const cls = classifyPriority(secRisk, hseRisk, businessCritical);
   const scoring = scoreJob({ request_amount: amount, total_exposure_day: totalExposureDay, security_risk: secRisk, hse_risk: hseRisk });
+  const assetSummary = selectedAssets.length <= 1
+    ? (selectedAssets[0]?.asset_folder || firstAsset?.asset_folder || '')
+    : `${selectedAssets[0]?.asset_folder || firstAsset?.asset_folder || selectedAssets.length + ' assets'} +${selectedAssets.length - 1} more`;
+  const companySummary = uniqueCompanyNames.length <= 1
+    ? (uniqueCompanyNames[0] || firstAsset?.company_folder || '')
+    : `${uniqueCompanyNames[0]} +${uniqueCompanyNames.length - 1} more`;
   return {
-    asset_id: asset?.asset_id || '',
-    asset_folder: asset?.asset_folder || '',
-    company_id: asset?.company_id || '',
-    company_name: company?.display_name || asset?.company_folder || '',
-    company_vat9: company?.vat9 || '',
+    asset_id: firstAsset?.asset_id || '',
+    asset_ids: selectedAssets.map(asset => asset.asset_id).filter(Boolean),
+    asset_folder: assetSummary,
+    asset_folders: selectedAssets.map(asset => asset.asset_folder).filter(Boolean),
+    selected_assets: selectedAssets,
+    company_id: uniqueCompanyIds.length === 1 ? uniqueCompanyIds[0] : '',
+    company_name: companySummary,
+    company_vat9: uniqueCompanyVats.length === 1 ? uniqueCompanyVats[0] : '',
     contractor_id: contractor?.contractor_id || partial.contractor_id || '',
     contractor_name: contractor?.display_name || '',
     contractor_vat9: contractor?.vat9 || '',
-    asset_type: asset?.type || '',
-    asset_type_label: assetTypeMap().get(asset?.type)?.label || asset?.type || '',
-    capacity_display: capacity.display,
-    capacity_mw: capacity.mw,
+    asset_type: uniqueTypes.length === 1 ? uniqueTypes[0] : '',
+    asset_type_label: uniqueTypes.length === 1 ? (assetTypeMap().get(uniqueTypes[0])?.label || uniqueTypes[0]) : `Multiple (${selectedAssets.length})`,
+    capacity_display: selectedAssets.length <= 1 ? (selectedAssets[0]?.capacity_display || '-') : (totalCapacityMw > 0 ? `${formatNum(totalCapacityMw,3)} MW total` : `${selectedAssets.length} assets`),
+    capacity_mw: totalCapacityMw > 0 ? round(totalCapacityMw, 3) : null,
     calc_mode: calcMode,
     typical_cf: cf,
     value_per_kwh: valuePerKwh,
@@ -995,22 +1115,29 @@ function scoreJobs(){
   state.jobs.filter(j => j.status === 'paid').forEach(j => { j.rank = null; });
 }
 function updateMetaPanel(){
-  const asset = currentAsset();
+  const assets = currentAssets();
+  const asset = assets[0] || null;
   if (!asset) {
     dom.metaAsset.textContent = '-'; dom.metaCompany.textContent='-'; dom.metaType.textContent='-'; dom.metaCapacity.textContent='-'; dom.metaCf.textContent='-'; dom.metaValueKwh.textContent='-';
-    dom.metaCalcNote.textContent = configReady() ? 'Select an asset to see the calculation basis.' : 'Load required masters first.';
+    dom.metaCalcNote.textContent = configReady() ? 'Select one or more assets to see the calculation basis.' : 'Load required masters first.';
     return;
   }
-  const company = companyMap().get(asset.company_id) || {};
-  const cap = deriveCapacity(asset);
-  const econ = economicsForAsset(asset);
-  dom.metaAsset.textContent = asset.asset_folder || asset.asset_id || '-';
-  dom.metaCompany.textContent = company.display_name || asset.company_folder || '-';
-  dom.metaType.textContent = `${asset.type || '-'}${econ?.label ? ' | ' + econ.label : ''}`;
-  dom.metaCapacity.textContent = cap.display;
-  dom.metaCf.textContent = econ ? formatNum(safeNumber(econ.typical_cf), 3) : '-';
-  dom.metaValueKwh.textContent = econ ? formatCurrency(safeNumber(econ.value_per_kwh)).replace('€','€ ') : '-';
-  dom.metaCalcNote.textContent = asset.is_virtual ? ((econ?.notes || 'Imported asset from jobs file.') + ' Imported assets stay editable even if they are not in the current asset master.') : (econ?.notes || 'Ready to calculate.');
+  const companyNames = [...new Set(assets.map(item => companyMap().get(item.company_id)?.display_name || item.company_folder || '').filter(Boolean))];
+  const types = [...new Set(assets.map(item => item.type).filter(Boolean))];
+  const totalCapacityMw = assets.reduce((sum, item) => {
+    const cap = deriveCapacity(item);
+    return sum + (Number.isFinite(cap.mw) ? cap.mw : 0);
+  }, 0);
+  const firstEcon = economicsForAsset(asset);
+  dom.metaAsset.textContent = assets.length === 1 ? (asset.asset_folder || asset.asset_id || '-') : `${assets.length} assets selected`;
+  dom.metaCompany.textContent = companyNames.length <= 1 ? (companyNames[0] || '-') : `${companyNames[0]} +${companyNames.length - 1} more`;
+  dom.metaType.textContent = types.length === 1 ? `${types[0] || '-'}${firstEcon?.label ? ' | ' + firstEcon.label : ''}` : `Multiple asset types (${types.length})`;
+  dom.metaCapacity.textContent = assets.length === 1 ? deriveCapacity(asset).display : (totalCapacityMw > 0 ? `${formatNum(totalCapacityMw,3)} MW total` : `${assets.length} assets`);
+  dom.metaCf.textContent = assets.length === 1 && firstEcon ? formatNum(safeNumber(firstEcon.typical_cf), 3) : 'Mixed';
+  dom.metaValueKwh.textContent = assets.length === 1 && firstEcon ? formatCurrency(safeNumber(firstEcon.value_per_kwh)).replace('€','€ ') : 'Mixed';
+  dom.metaCalcNote.textContent = assets.length === 1
+    ? (asset.is_virtual ? ((firstEcon?.notes || 'Imported asset from jobs file.') + ' Imported assets stay editable even if they are not in the current asset master.') : (firstEcon?.notes || 'Ready to calculate.'))
+    : `Aggregated preview across ${assets.length} selected assets. Cost centers and per-asset details are included in the expanded request info.`;
 }
 function getScale(kind){ return state.config?.risk_scales?.[kind] || []; }
 function fillRiskSelect(selectEl, items){
@@ -1027,18 +1154,23 @@ function refreshRiskDropdowns(){
 function populateAssetSelect(){
   const term = (dom.assetSearch.value || '').trim().toLowerCase();
   const companies = companyMap();
+  const currentIds = state.pendingAssetIds || getSelectedAssetIds();
+  if (state.pendingAssetIds) setSelectedAssetIds(state.pendingAssetIds);
   const assets = mergedAssets().filter(a => a && a.is_active !== false).filter(asset => {
     if (!term) return true;
     const company = companies.get(asset.company_id) || {};
     const hay = [asset.asset_id, asset.typeid, asset.asset_folder, asset.project_name, asset.location, asset.type, company.display_name, company.namecode, company.company_folder, asset.company_folder].filter(Boolean).join(' ').toLowerCase();
     return hay.includes(term);
   });
-  const current = dom.assetSelect.value;
-  dom.assetSelect.innerHTML = assets.length ? assets.map(a => `<option value="${escapeHtml(a.asset_id)}">${escapeHtml(assetView(a).label)}</option>`).join('') : '<option value="">No assets available</option>';
-  if (assets.length) {
-    const match = assets.some(a => a.asset_id === current);
-    dom.assetSelect.value = match ? current : assets[0].asset_id;
-  } else dom.assetSelect.value = '';
+  dom.assetSelect.innerHTML = assets.length ? assets.map(asset => {
+    const company = companies.get(asset.company_id) || {};
+    const subtitle = [company.display_name || asset.company_folder || '', asset.location || '', asset.type || ''].filter(Boolean).join(' | ');
+    const checked = currentIds.includes(asset.asset_id) ? ' checked' : '';
+    return `<label class="tick-item"><input type="checkbox" data-asset-id="${escapeHtml(asset.asset_id)}"${checked}><span class="tick-item-text"><span class="tick-item-title">${escapeHtml(assetView(asset).label)}</span><span class="tick-item-subtitle">${escapeHtml(subtitle || asset.asset_id || '')}</span></span></label>`;
+  }).join('') : '<div class="tick-list-empty">No assets available.</div>';
+  if (!getSelectedAssetIds().length && assets.length) setSelectedAssetIds([assets[0].asset_id]);
+  state.pendingAssetIds = null;
+  updateAssetTickSummary(assets);
   updateMetaPanel();
   renderLivePreview();
 }
@@ -1052,8 +1184,10 @@ function populateContractorSelect(){
   else if (!dom.contractorSelect.value) dom.contractorSelect.value = '';
 }
 function getFormData(){
+  const assetIds = getSelectedAssetIds();
   return {
-    asset_id: dom.assetSelect.value,
+    asset_id: assetIds[0] || '',
+    asset_ids: assetIds,
     contractor_id: dom.contractorSelect.value,
     title: (dom.requestTitle.value || '').trim(),
     description: (dom.requestDescription.value || '').trim(),
@@ -1068,7 +1202,7 @@ function getFormData(){
 }
 function validateForm(data){
   if (!configReady()) return 'Load assets, companies, asset types, and config first.';
-  if (!data.asset_id) return 'Select an asset.';
+  if (!Array.isArray(data.asset_ids) || !data.asset_ids.length) return 'Select at least one asset.';
   if (!data.title) return 'Enter a request name.';
   if (!data.description) return 'Enter a problem description.';
   if (!Number.isFinite(data.request_amount) || data.request_amount <= 0) return 'Enter a valid request amount.';
@@ -1120,6 +1254,7 @@ function rowTags(job){
 }
 function renderJobDetailRow(job, colspan){
   const parties = resolveJobParties(job);
+  const assetLines = resolveSelectedAssets(job);
   const fields = [
     ['Request', job.title || '-'],
     ['Status', job.status || '-'],
@@ -1151,6 +1286,7 @@ function renderJobDetailRow(job, colspan){
   return `<tr class="detail-row"><td colspan="${colspan}"><div class="detail-panel">
     <div class="detail-grid">
       ${fields.map(([label, value]) => `<div><div class="df-label">${escapeHtml(label)}</div><div class="df-value mono">${escapeHtml(String(value ?? '-'))}</div></div>`).join('')}
+      <div style="grid-column:1 / -1;"><div class="df-label">Assets and Cost Centers</div><div class="df-value">${assetLines.map(asset => escapeHtml(`${asset.asset_folder || asset.asset_id || '-'} | Cost Center: ${asset.cost_center || '-'}`)).join('<br>')}</div></div>
       <div style="grid-column:1 / -1;"><div class="df-label">Description</div><div class="df-value">${escapeHtml(job.description || '-')}</div></div>
     </div>
     <div class="detail-actions">
@@ -1393,7 +1529,7 @@ function renderAllNoCharts(){
   renderTables();
 }
 function fillFormFromJob(job){
-  dom.assetSelect.value = job.asset_id || '';
+  state.pendingAssetIds = Array.isArray(job.asset_ids) && job.asset_ids.length ? job.asset_ids : [job.asset_id].filter(Boolean);
   dom.contractorSelect.value = job.contractor_id || '';
   dom.requestTitle.value = job.title || '';
   dom.requestDescription.value = job.description || '';
@@ -1763,7 +1899,17 @@ function bindEvents(){
   dom.newJobsBtn.addEventListener('click', createNewJobsFile);
   dom.resetSelectionBtn.addEventListener('click', () => { state.selectedJobId = null; clearForm(); setStatus('Selection cleared.', 'note'); });
   dom.assetSearch.addEventListener('input', populateAssetSelect);
-  dom.assetSelect.addEventListener('change', () => { updateMetaPanel(); renderLivePreview(); });
+  dom.assetSelect.addEventListener('change', ev => {
+    const target = ev.target;
+    if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
+    const assetId = target.dataset.assetId || '';
+    const selected = new Set(getSelectedAssetIds());
+    if (target.checked) selected.add(assetId);
+    else selected.delete(assetId);
+    setSelectedAssetIds([...selected]);
+    updateMetaPanel();
+    renderLivePreview();
+  });
   dom.contractorSelect.addEventListener('change', renderLivePreview);
   ['requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical'].forEach(id => q(id).addEventListener('input', renderLivePreview));
   dom.addRequestBtn.addEventListener('click', () => addOrUpdateRequest('add'));
@@ -1775,10 +1921,11 @@ function bindEvents(){
   dom.jobsLoader.addEventListener('change', () => loadSingleFromFileInput(dom.jobsLoader, normalizeJobs, value => state.jobs = value, 'jobs', 'jobs file'));
 }
 function setDomRefs(){
-  ['openFolderBtn','saveJobsBtn','loadJobsBtn','exportCsvBtn','newJobsBtn','resetSelectionBtn','jobsLoader','statusMessage','statusFolder','statusMasters','statusJobsFile','statusAssetsCount','kpiCards','assetSearch','assetSelect','contractorSelect','metaAsset','metaCompany','metaType','metaCapacity','metaCf','metaValueKwh','metaCalcNote','requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical','addRequestBtn','updateRequestBtn','clearFormBtn','liveMetrics','selectedRequestLabel','openTableBody','paidTableBody','chartPriority','chartAmountByAsset','chartBuckets'].forEach(id => dom[id] = q(id));
+  ['openFolderBtn','saveJobsBtn','loadJobsBtn','exportCsvBtn','newJobsBtn','resetSelectionBtn','jobsLoader','statusMessage','statusFolder','statusMasters','statusJobsFile','statusAssetsCount','kpiCards','assetSearch','assetSelect','assetTickSummary','contractorSelect','metaAsset','metaCompany','metaType','metaCapacity','metaCf','metaValueKwh','metaCalcNote','requestTitle','requestDescription','requestAmount','productionEffect','secLikelihood','secImpact','hseLikelihood','hseImpact','businessCritical','addRequestBtn','updateRequestBtn','clearFormBtn','liveMetrics','selectedRequestLabel','openTableBody','paidTableBody','chartPriority','chartAmountByAsset','chartBuckets'].forEach(id => dom[id] = q(id));
 }
 function initDefaults(){
-  dom.assetSelect.innerHTML = '<option value="">Load data first</option>';
+  dom.assetSelect.innerHTML = '<div class="tick-list-empty">Load data first.</div>';
+  dom.assetTickSummary.textContent = 'No assets selected.';
   dom.contractorSelect.innerHTML = '<option value="">Load contractors first (optional)</option>';
   dom.liveMetrics.innerHTML = '<div class="card"><div class="small">Waiting for data</div><div class="metric">-</div></div>';
   ['secLikelihood','secImpact','hseLikelihood','hseImpact'].forEach(id => dom[id].innerHTML = '<option value="">Load config first</option>');
