@@ -65,6 +65,7 @@
       width:100%; border:1px solid var(--line); border-radius:12px;
       padding:10px 12px; font-size:14px; background:var(--card); color:var(--text);
     }
+    input[type="checkbox"] { width:auto; padding:0; margin:0; }
     input[readonly] { background:var(--soft); }
     textarea { min-height:72px; resize:vertical; }
     .small { font-size:12px; color:var(--muted); line-height:1.4; margin-top:4px; }
@@ -75,6 +76,21 @@
     @media (max-width:1200px) { .filters { grid-template-columns:1fr 1fr 1fr; } }
     @media (max-width:700px)  { .filters { grid-template-columns:1fr; } }
     .filter-actions { display:flex; flex-direction:column; gap:6px; justify-content:flex-end; }
+    .multi-filter { position:relative; }
+    .multi-filter-btn {
+      width:100%; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--text);
+      padding:10px 12px; font-size:13px; text-align:left; font-weight:500;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .multi-filter-btn::after { content:' \25BE'; float:right; color:var(--muted); }
+    .multi-filter-menu {
+      position:absolute; z-index:20; left:0; right:0; margin-top:6px; max-height:220px; overflow:auto;
+      border:1px solid var(--line); border-radius:12px; background:var(--card); padding:8px;
+      box-shadow:0 10px 30px rgba(0,0,0,.12); display:none;
+    }
+    .multi-filter.open .multi-filter-menu { display:block; }
+    .multi-filter-item { display:flex; align-items:center; justify-content:flex-start; text-align:left; gap:8px; font-size:12px; color:var(--text); margin:0; padding:4px 2px; cursor:pointer; }
+    .multi-filter-empty { font-size:12px; color:var(--muted); padding:6px 2px; }
     .summary-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
     .count-badge { font-size:13px; color:var(--muted); }
     .count-badge strong { color:var(--text); }
@@ -252,29 +268,20 @@
           <input id="searchInput" type="search" placeholder="Project, TYPEID, location, company, notes…" />
         </div>
         <div>
-          <label for="filterType">Asset type</label>
-          <select id="filterType"><option value="">All types</option></select>
+          <label>Asset type</label>
+          <div id="filterType" class="multi-filter"></div>
         </div>
         <div>
-          <label for="filterStatus">Lifecycle status</label>
-          <select id="filterStatus">
-            <option value="">All statuses</option>
-            <option value="development">development</option>
-            <option value="pipeline">pipeline</option>
-            <option value="construction">construction</option>
-            <option value="operational">operational</option>
-            <option value="no-scope">no-scope</option>
-            <option value="o-and-m">o-and-m</option>
-            <option value="archived">archived</option>
-          </select>
+          <label>Lifecycle status</label>
+          <div id="filterStatus" class="multi-filter"></div>
         </div>
         <div>
-          <label for="filterCompany">Company</label>
-          <select id="filterCompany"><option value="">All companies</option></select>
+          <label>Company</label>
+          <div id="filterCompany" class="multi-filter"></div>
         </div>
         <div>
-          <label for="filterLocation">Location</label>
-          <select id="filterLocation"><option value="">All locations</option></select>
+          <label>Location</label>
+          <div id="filterLocation" class="multi-filter"></div>
         </div>
         <div class="filter-actions">
           <button id="clearFiltersBtn" class="secondary sm">Clear filters</button>
@@ -320,8 +327,12 @@
       expandedId: null,
       _atMap: null,
       _cmMap: null,
-      cols: []
+      cols: [],
+      filterSets: { type: new Set(), status: new Set(), company: new Set(), location: new Set() },
+      _filterMenusBound: false,
     };
+
+    const FILTER_STATUS_OPTIONS = ['development','pipeline','construction','operational','no-scope','o-and-m','archived'];
 
     const $ = id => document.getElementById(id);
     const els = {
@@ -369,6 +380,46 @@
         String(a).localeCompare(String(b), undefined, { sensitivity: 'base' })
       );
     }
+    function selectedFilterValues(key) { return [...(state.filterSets[key] || new Set())]; }
+    function clearFilterValues() {
+      state.filterSets.type.clear();
+      state.filterSets.status.clear();
+      state.filterSets.company.clear();
+      state.filterSets.location.clear();
+    }
+    function bindFilterOutsideClose() {
+      if (state._filterMenusBound) return;
+      document.addEventListener('click', () => document.querySelectorAll('.multi-filter.open').forEach(el => el.classList.remove('open')));
+      state._filterMenusBound = true;
+    }
+    function renderMultiFilter(container, key, items, allLabel, onChange) {
+      const values = uniqueSorted(items);
+      const old = state.filterSets[key] || new Set();
+      const next = new Set([...old].filter(v => values.includes(v)));
+      state.filterSets[key] = next;
+      const selected = [...next];
+      const summary = selected.length === 0 ? allLabel : (selected.length === 1 ? selected[0] : `${selected.length} selected`);
+      container.innerHTML = `
+        <button type="button" class="multi-filter-btn" title="${esc(summary)}">${esc(summary)}</button>
+        <div class="multi-filter-menu">
+          <label class="multi-filter-item"><input type="checkbox" data-all="1" ${selected.length === 0 ? 'checked' : ''}>All</label>
+          ${values.length ? values.map(v => `<label class="multi-filter-item"><input type="checkbox" value="${esc(v)}" ${next.has(v) ? 'checked' : ''}>${esc(v)}</label>`).join('') : '<div class="multi-filter-empty">No values</div>'}
+        </div>`;
+      const button = container.querySelector('.multi-filter-btn');
+      const menu = container.querySelector('.multi-filter-menu');
+      button.addEventListener('click', ev => {
+        ev.stopPropagation();
+        document.querySelectorAll('.multi-filter.open').forEach(el => { if (el !== container) el.classList.remove('open'); });
+        container.classList.toggle('open');
+      });
+      menu.addEventListener('click', ev => ev.stopPropagation());
+      menu.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => {
+        const selectedValues = [...menu.querySelectorAll('input[type="checkbox"][value]:checked')].map(x => x.value);
+        state.filterSets[key] = new Set(selectedValues);
+        renderMultiFilter(container, key, values, allLabel, onChange);
+        onChange();
+      }));
+    }
 
     // ── Lookup caches ──────────────────────────────────────────────────────────
     function atMap() {
@@ -414,7 +465,7 @@
     function refreshCompanySelect() {
       const prev = els.fieldCompany.value;
       els.fieldCompany.innerHTML = (state.companies||[]).length
-        ? (state.companies||[]).map(c => `<option value="${esc(c.company_id)}">${esc(c.company_id)} — ${esc(c.display_name)}</option>`).join('')
+        ? (state.companies||[]).map(c => `<option value="${esc(c.company_id)}">${esc(c.company_id)} — ${esc(c.display_name || c.company_folder || '')}${c.company_folder ? ' | ' + esc(c.company_folder) : ''}</option>`).join('')
         : '<option value="">No companies loaded</option>';
       if (prev && [...els.fieldCompany.options].some(o => o.value === prev)) els.fieldCompany.value = prev;
     }
@@ -611,9 +662,16 @@
       const cm = Object.fromEntries((state.companies||[]).map(c => [c.company_id, c]));
       return (state.assets.assets||[]).map(a => {
         const c = cm[a.company_id] || {};
+        const companyFolder = a.company_folder || c.company_folder || a.company_id || '';
+        const assetFolder = a.asset_folder || '';
+        const assetIsoName = companyFolder && assetFolder
+          ? `${companyFolder}_${assetFolder}`
+          : (companyFolder || assetFolder || '');
         return {
           ...a,
-          company_display: c.display_name ? `${c.display_name} — ${a.company_folder || a.company_id || ''}` : (a.company_folder || a.company_id || ''),
+          company_folder: companyFolder,
+          asset_iso_name: assetIsoName,
+          company_display: c.display_name ? `${c.display_name} — ${companyFolder}` : companyFolder,
           capacity: a.input_value != null ? `${a.input_value} ${a.input_unit || ''}`.trim() : ''
         };
       });
@@ -621,16 +679,11 @@
 
     function populateFilterDropdowns() {
       const joined = buildJoined();
-      const snap = { type: els.filterType.value, company: els.filterCompany.value, location: els.filterLocation.value };
-      const fill = (sel, items, allLabel) => {
-        sel.innerHTML = `<option value="">${allLabel}</option>` + items.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
-      };
-      fill(els.filterType,     uniqueSorted(joined.map(a => a.type)),            'All types');
-      fill(els.filterCompany,  uniqueSorted(joined.map(a => a.company_display)), 'All companies');
-      fill(els.filterLocation, uniqueSorted(joined.map(a => a.location)),        'All locations');
-      if (snap.type     && [...els.filterType.options].some(o => o.value === snap.type))     els.filterType.value = snap.type;
-      if (snap.company  && [...els.filterCompany.options].some(o => o.value === snap.company)) els.filterCompany.value = snap.company;
-      if (snap.location && [...els.filterLocation.options].some(o => o.value === snap.location)) els.filterLocation.value = snap.location;
+      bindFilterOutsideClose();
+      renderMultiFilter(els.filterType, 'type', joined.map(a => a.type), 'All types', () => { initCols(); renderColPicker(); renderTable(); });
+      renderMultiFilter(els.filterStatus, 'status', FILTER_STATUS_OPTIONS, 'All statuses', () => renderTable());
+      renderMultiFilter(els.filterCompany, 'company', joined.map(a => a.company_display), 'All companies', () => renderTable());
+      renderMultiFilter(els.filterLocation, 'location', joined.map(a => a.location), 'All locations', () => renderTable());
     }
 
     // ── Filter + sort ──────────────────────────────────────────────────────────
@@ -644,18 +697,18 @@
 
     function getRows() {
       const q      = els.searchInput.value.trim().toLowerCase();
-      const typeF  = els.filterType.value;
-      const statF  = els.filterStatus.value;
-      const compF  = els.filterCompany.value;
-      const locF   = els.filterLocation.value;
+      const typeF  = selectedFilterValues('type');
+      const statF  = selectedFilterValues('status');
+      const compF  = selectedFilterValues('company');
+      const locF   = selectedFilterValues('location');
       let rows = buildJoined().filter(a => {
-        if (typeF && a.type             !== typeF)  return false;
-        if (statF && a.lifecycle_status !== statF)  return false;
-        if (compF && a.company_display  !== compF)  return false;
-        if (locF  && a.location         !== locF)   return false;
+        if (typeF.length && !typeF.includes(a.type)) return false;
+        if (statF.length && !statF.includes(a.lifecycle_status)) return false;
+        if (compF.length && !compF.includes(a.company_display)) return false;
+        if (locF.length && !locF.includes(a.location)) return false;
         if (q) {
           const hay = [a.typeid, a.project_name, a.location, a.type,
-            a.company_display, a.company_folder, a.asset_folder,
+            a.company_display, a.company_folder, a.asset_folder, a.asset_iso_name,
             a.lifecycle_status, a.notes, a.asset_id, a.capacity
           ].join(' ').toLowerCase();
           if (!hay.includes(q)) return false;
@@ -683,7 +736,8 @@
       { key: 'asset_id',         label: 'Asset ID',       sortable: false, selected: false },
       { key: 'ss',               label: 'SS',             sortable: false, selected: false },
       { key: 'metric',           label: 'Metric',         sortable: false, selected: false },
-      { key: 'company_folder',   label: 'Company folder', sortable: false, selected: false },
+      { key: 'company_folder',   label: 'Company folder', sortable: false, selected: true  },
+      { key: 'asset_iso_name',   label: 'Asset ISO name', sortable: false, selected: true  },
       { key: 'asset_folder',     label: 'Asset folder',   sortable: false, selected: false },
       { key: 'notes',            label: 'Notes',          sortable: false, selected: false },
     ];
@@ -697,9 +751,9 @@
       }));
       const seenKeys = new Set();
       const extra = [];
-      const typeFilter = (typeof els !== 'undefined' && els.filterType) ? els.filterType.value : '';
-      const typesToScan = typeFilter
-        ? (state.assetTypes.asset_types || []).filter(t => t.type_code === typeFilter)
+      const typeFilters = selectedFilterValues('type');
+      const typesToScan = typeFilters.length
+        ? (state.assetTypes.asset_types || []).filter(t => typeFilters.includes(t.type_code))
         : (state.assetTypes.asset_types || []);
       typesToScan.forEach(t => {
         (t.extra_fields || []).forEach(f => {
@@ -777,6 +831,7 @@
           case 'type':             return `<td><span class="type-badge">${esc(a.type || '—')}</span></td>`;
           case 'capacity':         return `<td>${esc(a.capacity || '—')}</td>`;
           case 'company_display':  return `<td title="${esc(a.company_folder)}">${esc(a.company_display)}</td>`;
+          case 'asset_iso_name':   return `<td class="mono">${esc(a.asset_iso_name || '—')}</td>`;
           case 'lifecycle_status': return `<td><span class="status-badge ${statusCls(a.lifecycle_status)}">${esc(a.lifecycle_status || '—')}</span></td>`;
           case 'is_active':        return `<td>${a.is_active === false ? 'No' : 'Yes'}</td>`;
           default:                 return `<td>${esc(String(a[col.key] ?? '—'))}</td>`;
@@ -801,6 +856,7 @@
             ['Active',        a.is_active === false ? 'No' : 'Yes'],
             ['Company',       a.company_display],
             ['Company folder',a.company_folder],
+            ['Asset ISO name',a.asset_iso_name || '—'],
             ['Asset folder',  a.asset_folder],
             ['Notes',         a.notes || '—']
           ];
@@ -825,6 +881,7 @@
               <button class="sm secondary copy-btn" data-val="${esc(a.asset_id)}">Copy asset ID</button>
               <button class="sm secondary copy-btn" data-val="${esc(a.typeid)}">Copy TYPEID</button>
               <button class="sm secondary copy-btn" data-val="${esc(a.company_folder)}">Copy company folder</button>
+              <button class="sm secondary copy-btn" data-val="${esc(a.asset_iso_name || '')}">Copy asset ISO name</button>
               <button class="sm secondary copy-btn" data-val="${esc(a.asset_folder)}">Copy asset folder</button>
               <button class="sm secondary edit-btn" data-idx="${assetIdx}" data-company="${esc(a.company_id)}">Edit</button>
             </div>
@@ -1135,13 +1192,12 @@
     els.fieldProjectName.addEventListener('blur', () => computeDerived({ applyProjectName: true }));
 
     els.searchInput.addEventListener('input', debounce(renderTable));
-    els.filterType.addEventListener('change', () => { initCols(); renderColPicker(); renderTable(); });
-    els.filterStatus.addEventListener('change', renderTable);
-    els.filterCompany.addEventListener('change', renderTable);
-    els.filterLocation.addEventListener('change', renderTable);
     $('clearFiltersBtn').addEventListener('click', () => {
-      els.searchInput.value = ''; els.filterType.value = ''; els.filterStatus.value = '';
-      els.filterCompany.value = ''; els.filterLocation.value = '';
+      els.searchInput.value = '';
+      clearFilterValues();
+      populateFilterDropdowns();
+      initCols();
+      renderColPicker();
       state.expandedId = null; renderTable();
     });
     $('copyTableBtn').addEventListener('click', async () => {
