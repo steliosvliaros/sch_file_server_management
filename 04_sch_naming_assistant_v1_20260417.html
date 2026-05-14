@@ -236,9 +236,9 @@
             <div class="hint">Greek selection shown in the dropdown; the generated filename uses the English stem.</div>
           </div>
           <div id="finSpecificWrap" style="display:none;">
-            <label for="finSpecific">FIN specific value (up to 6 digits)</label>
-            <input id="finSpecific" value="" maxlength="6" placeholder="123" />
-            <div class="hint">Use exactly 6 letters and/or numbers.</div>
+            <label for="finSpecific">FIN specific value (up to 9 letters and/or numbers)</label>
+            <input id="finSpecific" value="" maxlength="9" placeholder="A123" />
+            <div class="hint">Use 1 to 9 letters and/or numbers.</div>
           </div>
 
           <div class="full">
@@ -373,6 +373,7 @@
       { greek: 'ΔΑ', stem: 'delivery-note' },
       { greek: 'ΔΑ-ΤΙΜ', stem: 'delivery-note-invoice' },
       { greek: 'Τιμολόγιο', stem: 'invoice' },
+      { greek: 'Προσφορά', stem: 'offer' },
       { greek: 'Πιστωτικό', stem: 'credit-note' },
       { greek: 'Απόδειξη πληρωμής', stem: 'payment-receipt' },
       { greek: 'Τραπεζική μεταφορά', stem: 'bank-transfer-receipt' },
@@ -481,12 +482,13 @@
       return (value || '')
         .normalize('NFKD')
         .replace(/[̀-ͯ]/g, '')
-        .replace(/[^0-9]/g, '')
-        .slice(0, 6);
+        .replace(/[^A-Za-z0-9]/g, '')
+        .slice(0, 9)
+        .toUpperCase();
     }
 
     function normalizeFinSpecific(value) {
-      return normalizeFinSpecificRaw(value).padStart(6, '0');
+      return normalizeFinSpecificRaw(value);
     }
 
     function getActiveContractors() {
@@ -639,7 +641,7 @@
       if (docMeta.counterparty_sensitive) populateCounterpartySelects();
       if (isFin) populateFinStemSelect();
       els.descriptionHint.textContent = isFin
-        ? 'For FIN, enter up to 6 digits. The generated description will apply left zero-padding to reach 6 digits, then append the free description.'
+        ? 'For FIN, enter 1 to 9 letters and/or numbers. The generated description will append the value exactly as entered after normalization, then append the free description.'
         : 'Free description text that will be normalized into the canonical filename.';
     }
 
@@ -742,7 +744,7 @@
       if ((docType === 'DRWTEC' || docType === 'SDYTEC') && !stage) issues.push('Missing deliverable stage');
       if ((docType === 'FIN' || docType === 'CNT') && !normalizeCounterparty(els.counterparty.value)) issues.push('Missing counterparty');
       if (docType === 'FIN' && !normalizeText(finStem)) issues.push('Missing FIN document stem');
-      if (docType === 'FIN' && !/^\d{1,6}$/.test(finSpecificRaw)) issues.push('FIN specific value must contain 1 to 6 digits');
+      if (docType === 'FIN' && !/^[A-Z0-9]{1,9}$/.test(finSpecificRaw)) issues.push('FIN specific value must contain 1 to 9 letters and/or numbers');
 
       const route = resolveRoute(docType, workstream, stage);
       if (!route.folderId || !route.folderPath) issues.push(portfolioShared ? 'Could not resolve Portfolio Shared target folder' : 'Could not resolve target folder from policy route registry');
