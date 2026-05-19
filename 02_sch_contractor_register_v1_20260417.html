@@ -148,8 +148,16 @@
           <input id="fieldId" readonly />
         </div>
         <div>
-          <label for="fieldDisplayName">Display name</label>
-          <input id="fieldDisplayName" placeholder="Habitatio" />
+          <label for="fieldCommercialTitle">Commercial title</label>
+          <input id="fieldCommercialTitle" placeholder="Habitatio" />
+        </div>
+        <div>
+          <label for="fieldNameRoman">Name (Roman characters)</label>
+          <input id="fieldNameRoman" placeholder="HABITATIO" />
+        </div>
+        <div class="full">
+          <label for="fieldNameGreek">Name (Greek characters)</label>
+          <input id="fieldNameGreek" placeholder="ΧΑΜΠΙΤΑΤΙΟ" />
         </div>
         <div>
           <label for="fieldCanonicalName">Canonical uppercase name</label>
@@ -158,12 +166,16 @@
         </div>
         <div class="full">
           <label for="fieldAliases">Aliases</label>
-          <input id="fieldAliases" placeholder="Habitatio; Habitatio SA; HABITATIO" />
-          <div class="small">Separate aliases with semicolons. Stored as uppercase canonical names.</div>
+          <select id="fieldAliases" multiple size="8"></select>
+          <div class="small">Select one or more companies from company register.</div>
         </div>
         <div>
           <label for="fieldVat">VAT number (vat9)</label>
           <input id="fieldVat" placeholder="9 digits" />
+        </div>
+        <div>
+          <label for="fieldElgemi">ELGEMI number</label>
+          <input id="fieldElgemi" placeholder="e.g. 123456789000" />
         </div>
         <div>
           <label for="fieldActive">Active</label>
@@ -189,7 +201,7 @@
       <div class="filters">
         <div>
           <label for="searchInput">Search</label>
-          <input id="searchInput" type="search" placeholder="ID, display name, canonical name, aliases, notes…" />
+          <input id="searchInput" type="search" placeholder="ID, commercial title, roman/greek name, canonical name, aliases, notes…" />
         </div>
         <div>
           <label for="filterActive">Active</label>
@@ -215,7 +227,7 @@
         <thead>
           <tr>
             <th data-col="contractor_id">ID</th>
-            <th data-col="display_name">Display name</th>
+            <th data-col="commercial_title">Commercial title</th>
             <th data-col="canonical_name">Canonical name</th>
             <th data-col="aliases_display">Aliases</th>
             <th data-col="is_active">Active</th>
@@ -231,9 +243,10 @@
   <script>
     const state = {
       contractors: { schema: { generated_at: new Date().toISOString() }, contractors: [] },
+      companies: { companies: [] },
       directoryHandle: null,
       currentIndex: -1,
-      sortCol: 'display_name',
+      sortCol: 'commercial_title',
       sortDir: 'asc',
       expandedId: null
     };
@@ -243,10 +256,13 @@
       statusBadge:      $('statusBadge'),
       selectRecord:     $('selectRecord'),
       fieldId:          $('fieldId'),
-      fieldDisplayName: $('fieldDisplayName'),
+      fieldCommercialTitle: $('fieldCommercialTitle'),
+      fieldNameRoman:   $('fieldNameRoman'),
+      fieldNameGreek:   $('fieldNameGreek'),
       fieldCanonicalName: $('fieldCanonicalName'),
       fieldAliases:     $('fieldAliases'),
       fieldVat:         $('fieldVat'),
+      fieldElgemi:      $('fieldElgemi'),
       fieldActive:      $('fieldActive'),
       fieldNotes:       $('fieldNotes'),
       searchInput:      $('searchInput'),
@@ -263,18 +279,47 @@
     function slug(v) { return String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9\s\-]/g,'').trim().replace(/[\s]+/g,'-').replace(/-+/g,'-').replace(/^[-]+|[-]+$/g,''); }
     function normalizeCanonical(v, fb = '') { return slug(v || fb).toUpperCase(); }
     function normalizeVat9(v) { return String(v || '').replace(/\D/g, '').slice(0, 9); }
-    function splitAliases(v) { return String(v||'').split(';').map(x => x.trim()).filter(Boolean); }
+    function normalizeElgemi(v) { return String(v || '').replace(/\s+/g, '').replace(/[^0-9A-Za-z\-]/g, '').slice(0, 20); }
+    function selectedAliases() {
+      return Array.from(els.fieldAliases.selectedOptions || []).map(o => o.value).filter(Boolean);
+    }
     function nextId(items, prefix, key) {
       let max = 0;
       (items||[]).forEach(item => { const m = String(item?.[key]||'').toUpperCase().match(new RegExp(`^${prefix}-(\\d+)$`)); if (m) max = Math.max(max, Number(m[1])); });
       return `${prefix}-${String(max+1).padStart(4,'0')}`;
     }
 
+    function companyAliasOptions() {
+      return (state.companies.companies || []).map(c => {
+        const aliasValue = normalizeCanonical(c.display_name || c.company_folder || c.company_id || '');
+        return {
+          value: aliasValue,
+          label: `${c.company_id || 'CMP-?'} - ${c.display_name || c.company_folder || aliasValue || 'Unnamed company'}`
+        };
+      }).filter(x => x.value);
+    }
+
+    function aliasValueToLabelMap() {
+      const m = new Map();
+      companyAliasOptions().forEach(o => m.set(o.value, o.label));
+      return m;
+    }
+
+    function renderAliasOptions(selectedValues = []) {
+      const selected = new Set((selectedValues || []).map(v => String(v || '')));
+      const options = companyAliasOptions();
+      const missing = Array.from(selected).filter(v => !options.some(o => o.value === v));
+      const allOptions = options.concat(missing.map(v => ({ value: v, label: `${v} (not in company register)` })));
+      els.fieldAliases.innerHTML = allOptions.length
+        ? allOptions.map(o => `<option value="${esc(o.value)}"${selected.has(o.value) ? ' selected' : ''}>${esc(o.label)}</option>`).join('')
+        : '<option value="" disabled>No companies available</option>';
+    }
+
     // ── Record select ──────────────────────────────────────────────────────────
     function refreshRecordSelect(preferredIndex = state.currentIndex) {
       const rows = state.contractors.contractors || [];
       els.selectRecord.innerHTML = rows.length
-        ? rows.map((r, i) => `<option value="${i}">${esc(r.contractor_id)} — ${esc(r.display_name || r.canonical_name || '')}</option>`).join('')
+        ? rows.map((r, i) => `<option value="${i}">${esc(r.contractor_id)} — ${esc(r.commercial_title || r.display_name || r.name_roman || r.canonical_name || '')}</option>`).join('')
         : '<option value="">No contractors</option>';
       if (!rows.length) return null;
       const sel = rows[preferredIndex] ? preferredIndex : 0;
@@ -285,7 +330,10 @@
     // ── Derived fields ─────────────────────────────────────────────────────────
     function computeDerived() {
       els.fieldId.value = els.fieldId.value.trim() || nextId(state.contractors.contractors, 'CTR', 'contractor_id');
-      els.fieldCanonicalName.value = normalizeCanonical(els.fieldCanonicalName.value, els.fieldDisplayName.value);
+      els.fieldCanonicalName.value = normalizeCanonical(
+        els.fieldCanonicalName.value,
+        els.fieldNameRoman.value || els.fieldCommercialTitle.value
+      );
     }
 
     // ── Form load / clear ──────────────────────────────────────────────────────
@@ -295,38 +343,57 @@
       if (!row) return;
       els.selectRecord.value       = String(index);
       els.fieldId.value            = row.contractor_id || '';
-      els.fieldDisplayName.value   = row.display_name || '';
-      els.fieldCanonicalName.value = normalizeCanonical(row.canonical_name || row.display_name || '');
-      els.fieldAliases.value       = (row.aliases || []).join('; ');
+      els.fieldCommercialTitle.value = row.commercial_title || row.display_name || '';
+      els.fieldNameRoman.value     = row.name_roman || '';
+      els.fieldNameGreek.value     = row.name_greek || '';
+      els.fieldCanonicalName.value = normalizeCanonical(row.canonical_name || row.name_roman || row.commercial_title || row.display_name || '');
+      renderAliasOptions(row.aliases || []);
       els.fieldVat.value           = row.vat9 || '';
+      els.fieldElgemi.value        = row.elgemi || '';
       els.fieldActive.value        = String(row.is_active !== false);
       els.fieldNotes.value         = row.notes || '';
       computeDerived();
     }
-    function newRecord() {
+    function clearFormAndSelection() {
       state.currentIndex = -1;
-      els.fieldId.value            = nextId(state.contractors.contractors, 'CTR', 'contractor_id');
-      els.fieldDisplayName.value   = '';
+      els.selectRecord.selectedIndex = -1;
+      els.fieldId.value            = '';
+      els.fieldCommercialTitle.value = '';
+      els.fieldNameRoman.value     = '';
+      els.fieldNameGreek.value     = '';
       els.fieldCanonicalName.value = '';
-      els.fieldAliases.value       = '';
+      renderAliasOptions([]);
       els.fieldVat.value           = '';
-      els.fieldActive.value        = 'true';
+      els.fieldElgemi.value        = '';
+      els.fieldActive.selectedIndex = -1;
       els.fieldNotes.value         = '';
-      computeDerived();
+    }
+    function newRecord() {
+      clearFormAndSelection();
     }
 
     // ── Save / Delete ──────────────────────────────────────────────────────────
     function saveRecord() {
       computeDerived();
       if (!els.fieldCanonicalName.value) { setStatus('Canonical name is required.', 'bad'); return false; }
+      const vat9 = normalizeVat9(els.fieldVat.value);
+      const elgemi = normalizeElgemi(els.fieldElgemi.value);
+      if (!vat9 && !elgemi) { setStatus('VAT or ELGEMI is required.', 'bad'); return false; }
       const dup = (state.contractors.contractors||[]).some((r,i) => i !== state.currentIndex && r.contractor_id === els.fieldId.value);
       if (dup) { setStatus('contractor_id must be unique.', 'bad'); return false; }
+      const commercialTitle = els.fieldCommercialTitle.value.trim();
+      const nameRoman = els.fieldNameRoman.value.trim();
+      const nameGreek = els.fieldNameGreek.value.trim();
       const row = {
         contractor_id:  els.fieldId.value,
-        display_name:   els.fieldDisplayName.value.trim() || els.fieldCanonicalName.value,
+        commercial_title: commercialTitle || nameRoman || els.fieldCanonicalName.value,
+        name_roman:     nameRoman,
+        name_greek:     nameGreek,
+        display_name:   commercialTitle || nameRoman || els.fieldCanonicalName.value,
         canonical_name: els.fieldCanonicalName.value,
-        aliases:        splitAliases(els.fieldAliases.value).map(x => normalizeCanonical(x)).filter(Boolean),
-        vat9:           normalizeVat9(els.fieldVat.value),
+        aliases:        selectedAliases().map(x => normalizeCanonical(x)).filter(Boolean),
+        vat9,
+        elgemi,
         is_active:      els.fieldActive.value === 'true',
         notes:          els.fieldNotes.value.trim()
       };
@@ -339,14 +406,15 @@
       state.contractors.schema.generated_at = new Date().toISOString();
       refreshRecordSelect(state.currentIndex);
       renderTable();
-      setStatus('Contractor saved.', 'ok');
+      clearFormAndSelection();
+      setStatus('Contractor saved. Form cleared.', 'ok');
       return true;
     }
     function deleteRecord() {
       if (state.currentIndex < 0) return;
       const row = state.contractors.contractors[state.currentIndex];
       if (!row) return;
-      if (!window.confirm(`Delete contractor ${row.contractor_id} — ${row.display_name || row.canonical_name}?`)) return;
+      if (!window.confirm(`Delete contractor ${row.contractor_id} — ${row.commercial_title || row.display_name || row.name_roman || row.canonical_name}?`)) return;
       state.contractors.contractors.splice(state.currentIndex, 1);
       state.contractors.schema.generated_at = new Date().toISOString();
       const sel = refreshRecordSelect(0);
@@ -359,14 +427,16 @@
     function getRows() {
       const q    = els.searchInput.value.trim().toLowerCase();
       const actF = els.filterActive.value;
+      const aliasLabelMap = aliasValueToLabelMap();
       let rows = (state.contractors.contractors || []).map((row, index) => ({
         ...row,
+        commercial_title: row.commercial_title || row.display_name || row.name_roman || '',
         _index: index,
-        aliases_display: (row.aliases || []).join('; ')
+        aliases_display: (row.aliases || []).map(a => aliasLabelMap.get(a) || a).join('; ')
       }));
       if (actF) rows = rows.filter(r => String(r.is_active !== false) === actF);
       if (q) rows = rows.filter(r =>
-        [r.contractor_id, r.display_name, r.canonical_name, r.vat9, ...(r.aliases||[]), r.notes]
+        [r.contractor_id, r.commercial_title, r.display_name, r.name_roman, r.name_greek, r.canonical_name, r.vat9, r.elgemi, ...(r.aliases||[]), r.notes]
           .map(v => searchText(v)).join(' ').includes(searchText(q))
       );
       const col = state.sortCol;
@@ -392,9 +462,12 @@
         if (isExp) {
           const fields = [
             ['Contractor ID',  r.contractor_id],
-            ['Display name',   r.display_name],
+            ['Commercial title', r.commercial_title || r.display_name || '—'],
+            ['Name (Roman)',   r.name_roman || '—'],
+            ['Name (Greek)',   r.name_greek || '—'],
             ['Canonical name', r.canonical_name],
             ['VAT number',     r.vat9 || '—'],
+            ['ELGEMI',         r.elgemi || '—'],
             ['Aliases',        r.aliases_display || '—'],
             ['Active',         r.is_active === false ? 'No' : 'Yes'],
             ['Notes',          r.notes || '—']
@@ -412,7 +485,7 @@
         }
         return `<tr class="data-row${inact}${isExp ? ' expanded' : ''}" data-id="${esc(r.contractor_id)}">
           <td class="mono">${esc(r.contractor_id)}</td>
-          <td>${esc(r.display_name || '—')}</td>
+          <td>${esc(r.commercial_title || r.display_name || '—')}</td>
           <td class="mono">${esc(r.canonical_name || '—')}</td>
           <td>${esc(r.aliases_display || '—')}</td>
           <td><span class="status-badge ${r.is_active === false ? 's-no' : 's-yes'}">${r.is_active === false ? 'No' : 'Yes'}</span></td>
@@ -493,8 +566,12 @@
     }
 
     async function loadFromDir(dir, source = 'manual') {
-      const co = await readJson(dir, 'contractors_master.json');
+      const [co, cm] = await Promise.all([
+        readJson(dir, 'contractors_master.json'),
+        readJson(dir, 'company_master.json').catch(() => ({ companies: [] }))
+      ]);
       state.directoryHandle = dir;
+      state.companies = { companies: Array.isArray(cm?.companies) ? cm.companies : [] };
       applyLoadedData(co);
       const wp = document.getElementById('workingFolderPath');
       if (wp) wp.value = dir.name || '\\\\192.168.200.4\\Files\\_sch_file_manager_';
@@ -537,7 +614,11 @@
       });
     }
     async function tryXhrLoad(base) {
-      const co = await xhrJson(base + 'contractors_master.json');
+      const [co, cm] = await Promise.all([
+        xhrJson(base + 'contractors_master.json'),
+        xhrJson(base + 'company_master.json').catch(() => ({ companies: [] }))
+      ]);
+      state.companies = { companies: Array.isArray(cm?.companies) ? cm.companies : [] };
       applyLoadedData(co);
     }
     async function autoLoadSameFolder() {
@@ -586,12 +667,15 @@
     });
 
     $('downloadBtn').addEventListener('click', downloadJson);
-    $('newBtn').addEventListener('click', newRecord);
+    $('newBtn').addEventListener('click', () => {
+      newRecord();
+      setStatus('Form cleared. Ready for new contractor.', 'info');
+    });
     $('saveBtn').addEventListener('click', async () => { if (saveRecord()) await saveToDir(); });
     $('deleteBtn').addEventListener('click', async () => { deleteRecord(); await saveToDir(); });
 
     els.selectRecord.addEventListener('change', e => loadForm(Number(e.target.value)));
-    [els.fieldDisplayName, els.fieldCanonicalName].forEach(el => el.addEventListener('input', computeDerived));
+    [els.fieldCommercialTitle, els.fieldNameRoman, els.fieldCanonicalName].forEach(el => el.addEventListener('input', computeDerived));
 
     document.querySelectorAll('thead th[data-col]').forEach(th => {
       th.addEventListener('click', () => {
@@ -611,7 +695,7 @@
     $('copyTableBtn').addEventListener('click', async () => {
       const rows = getRows();
       if (!rows.length) { setStatus('No rows to copy.', 'warn'); return; }
-      const cols = ['contractor_id','display_name','canonical_name','vat9','aliases_display','is_active','notes'];
+      const cols = ['contractor_id','commercial_title','name_roman','name_greek','canonical_name','vat9','elgemi','aliases_display','is_active','notes'];
       const q = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
       const tsv = [cols.join('\t'), ...rows.map(r => cols.map(c => q(r[c])).join('\t'))].join('\n');
       try { await navigator.clipboard.writeText(tsv); setStatus(`Copied ${rows.length} rows — paste into Excel.`, 'ok'); }
