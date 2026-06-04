@@ -8,6 +8,7 @@ This markdown is generated automatically from `master_policy.yaml`. Edit the mas
 - Workstream is the physical filing axis.
 - Phase stays in the filename and metadata, not as the main folder tree.
 - FIN and CNT keep counterparties in the filename and metadata instead of deep folder trees.
+- Portfolio Shared mode routes files directly under `__PORTFOLIO_SHARED__` when selected.
 
 ## The four naming backbones
 - Company folder: `{NAMECODE}-{TYP3}-{VAT9}`
@@ -16,6 +17,7 @@ This markdown is generated automatically from `master_policy.yaml`. Edit the mas
 - Internal filename: `{TYPEID}_{PHASE}_{DOCTYPE}_{DESCRIPTION}_{DATE}_{VERSION}_{STATUS}.{EXT}`
 
 ## What users enter
+- `company_root_path`
 - `asset`
 - `workstream`
 - `phase`
@@ -26,7 +28,7 @@ This markdown is generated automatically from `master_policy.yaml`. Edit the mas
 - `status`
 
 Conditional fields:
-- `FIN` also requires: `counterparty_name`
+- `FIN` also requires: `counterparty_name`, `fin_stem`, `fin_specific`
 - `CNT` also requires: `counterparty_name`
 - `DRWTEC` also requires: `deliverable_stage`
 - `SDYTEC` also requires: `deliverable_stage`
@@ -38,6 +40,8 @@ Conditional fields:
 - `metric`
 - `ss`
 - `owner_or_project`
+- `target_folder_id`
+- `canonical_filename`
 
 ## Optional metadata
 - `other_counterparty_name`
@@ -127,16 +131,17 @@ Canonical folder: `99_EXPORTS`
 | `HSE` | HSE Record | `fixed` | — |
 
 ## Daily filing flow
-1. Select the asset.
-2. Select the workstream.
-3. Select the phase.
-4. Select the document type.
-5. Add deliverable stage only for `DRWTEC` and `SDYTEC`.
-6. Add counterparty for `FIN` and `CNT`.
-7. Write a short canonical description.
-8. Set date, version, and status.
-9. Let the system build the canonical filename and route the file.
-10. If confidence is low, send the file to the same workstream `99_MISC_REVIEW` bucket.
+1. Open the working folder and load the JSON master files.
+2. Select the asset.
+3. Select the workstream.
+4. Select the phase.
+5. Select the document type.
+6. Add deliverable stage only for `DRWTEC` and `SDYTEC`.
+7. Add counterparty for `FIN` and `CNT`.
+8. Write a short canonical description.
+9. Set date, version, and status.
+10. Let the system build the canonical filename and route the file.
+11. If confidence is low, send the file to the same workstream `99_MISC_REVIEW` bucket.
 
 ## Canonical examples
 - Company folder: `SCH-IKE-123456789` following `{NAMECODE}-{TYP3}-{VAT9}`
@@ -165,5 +170,5 @@ Canonical folder: `99_EXPORTS`
 
 ## Regeneration command
 ```bash
-python /mnt/data/export_policies.py
+python src/export_policies.py
 ```

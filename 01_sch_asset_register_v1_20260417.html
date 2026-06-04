@@ -313,7 +313,9 @@
     const DEFAULT_ASSET_TYPES = [
       { type_code:'PVS', label:'PV plant', characteristic:'capacity', allowed_input_units:['MW','kW','kWp'], input_to_base_multiplier:{ MW:1000, kW:1, kWp:1 }, metric_rule:'Convert input to kW integer, then encode XXpYYY.', example:'15.473 MW → 15p473' },
       { type_code:'DTC', label:'Datacenter', characteristic:'contracted IT load', allowed_input_units:['MW','kW'], input_to_base_multiplier:{ MW:1000, kW:1 }, metric_rule:'Convert input to kW integer, then encode XXpYYY.', example:'3.200 MW → 03p200' },
-      { type_code:'HYP', label:'Hydroponics', characteristic:'cultivation area', allowed_input_units:['m2','ha'], input_to_base_multiplier:{ m2:1, ha:10000 }, metric_rule:'Convert input to integer m2, then encode XXpYYY.', example:'7000 m2 → 07p000' }
+      { type_code:'HYP', label:'Hydroponics', characteristic:'cultivation area', allowed_input_units:['m2','ha'], input_to_base_multiplier:{ m2:1, ha:10000 }, metric_rule:'Convert input to integer m2, then encode XXpYYY.', example:'7000 m2 → 07p000' },
+      { type_code:'ECU', label:'Elder Care Unit', characteristic:'capacity', allowed_input_units:['beds','units'], input_to_base_multiplier:{ beds:1, units:1 }, metric_rule:'Convert input to integer count, then encode XXpYYY.', example:'25 beds → 25p000' },
+      { type_code:'FCT', label:'Factory', characteristic:'production area', allowed_input_units:['m2','ha'], input_to_base_multiplier:{ m2:1, ha:10000 }, metric_rule:'Convert input to integer m2, then encode XXpYYY.', example:'12000 m2 → 12p000' }
     ];
 
     const state = {
